@@ -191,4 +191,29 @@ class Queryra_API {
 
         return $response;
     }
+
+    /**
+     * Search records using Queryra AI
+     *
+     * @param string $query Search query
+     * @param int $limit Maximum number of results (default: 20)
+     * @return array Response with results
+     */
+    public function search($query, $limit = 20) {
+        if (empty($this->api_key)) {
+            return new WP_Error('no_api_key', 'API key is required');
+        }
+
+        if (empty($query)) {
+            return new WP_Error('no_query', 'Search query is required');
+        }
+
+        $response = $this->request('GET', '/api/v1/search', array(
+            'key' => $this->api_key,
+            'q' => $query,
+            'limit' => $limit
+        ));
+
+        return $response;
+    }
 }

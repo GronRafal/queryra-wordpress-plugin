@@ -28,6 +28,7 @@ define('QUERYRA_PLUGIN_FILE', __FILE__);
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-api.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-sync.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-admin.php';
+require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-search.php';
 
 /**
  * Main Plugin Class
@@ -73,6 +74,9 @@ class Queryra_Search {
         // Initialize sync
         new Queryra_Sync();
 
+        // Initialize search integration (AI-powered search)
+        new Queryra_Search_Integration();
+
         // Load text domain
         load_plugin_textdomain('queryra-search', false, dirname(plugin_basename(__FILE__)) . '/languages/');
     }
@@ -90,6 +94,9 @@ class Queryra_Search {
         }
         if (!get_option('queryra_auto_sync')) {
             add_option('queryra_auto_sync', '1');
+        }
+        if (!get_option('queryra_ai_search')) {
+            add_option('queryra_ai_search', '0'); // Disabled by default
         }
         if (!get_option('queryra_post_types')) {
             add_option('queryra_post_types', array('post', 'page'));

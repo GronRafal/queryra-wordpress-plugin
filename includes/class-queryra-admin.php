@@ -47,6 +47,7 @@ class Queryra_Admin {
         register_setting('queryra_settings', 'queryra_api_key');
         register_setting('queryra_settings', 'queryra_api_url');
         register_setting('queryra_settings', 'queryra_auto_sync');
+        register_setting('queryra_settings', 'queryra_ai_search');
         register_setting('queryra_settings', 'queryra_post_types');
     }
 
@@ -69,6 +70,40 @@ class Queryra_Admin {
     }
 
     /**
+     * Convert status time from UTC to WordPress timezone
+     *
+     * @param array $status Status from API (with UTC times)
+     * @return array Status with WordPress timezone times
+     */
+    private function convert_status_to_wp_timezone($status) {
+        if (!isset($status['next_opens_at'])) {
+            return $status;
+        }
+
+        // Get WordPress timezone
+        $wp_timezone = wp_timezone();
+
+        try {
+            // Parse UTC time from API (format: "12:00 UTC")
+            $utc_time_string = str_replace(' UTC', '', $status['next_opens_at']);
+
+            // Create DateTime in UTC
+            $utc_datetime = new DateTime($utc_time_string . ' UTC');
+
+            // Convert to WordPress timezone
+            $utc_datetime->setTimezone($wp_timezone);
+
+            // Format as "13:00" (local time, no timezone label)
+            $status['next_opens_at'] = $utc_datetime->format('H:i');
+
+        } catch (Exception $e) {
+            // If conversion fails, keep original
+        }
+
+        return $status;
+    }
+
+    /**
      * Render settings page
      */
     public function render_settings_page() {
@@ -76,6 +111,7 @@ class Queryra_Admin {
         $api_key = get_option('queryra_api_key', '');
         $api_url = get_option('queryra_api_url', 'https://queryra.com');
         $auto_sync = get_option('queryra_auto_sync', '1');
+        $ai_search = get_option('queryra_ai_search', '0'); // Disabled by default
         $post_types = get_option('queryra_post_types', array('post', 'page'));
 
         // Get available post types (exclude attachment/media and revisions)
@@ -91,6 +127,7 @@ class Queryra_Admin {
         }
 
         // Get API data if API key is set
+        // Admin panel ALWAYS fetches fresh data from API (no cache)
         $stats = null;
         $status = null;
         $api_error = false;
@@ -98,20 +135,28 @@ class Queryra_Admin {
         if (!empty($api_key)) {
             $api = new Queryra_API();
 
-            // Get stats (records, limits, plan)
+            // Get stats (records, limits, plan) - FRESH from API
             $stats_response = $api->get_stats();
             if (!is_wp_error($stats_response)) {
                 $stats = $stats_response;
+                // Save to DB for search integration to use
+                update_option('queryra_cached_stats', $stats, false);
             } else {
                 $api_error = true;
+                delete_option('queryra_cached_stats');
             }
 
-            // Get status (search window for FREE plan)
+            // Get status (search window for FREE plan) - FRESH from API
             $status_response = $api->get_status();
             if (!is_wp_error($status_response)) {
                 $status = $status_response;
+                // Convert UTC time to WordPress timezone for display
+                $status = $this->convert_status_to_wp_timezone($status);
+                // Save to DB for search integration to use
+                update_option('queryra_cached_status', $status, false);
             } else {
                 $api_error = true;
+                delete_option('queryra_cached_status');
             }
         }
 
@@ -186,6 +231,76 @@ class Queryra_Admin {
                                                    <?php checked($auto_sync, '1'); ?>>
                                             Automatically send posts to Queryra when published or updated
                                         </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">AI Search</th>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox"
+                                                   name="queryra_ai_search"
+                                                   value="1"
+                                                   <?php checked($ai_search, '1'); ?>>
+                                            Use Queryra AI for WordPress search
+                                        </label>
+
+                                        <?php if ($stats && $status): ?>
+                                            <!-- AI Search Status Info -->
+                                            <div style="margin-top: 10px; padding: 10px; background: <?php
+                                                // Determine status color
+                                                $can_search = true;
+                                                $status_color = '#e7f5e7'; // green
+                                                $border_color = '#46b450';
+
+                                                if ($stats['synced_records'] == 0) {
+                                                    $can_search = false;
+                                                    $status_color = '#fff3cd'; // yellow
+                                                    $border_color = '#f0b849';
+                                                } elseif ($stats['plan'] === 'free' && !$status['available']) {
+                                                    $can_search = false;
+                                                    $status_color = '#fff3cd'; // yellow
+                                                    $border_color = '#f0b849';
+                                                }
+
+                                                echo $status_color;
+                                            ?>; border-left: 3px solid <?php echo $border_color; ?>; border-radius: 3px;">
+
+                                                <?php if ($can_search): ?>
+                                                    <!-- Can use AI search -->
+                                                    <p style="margin: 0 0 5px 0; color: #46b450;">
+                                                        <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                                        <strong>AI Search Ready</strong>
+                                                    </p>
+                                                    <p style="margin: 0; font-size: 13px; color: #646970;">
+                                                        Plan: <?php echo ucfirst($stats['plan']); ?> |
+                                                        Synced: <?php echo number_format($stats['synced_records']); ?> records
+                                                        <?php if ($stats['plan'] === 'free' && $status['available']): ?>
+                                                            | Window: <?php echo $status['minutes_left']; ?> min left
+                                                        <?php endif; ?>
+                                                    </p>
+                                                <?php else: ?>
+                                                    <!-- Cannot use AI search -->
+                                                    <p style="margin: 0 0 5px 0; color: #f0b849;">
+                                                        <span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                                        <strong>AI Search Unavailable</strong>
+                                                    </p>
+                                                    <?php if ($stats['synced_records'] == 0): ?>
+                                                        <p style="margin: 0; font-size: 13px; color: #646970;">
+                                                            No synced records. Go to <a href="https://queryra.com/dashboard/sync" target="_blank">Queryra Dashboard</a> to sync.
+                                                        </p>
+                                                    <?php elseif ($stats['plan'] === 'free' && !$status['available']): ?>
+                                                        <p style="margin: 0; font-size: 13px; color: #646970;">
+                                                            Search window closed. Opens in <?php echo $status['minutes_until_open']; ?> min (<?php echo $status['next_opens_at']; ?>)
+                                                        </p>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <p class="description">
+                                                <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                                When enabled, WordPress search uses AI semantic search. Falls back to standard search if unavailable.
+                                            </p>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                                 <tr>
@@ -311,19 +426,16 @@ class Queryra_Admin {
 
                             <!-- Sync Status -->
                             <div style="margin: 15px 0;">
-                                <p style="margin: 0 0 8px 0; font-weight: 600; color: #1d2327;">Sync Status:</p>
+                                <p style="margin: 0 0 8px 0; font-weight: 600; color: #1d2327;">
+                                    <span class="dashicons dashicons-update" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                    Sync Status
+                                </p>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                    <span>
-                                        <span class="dashicons dashicons-yes" style="color: #46b450; font-size: 16px; width: 16px; height: 16px;"></span>
-                                        Synced
-                                    </span>
+                                    <span style="color: #646970;">Synced</span>
                                     <strong><?php echo number_format($stats['synced_records']); ?></strong>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
-                                    <span>
-                                        <span class="dashicons dashicons-upload" style="color: #f0b849; font-size: 16px; width: 16px; height: 16px;"></span>
-                                        Unsynced
-                                    </span>
+                                    <span style="color: #646970;">Unsynced</span>
                                     <strong><?php echo number_format($stats['unsynced_records']); ?></strong>
                                 </div>
                             </div>
