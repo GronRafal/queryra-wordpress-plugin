@@ -1,5 +1,25 @@
 jQuery(document).ready(function($) {
 
+    // Check if API key is saved - disable Test Connection if not
+    function updateTestConnectionButton() {
+        var $button = $('#queryra-test-connection');
+        var $hint = $('#queryra-test-hint');
+
+        // Check if API key exists (passed from PHP)
+        if (!queryraData.hasApiKey) {
+            $button.prop('disabled', true).addClass('button-disabled');
+            if ($hint.length === 0) {
+                $button.after('<p id="queryra-test-hint" class="description" style="color: #999; margin-top: 8px;">💡 Save settings first to enable connection test</p>');
+            }
+        } else {
+            $button.prop('disabled', false).removeClass('button-disabled');
+            $hint.remove();
+        }
+    }
+
+    // Initialize on page load
+    updateTestConnectionButton();
+
     // Test Connection
     $('#queryra-test-connection').on('click', function() {
         var $button = $(this);

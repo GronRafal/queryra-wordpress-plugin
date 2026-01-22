@@ -63,7 +63,8 @@ class Queryra_Admin {
 
         wp_localize_script('queryra-admin', 'queryraData', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('queryra_sync')
+            'nonce' => wp_create_nonce('queryra_sync'),
+            'hasApiKey' => !empty(get_option('queryra_api_key'))
         ));
     }
 
