@@ -90,13 +90,28 @@ class Queryra_Admin {
             }
         }
 
-        // Get stats if API key is set
+        // Get API data if API key is set
         $stats = null;
+        $status = null;
+        $api_error = false;
+
         if (!empty($api_key)) {
             $api = new Queryra_API();
+
+            // Get stats (records, limits, plan)
             $stats_response = $api->get_stats();
             if (!is_wp_error($stats_response)) {
                 $stats = $stats_response;
+            } else {
+                $api_error = true;
+            }
+
+            // Get status (search window for FREE plan)
+            $status_response = $api->get_status();
+            if (!is_wp_error($status_response)) {
+                $status = $status_response;
+            } else {
+                $api_error = true;
             }
         }
 
@@ -201,7 +216,10 @@ class Queryra_Admin {
 
                         <!-- Info Box -->
                         <div class="queryra-info-box" style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 12px; margin: 15px 0;">
-                            <p style="margin: 0 0 8px 0;"><strong>ℹ️ How it works:</strong></p>
+                            <p style="margin: 0 0 8px 0;">
+                                <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                <strong>How it works:</strong>
+                            </p>
                             <ol style="margin: 5px 0 5px 20px; padding: 0;">
                                 <li>Posts are sent to Queryra (happens here)</li>
                                 <li>Generate embeddings in <a href="https://queryra.com/dashboard/sync" target="_blank">Queryra dashboard</a></li>
@@ -211,7 +229,10 @@ class Queryra_Admin {
 
                         <!-- Tips Box -->
                         <div class="queryra-tips-box" style="background: #f0f0f1; border-left: 4px solid #72aee6; padding: 12px; margin: 15px 0;">
-                            <p style="margin: 0 0 8px 0;"><strong>💡 Tips:</strong></p>
+                            <p style="margin: 0 0 8px 0;">
+                                <span class="dashicons dashicons-lightbulb" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                <strong>Tips:</strong>
+                            </p>
                             <ul style="margin: 5px 0 0 20px; padding: 0;">
                                 <li>To send a single post: Edit it and click "Update"</li>
                                 <li>Manage records in <a href="https://queryra.com/dashboard/records" target="_blank">Queryra dashboard</a></li>
@@ -228,21 +249,92 @@ class Queryra_Admin {
 
                 <!-- Sidebar -->
                 <div class="queryra-sidebar">
-                    <?php if ($stats): ?>
+                    <?php if ($api_error): ?>
+                        <!-- API Error -->
+                        <div class="queryra-card" style="border-left: 4px solid #dc3232;">
+                            <h3>
+                                <span class="dashicons dashicons-warning" style="color: #dc3232;"></span>
+                                API Status
+                            </h3>
+                            <p style="margin: 10px 0; color: #646970;">
+                                <span class="dashicons dashicons-dismiss" style="color: #dc3232;"></span>
+                                API unavailable
+                            </p>
+                            <p style="margin: 10px 0; font-size: 13px; color: #646970;">
+                                Check your API key or try again later.
+                            </p>
+                        </div>
+                    <?php elseif ($stats): ?>
+                        <!-- API Stats -->
                         <div class="queryra-card">
-                            <h3>Stats</h3>
-                            <div class="queryra-stat">
-                                <div class="queryra-stat-label">Total Records</div>
-                                <div class="queryra-stat-value"><?php echo number_format($stats['total_records']); ?></div>
+                            <h3>
+                                <span class="dashicons dashicons-chart-bar"></span>
+                                API Stats
+                            </h3>
+
+                            <!-- Plan Info -->
+                            <div style="margin: 15px 0; padding: 10px; background: #f6f7f7; border-radius: 4px;">
+                                <p style="margin: 0 0 5px 0;">
+                                    <span class="dashicons dashicons-admin-network" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                    <strong>Plan:</strong> <?php echo esc_html(ucfirst($stats['plan'])); ?>
+                                </p>
+                                <p style="margin: 0;">
+                                    <span class="dashicons dashicons-portfolio" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                    <strong>Records:</strong> <?php echo number_format($stats['total_records']); ?> / <?php echo number_format($stats['record_limit']); ?>
+                                    <span style="color: #646970;">(<?php echo $stats['usage_percentage']; ?>%)</span>
+                                </p>
                             </div>
-                            <div class="queryra-stat">
-                                <div class="queryra-stat-label">Synced</div>
-                                <div class="queryra-stat-value"><?php echo number_format($stats['synced_records']); ?></div>
+
+                            <!-- Search Window (FREE plan only) -->
+                            <?php if ($status && $stats['plan'] === 'free'): ?>
+                                <div style="margin: 15px 0; padding: 10px; background: <?php echo $status['available'] ? '#e7f5e7' : '#fff3cd'; ?>; border-radius: 4px; border-left: 3px solid <?php echo $status['available'] ? '#46b450' : '#f0b849'; ?>;">
+                                    <p style="margin: 0 0 5px 0;">
+                                        <span class="dashicons dashicons-search" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                        <strong>Search Window:</strong>
+                                    </p>
+                                    <?php if ($status['available']): ?>
+                                        <p style="margin: 0; color: #46b450;">
+                                            <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                            Active (<?php echo $status['minutes_left']; ?> min left)
+                                        </p>
+                                    <?php else: ?>
+                                        <p style="margin: 0; color: #f0b849;">
+                                            <span class="dashicons dashicons-clock" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                            Opens in <?php echo $status['minutes_until_open']; ?> min
+                                        </p>
+                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #646970;">
+                                            Next: <?php echo $status['next_opens_at']; ?>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Sync Status -->
+                            <div style="margin: 15px 0;">
+                                <p style="margin: 0 0 8px 0; font-weight: 600; color: #1d2327;">Sync Status:</p>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>
+                                        <span class="dashicons dashicons-yes" style="color: #46b450; font-size: 16px; width: 16px; height: 16px;"></span>
+                                        Synced
+                                    </span>
+                                    <strong><?php echo number_format($stats['synced_records']); ?></strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>
+                                        <span class="dashicons dashicons-upload" style="color: #f0b849; font-size: 16px; width: 16px; height: 16px;"></span>
+                                        Unsynced
+                                    </span>
+                                    <strong><?php echo number_format($stats['unsynced_records']); ?></strong>
+                                </div>
                             </div>
-                            <div class="queryra-stat">
-                                <div class="queryra-stat-label">Unsynced</div>
-                                <div class="queryra-stat-value"><?php echo number_format($stats['unsynced_records']); ?></div>
-                            </div>
+
+                            <!-- Dashboard Link -->
+                            <?php if ($stats['unsynced_records'] > 0): ?>
+                                <a href="https://queryra.com/dashboard/sync" target="_blank" class="button button-secondary" style="width: 100%; text-align: center; margin-top: 10px;">
+                                    <span class="dashicons dashicons-update" style="font-size: 16px; width: 16px; height: 16px; vertical-align: middle;"></span>
+                                    Sync in Dashboard
+                                </a>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 

@@ -159,7 +159,7 @@ class Queryra_API {
     }
 
     /**
-     * Get API stats
+     * Get API stats (records count, limits, plan info)
      *
      * @return array Response
      */
@@ -169,6 +169,23 @@ class Queryra_API {
         }
 
         $response = $this->request('GET', '/api/v1/records/stats', array(
+            'key' => $this->api_key
+        ));
+
+        return $response;
+    }
+
+    /**
+     * Get API status (search window availability for FREE plan)
+     *
+     * @return array Response
+     */
+    public function get_status() {
+        if (empty($this->api_key)) {
+            return new WP_Error('no_api_key', 'API key is required');
+        }
+
+        $response = $this->request('GET', '/api/v1/status', array(
             'key' => $this->api_key
         ));
 

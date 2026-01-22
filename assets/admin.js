@@ -105,7 +105,7 @@ jQuery(document).ready(function($) {
                     var successHtml = '<div style="margin-top: 15px;">';
                     successHtml += '✓ ' + response.data.message;
                     successHtml += '<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-top: 12px;">';
-                    successHtml += '<p style="margin: 0 0 8px 0;"><strong>⚠️ Next step required:</strong></p>';
+                    successHtml += '<p style="margin: 0 0 8px 0;"><span class="dashicons dashicons-warning" style="color: #f0b849; font-size: 16px; width: 16px; height: 16px; vertical-align: middle;"></span> <strong>Next step required:</strong></p>';
                     successHtml += '<p style="margin: 0 0 8px 0;">Records are sent but need to be synced in Queryra dashboard to generate AI embeddings and become searchable.</p>';
                     successHtml += '<a href="https://queryra.com/dashboard/sync" target="_blank" class="button button-primary" style="margin-top: 8px;">Go to Queryra Dashboard →</a>';
                     successHtml += '</div></div>';
