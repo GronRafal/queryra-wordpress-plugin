@@ -146,4 +146,52 @@ jQuery(document).ready(function($) {
         });
     });
 
+    // Clear Cache
+    $('#queryra-clear-cache').on('click', function() {
+        var $button = $(this);
+        var $status = $('#queryra-cache-status');
+
+        if (!confirm('Clear all cached search results? Next searches will fetch fresh data from Queryra API.')) {
+            return;
+        }
+
+        // Disable button
+        $button.prop('disabled', true);
+
+        // Show loading
+        $status.html('<span class="queryra-spinner"></span> Clearing...')
+               .css('color', '#666');
+
+        // Make AJAX request
+        $.ajax({
+            url: queryraData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'queryra_clear_cache',
+                nonce: queryraData.cacheNonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    $status.html('✓ Cache cleared')
+                           .css('color', '#46b450');
+
+                    // Reload page after 2 seconds to update cache count
+                    setTimeout(function() {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    $status.html('✗ ' + response.data)
+                           .css('color', '#dc3232');
+                }
+            },
+            error: function(xhr, status, error) {
+                $status.html('✗ Failed: ' + error)
+                       .css('color', '#dc3232');
+            },
+            complete: function() {
+                $button.prop('disabled', false);
+            }
+        });
+    });
+
 });

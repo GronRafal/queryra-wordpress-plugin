@@ -151,8 +151,19 @@ class Queryra_API {
 
         // Check for API errors
         if ($code >= 400) {
-            $message = isset($data['detail']) ? $data['detail'] : 'API request failed';
-            return new WP_Error('api_error', $message, array('status' => $code));
+            // Try different error formats
+            $message = 'API request failed';
+
+            if (isset($data['detail'])) {
+                $message = is_array($data['detail']) ? json_encode($data['detail']) : $data['detail'];
+            } elseif (isset($data['errors']['api_error'][0]['message'])) {
+                // FREE_PLAN_WINDOW_CLOSED format
+                $message = $data['errors']['api_error'][0]['message'];
+            } elseif (isset($data['message'])) {
+                $message = $data['message'];
+            }
+
+            return new WP_Error('api_error', $message, array('status' => $code, 'data' => $data));
         }
 
         return $data;

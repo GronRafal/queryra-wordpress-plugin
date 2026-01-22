@@ -23,6 +23,9 @@ class Queryra_Admin {
 
         // Enqueue admin scripts
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
+
+        // AJAX handler for clearing cache
+        add_action('wp_ajax_queryra_clear_cache', array($this, 'ajax_clear_cache'));
     }
 
     /**
@@ -65,6 +68,7 @@ class Queryra_Admin {
         wp_localize_script('queryra-admin', 'queryraData', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('queryra_sync'),
+            'cacheNonce' => wp_create_nonce('queryra_cache'),
             'hasApiKey' => !empty(get_option('queryra_api_key'))
         ));
     }
@@ -315,7 +319,7 @@ class Queryra_Admin {
                                                 <?php echo esc_html($post_type->label); ?>
                                             </label>
                                         <?php endforeach; ?>
-                                        <p class="description">Select which post types to sync with Queryra</p>
+                                        <p class="description">Select which post types to send to Queryra and include in AI search results</p>
                                     </td>
                                 </tr>
                             </table>
@@ -323,6 +327,54 @@ class Queryra_Admin {
 
                         <?php submit_button(); ?>
                     </form>
+
+                    <!-- Cache Management -->
+                    <div class="queryra-card">
+                        <h2>
+                            <span class="dashicons dashicons-performance" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                            Search Cache
+                        </h2>
+
+                        <div class="queryra-info-box" style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 15px; margin: 15px 0;">
+                            <p style="margin: 0 0 12px 0;">
+                                <strong>How cache reduces API calls:</strong>
+                            </p>
+                            <ul style="margin: 5px 0 5px 20px; padding: 0; list-style: disc;">
+                                <li><strong>Without cache:</strong> Every search = 1 API call</li>
+                                <li><strong>With cache (10 min):</strong> Same search repeated = 0 API calls</li>
+                                <li><strong>Result:</strong> 10x-100x fewer API calls, faster responses</li>
+                            </ul>
+                            <p style="margin: 12px 0 0 0; font-size: 13px; color: #646970;">
+                                Cache is managed automatically by WordPress.
+                                Default: 10 minutes per search term.
+                                <a href="https://developer.wordpress.org/apis/transients/" target="_blank" style="color: #2271b1;">Learn about WordPress Transients →</a>
+                            </p>
+                        </div>
+
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">Cache Status</th>
+                                <td>
+                                    <?php
+                                    global $wpdb;
+                                    $cache_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
+                                    $total_size = $wpdb->get_var("SELECT SUM(LENGTH(option_value)) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
+                                    ?>
+                                    <p style="margin: 0 0 8px 0;">
+                                        <strong><?php echo (int)$cache_count; ?></strong> cached searches
+                                        (<?php echo $total_size ? round($total_size / 1024, 1) : 0; ?> KB)
+                                    </p>
+                                    <button type="button" id="queryra-clear-cache" class="button button-secondary">
+                                        Clear All Search Cache
+                                    </button>
+                                    <span id="queryra-cache-status" style="margin-left: 10px;"></span>
+                                    <p class="description" style="margin-top: 8px;">
+                                        Clears cached search results. Next search will fetch fresh data from Queryra API.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
 
                     <!-- Send to Queryra -->
                     <div class="queryra-card">
@@ -468,5 +520,35 @@ class Queryra_Admin {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * AJAX: Clear all search cache
+     */
+    public function ajax_clear_cache() {
+        check_ajax_referer('queryra_cache', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+            return;
+        }
+
+        global $wpdb;
+
+        // Delete all Queryra search transients
+        $deleted = $wpdb->query("
+            DELETE FROM {$wpdb->options}
+            WHERE option_name LIKE '_transient_queryra_search_%'
+            OR option_name LIKE '_transient_timeout_queryra_search_%'
+        ");
+
+        if ($deleted !== false) {
+            wp_send_json_success(array(
+                'message' => 'Cache cleared successfully',
+                'deleted' => $deleted
+            ));
+        } else {
+            wp_send_json_error('Failed to clear cache');
+        }
     }
 }
