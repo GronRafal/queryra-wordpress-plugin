@@ -154,24 +154,49 @@ class Queryra_Sync {
         $categories = wp_get_post_categories($post->ID, array('fields' => 'names'));
         $tags = wp_get_post_tags($post->ID, array('fields' => 'names'));
 
+        // Build rich description with all content for better AI search
+        // Include: excerpt, full content, categories, and tags
+        $description_parts = array();
+
+        // Add excerpt if different from content start
+        if (!empty($excerpt)) {
+            $description_parts[] = $excerpt;
+        }
+
+        // Add full content
+        if (!empty($content)) {
+            $description_parts[] = $content;
+        }
+
+        // Add categories
+        if (!empty($categories)) {
+            $description_parts[] = "Categories: " . implode(', ', $categories);
+        }
+
+        // Add tags
+        if (!empty($tags)) {
+            $description_parts[] = "Tags: " . implode(', ', $tags);
+        }
+
+        // Combine all parts with double line breaks
+        $full_description = implode("\n\n", $description_parts);
+
         // Get featured image
         $image_url = get_the_post_thumbnail_url($post->ID, 'medium');
 
-        // Build record
+        // Calculate margin based on post importance
+        // Sticky posts (featured) = 100%, normal posts = 50%
+        $margin = is_sticky($post->ID) ? 1.0 : 0.5;
+
+        // Build record - only fields that backend expects
         $record = array(
             'id' => 'wp-' . $post->ID,
             'name' => $post->post_title,
-            'description' => $excerpt,
-            'content' => $content,
+            'description' => $full_description,
+            'price' => 0.0,
             'url' => get_permalink($post->ID),
             'image_url' => $image_url ?: '',
-            'categories' => implode(', ', $categories),
-            'tags' => implode(', ', $tags),
-            'metadata' => array(
-                'post_type' => $post->post_type,
-                'author' => get_the_author_meta('display_name', $post->post_author),
-                'date' => $post->post_date
-            )
+            'margin' => $margin
         );
 
         return $record;

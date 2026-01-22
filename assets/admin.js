@@ -47,7 +47,18 @@ jQuery(document).ready(function($) {
                            .removeClass('queryra-status-loading queryra-status-error')
                            .addClass('queryra-status-success');
                 } else {
-                    $status.html('✗ ' + response.data.message)
+                    // Parse error message (could be string or array of validation errors)
+                    var errorMsg = response.data.message;
+                    if (Array.isArray(errorMsg)) {
+                        // FastAPI validation errors
+                        errorMsg = errorMsg.map(function(err) {
+                            return err.loc ? err.loc.join('.') + ': ' + err.msg : JSON.stringify(err);
+                        }).join('<br>');
+                    } else if (typeof errorMsg === 'object') {
+                        errorMsg = JSON.stringify(errorMsg, null, 2);
+                    }
+
+                    $status.html('✗ ' + errorMsg)
                            .removeClass('queryra-status-loading queryra-status-success')
                            .addClass('queryra-status-error');
                 }
@@ -108,7 +119,18 @@ jQuery(document).ready(function($) {
                         location.reload();
                     }, 5000);
                 } else {
-                    $status.html('✗ ' + response.data.message)
+                    // Parse error message (could be string or array of validation errors)
+                    var errorMsg = response.data.message;
+                    if (Array.isArray(errorMsg)) {
+                        // FastAPI validation errors
+                        errorMsg = errorMsg.map(function(err) {
+                            return err.loc ? err.loc.join('.') + ': ' + err.msg : JSON.stringify(err);
+                        }).join('<br>');
+                    } else if (typeof errorMsg === 'object') {
+                        errorMsg = JSON.stringify(errorMsg, null, 2);
+                    }
+
+                    $status.html('✗ ' + errorMsg)
                            .removeClass('queryra-status-loading queryra-status-success')
                            .addClass('queryra-status-error');
                 }
