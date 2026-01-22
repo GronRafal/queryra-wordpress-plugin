@@ -77,8 +77,17 @@ class Queryra_Admin {
         $auto_sync = get_option('queryra_auto_sync', '1');
         $post_types = get_option('queryra_post_types', array('post', 'page'));
 
-        // Get available post types
-        $available_post_types = get_post_types(array('public' => true), 'objects');
+        // Get available post types (exclude attachment/media and revisions)
+        $all_post_types = get_post_types(array('public' => true), 'objects');
+        $available_post_types = array();
+
+        // Filter out unwanted types
+        $exclude = array('attachment', 'revision', 'nav_menu_item', 'wp_block');
+        foreach ($all_post_types as $post_type) {
+            if (!in_array($post_type->name, $exclude)) {
+                $available_post_types[$post_type->name] = $post_type;
+            }
+        }
 
         // Get stats if API key is set
         $stats = null;
