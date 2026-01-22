@@ -95,7 +95,7 @@ class Queryra_Sync {
         if (empty($post_ids)) {
             return array(
                 'success' => false,
-                'message' => 'No posts to sync'
+                'message' => 'No posts to send'
             );
         }
 
@@ -118,7 +118,7 @@ class Queryra_Sync {
         if (empty($records)) {
             return array(
                 'success' => false,
-                'message' => 'No valid posts to sync'
+                'message' => 'No valid posts to send'
             );
         }
 
@@ -134,7 +134,7 @@ class Queryra_Sync {
 
         return array(
             'success' => true,
-            'message' => sprintf('Successfully synced %d posts', count($records)),
+            'message' => sprintf('Successfully sent %d posts to Queryra', count($records)),
             'data' => $response
         );
     }

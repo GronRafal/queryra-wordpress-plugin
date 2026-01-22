@@ -156,20 +156,20 @@ class Queryra_Admin {
                             </p>
                         </div>
 
-                        <!-- Sync Settings -->
+                        <!-- Send Settings -->
                         <div class="queryra-card">
-                            <h2>Sync Settings</h2>
+                            <h2>Send Settings</h2>
 
                             <table class="form-table">
                                 <tr>
-                                    <th scope="row">Auto Sync</th>
+                                    <th scope="row">Auto-Send</th>
                                     <td>
                                         <label>
                                             <input type="checkbox"
                                                    name="queryra_auto_sync"
                                                    value="1"
                                                    <?php checked($auto_sync, '1'); ?>>
-                                            Automatically sync posts when published or updated
+                                            Automatically send posts to Queryra when published or updated
                                         </label>
                                     </td>
                                 </tr>
@@ -194,12 +194,33 @@ class Queryra_Admin {
                         <?php submit_button(); ?>
                     </form>
 
-                    <!-- Manual Sync -->
+                    <!-- Send to Queryra -->
                     <div class="queryra-card">
-                        <h2>Manual Sync</h2>
-                        <p>Sync all published posts to Queryra</p>
+                        <h2>Send to Queryra</h2>
+                        <p>Send all published posts and pages to Queryra.</p>
+
+                        <!-- Info Box -->
+                        <div class="queryra-info-box" style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 12px; margin: 15px 0;">
+                            <p style="margin: 0 0 8px 0;"><strong>ℹ️ How it works:</strong></p>
+                            <ol style="margin: 5px 0 5px 20px; padding: 0;">
+                                <li>Posts are sent to Queryra (happens here)</li>
+                                <li>Generate embeddings in <a href="https://queryra.com/dashboard/sync" target="_blank">Queryra dashboard</a></li>
+                                <li>Records become searchable</li>
+                            </ol>
+                        </div>
+
+                        <!-- Tips Box -->
+                        <div class="queryra-tips-box" style="background: #f0f0f1; border-left: 4px solid #72aee6; padding: 12px; margin: 15px 0;">
+                            <p style="margin: 0 0 8px 0;"><strong>💡 Tips:</strong></p>
+                            <ul style="margin: 5px 0 0 20px; padding: 0;">
+                                <li>To send a single post: Edit it and click "Update"</li>
+                                <li>Manage records in <a href="https://queryra.com/dashboard/records" target="_blank">Queryra dashboard</a></li>
+                                <li>Deleted WordPress posts are automatically removed from Queryra</li>
+                            </ul>
+                        </div>
+
                         <button type="button" id="queryra-sync-all" class="button button-primary">
-                            Sync All Posts
+                            Send All Posts
                         </button>
                         <div id="queryra-sync-status"></div>
                     </div>

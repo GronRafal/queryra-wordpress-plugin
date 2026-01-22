@@ -9,7 +9,7 @@ jQuery(document).ready(function($) {
         if (!queryraData.hasApiKey) {
             $button.prop('disabled', true).addClass('button-disabled');
             if ($hint.length === 0) {
-                $button.after('<p id="queryra-test-hint" class="description" style="color: #999; margin-top: 8px;">💡 Save settings first to enable connection test</p>');
+                $button.after('<p id="queryra-test-hint" class="description" style="color: #999; margin-top: 8px;"><span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px; vertical-align: middle;"></span> Save settings first to enable connection test</p>');
             }
         } else {
             $button.prop('disabled', false).removeClass('button-disabled');
@@ -63,12 +63,12 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Sync All Posts
+    // Send All Posts
     $('#queryra-sync-all').on('click', function() {
         var $button = $(this);
         var $status = $('#queryra-sync-status');
 
-        if (!confirm('This will sync all published posts to Queryra. Continue?')) {
+        if (!confirm('This will send all published posts and pages to Queryra. Continue?')) {
             return;
         }
 
@@ -76,7 +76,7 @@ jQuery(document).ready(function($) {
         $button.prop('disabled', true);
 
         // Show loading
-        $status.html('<span class="queryra-spinner"></span> Syncing posts...')
+        $status.html('<span class="queryra-spinner"></span> Sending posts...')
                .removeClass('queryra-status-success queryra-status-error')
                .addClass('queryra-status-loading')
                .show();
@@ -91,14 +91,22 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    $status.html('✓ ' + response.data.message)
+                    var successHtml = '<div style="margin-top: 15px;">';
+                    successHtml += '✓ ' + response.data.message;
+                    successHtml += '<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-top: 12px;">';
+                    successHtml += '<p style="margin: 0 0 8px 0;"><strong>⚠️ Next step required:</strong></p>';
+                    successHtml += '<p style="margin: 0 0 8px 0;">Records are sent but need to be synced in Queryra dashboard to generate AI embeddings and become searchable.</p>';
+                    successHtml += '<a href="https://queryra.com/dashboard/sync" target="_blank" class="button button-primary" style="margin-top: 8px;">Go to Queryra Dashboard →</a>';
+                    successHtml += '</div></div>';
+
+                    $status.html(successHtml)
                            .removeClass('queryra-status-loading queryra-status-error')
                            .addClass('queryra-status-success');
 
-                    // Reload page after 2 seconds to refresh stats
+                    // Reload page after 5 seconds to refresh stats
                     setTimeout(function() {
                         location.reload();
-                    }, 2000);
+                    }, 5000);
                 } else {
                     $status.html('✗ ' + response.data.message)
                            .removeClass('queryra-status-loading queryra-status-success')
@@ -106,7 +114,7 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr, status, error) {
-                $status.html('✗ Sync failed: ' + error)
+                $status.html('✗ Send failed: ' + error)
                        .removeClass('queryra-status-loading queryra-status-success')
                        .addClass('queryra-status-error');
             },

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Queryra Search for WordPress
  * Plugin URI: https://queryra.com
- * Description: AI-powered semantic search for your WordPress content. Automatically syncs posts, pages, and custom post types to Queryra.
+ * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
  * Version: 1.0.0
  * Author: Queryra
  * Author URI: https://queryra.com
