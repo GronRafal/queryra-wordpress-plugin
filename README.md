@@ -4,11 +4,11 @@ AI-powered semantic search for your WordPress content. Automatically syncs posts
 
 ## Features
 
-- 🔄 **Auto-sync** - Automatically sync posts when published or updated
-- 📝 **Post Types** - Sync posts, pages, and custom post types
-- 🎯 **Manual Sync** - Bulk sync all existing posts with one click
-- 📊 **Stats Dashboard** - View sync status and statistics
-- ⚡ **Fast & Reliable** - Built with WordPress best practices
+- **Auto-sync** - Automatically sync posts when published or updated
+- **Post Types** - Sync posts, pages, and custom post types
+- **Manual Sync** - Bulk sync all existing posts with one click
+- **Stats Dashboard** - View sync status and statistics
+- **Fast & Reliable** - Built with WordPress best practices
 
 ## Installation
 
