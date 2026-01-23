@@ -2,7 +2,7 @@
 Contributors: queryra
 Tags: search, ai, ai search, chatgpt, semantic search, smart search, site search, search plugin, machine learning, artificial intelligence
 Requires at least: 5.8
-Tested up to: 6.7
+Tested up to: 6.9
 Stable tag: 1.0.0
 Requires PHP: 7.4
 License: GPLv2 or later

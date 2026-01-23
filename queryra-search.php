@@ -8,7 +8,7 @@
  * Author URI: https://queryra.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: queryra-search
+ * Text Domain: queryra-ai-search
  * Requires at least: 5.8
  * Requires PHP: 7.4
  */
@@ -76,9 +76,6 @@ class Queryra_Search {
 
         // Initialize search integration (AI-powered search)
         new Queryra_Search_Integration();
-
-        // Load text domain
-        load_plugin_textdomain('queryra-search', false, dirname(plugin_basename(__FILE__)) . '/languages/');
     }
 
     /**
