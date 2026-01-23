@@ -154,10 +154,10 @@ Queryra supports semantic search in all major languages. The AI model works with
 
 == Screenshots ==
 
-1. Plugin settings page - configure API key and sync options
-2. Sync status dashboard - see how many posts are synced
-3. Search results - AI-powered results with relevance scores
-4. Auto-sync in action - posts sync automatically when published
+1. Plugin settings page - configure API key, enable AI search, and manage sync options
+2. WordPress default search fails to find relevant content for semantic queries like "mindfulness"
+3. Queryra AI search succeeds - finds semantically related article "The Quiet Strength of a Balanced Mind"
+4. Dashboard to manage indexed records and monitor usage across all your content
 
 == Changelog ==
 
