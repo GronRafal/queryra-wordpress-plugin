@@ -266,8 +266,8 @@ class Queryra_Admin {
                                                     $border_color = '#f0b849';
                                                 }
 
-                                                echo $status_color;
-                                            ?>; border-left: 3px solid <?php echo $border_color; ?>; border-radius: 3px;">
+                                                echo esc_attr($status_color);
+                                            ?>; border-left: 3px solid <?php echo esc_attr($border_color); ?>; border-radius: 3px;">
 
                                                 <?php if ($can_search): ?>
                                                     <!-- Can use AI search -->
@@ -276,10 +276,10 @@ class Queryra_Admin {
                                                         <strong>AI Search Ready</strong>
                                                     </p>
                                                     <p style="margin: 0; font-size: 13px; color: #646970;">
-                                                        Plan: <?php echo ucfirst($stats['plan']); ?> |
-                                                        Synced: <?php echo number_format($stats['synced_records']); ?> records
+                                                        Plan: <?php echo esc_html(ucfirst($stats['plan'])); ?> |
+                                                        Synced: <?php echo esc_html(number_format($stats['synced_records'])); ?> records
                                                         <?php if ($stats['plan'] === 'free' && $status['available']): ?>
-                                                            | Window: <?php echo $status['minutes_left']; ?> min left
+                                                            | Window: <?php echo esc_html($status['minutes_left']); ?> min left
                                                         <?php endif; ?>
                                                     </p>
                                                 <?php else: ?>
@@ -294,7 +294,7 @@ class Queryra_Admin {
                                                         </p>
                                                     <?php elseif ($stats['plan'] === 'free' && !$status['available']): ?>
                                                         <p style="margin: 0; font-size: 13px; color: #646970;">
-                                                            Search window closed. Opens in <?php echo $status['minutes_until_open']; ?> min (<?php echo $status['next_opens_at']; ?>)
+                                                            Search window closed. Opens in <?php echo esc_html($status['minutes_until_open']); ?> min (<?php echo esc_html($status['next_opens_at']); ?>)
                                                         </p>
                                                     <?php endif; ?>
                                                 <?php endif; ?>
@@ -361,8 +361,8 @@ class Queryra_Admin {
                                     $total_size = $wpdb->get_var("SELECT SUM(LENGTH(option_value)) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
                                     ?>
                                     <p style="margin: 0 0 8px 0;">
-                                        <strong><?php echo (int)$cache_count; ?></strong> cached searches
-                                        (<?php echo $total_size ? round($total_size / 1024, 1) : 0; ?> KB)
+                                        <strong><?php echo esc_html((int)$cache_count); ?></strong> cached searches
+                                        (<?php echo esc_html($total_size ? round($total_size / 1024, 1) : 0); ?> KB)
                                     </p>
                                     <button type="button" id="queryra-clear-cache" class="button button-secondary">
                                         Clear All Search Cache
@@ -447,14 +447,14 @@ class Queryra_Admin {
                                 </p>
                                 <p style="margin: 0;">
                                     <span class="dashicons dashicons-portfolio" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                    <strong>Records:</strong> <?php echo number_format($stats['total_records']); ?> / <?php echo number_format($stats['record_limit']); ?>
-                                    <span style="color: #646970;">(<?php echo $stats['usage_percentage']; ?>%)</span>
+                                    <strong>Records:</strong> <?php echo esc_html(number_format($stats['total_records'])); ?> / <?php echo esc_html(number_format($stats['record_limit'])); ?>
+                                    <span style="color: #646970;">(<?php echo esc_html($stats['usage_percentage']); ?>%)</span>
                                 </p>
                             </div>
 
                             <!-- Search Window (FREE plan only) -->
                             <?php if ($status && $stats['plan'] === 'free'): ?>
-                                <div style="margin: 15px 0; padding: 10px; background: <?php echo $status['available'] ? '#e7f5e7' : '#fff3cd'; ?>; border-radius: 4px; border-left: 3px solid <?php echo $status['available'] ? '#46b450' : '#f0b849'; ?>;">
+                                <div style="margin: 15px 0; padding: 10px; background: <?php echo esc_attr($status['available'] ? '#e7f5e7' : '#fff3cd'); ?>; border-radius: 4px; border-left: 3px solid <?php echo esc_attr($status['available'] ? '#46b450' : '#f0b849'); ?>;">
                                     <p style="margin: 0 0 5px 0;">
                                         <span class="dashicons dashicons-search" style="font-size: 16px; width: 16px; height: 16px;"></span>
                                         <strong>Search Window:</strong>
@@ -462,15 +462,15 @@ class Queryra_Admin {
                                     <?php if ($status['available']): ?>
                                         <p style="margin: 0; color: #46b450;">
                                             <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                            Active (<?php echo $status['minutes_left']; ?> min left)
+                                            Active (<?php echo esc_html($status['minutes_left']); ?> min left)
                                         </p>
                                     <?php else: ?>
                                         <p style="margin: 0; color: #f0b849;">
                                             <span class="dashicons dashicons-clock" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                            Opens in <?php echo $status['minutes_until_open']; ?> min
+                                            Opens in <?php echo esc_html($status['minutes_until_open']); ?> min
                                         </p>
                                         <p style="margin: 5px 0 0 0; font-size: 12px; color: #646970;">
-                                            Next: <?php echo $status['next_opens_at']; ?>
+                                            Next: <?php echo esc_html($status['next_opens_at']); ?>
                                         </p>
                                     <?php endif; ?>
                                 </div>
@@ -484,11 +484,11 @@ class Queryra_Admin {
                                 </p>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                                     <span style="color: #646970;">Synced</span>
-                                    <strong><?php echo number_format($stats['synced_records']); ?></strong>
+                                    <strong><?php echo esc_html(number_format($stats['synced_records'])); ?></strong>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
                                     <span style="color: #646970;">Unsynced</span>
-                                    <strong><?php echo number_format($stats['unsynced_records']); ?></strong>
+                                    <strong><?php echo esc_html(number_format($stats['unsynced_records'])); ?></strong>
                                 </div>
                             </div>
 
