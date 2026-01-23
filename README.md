@@ -164,17 +164,17 @@ The roadmap is actively being shaped by user feedback. We're building features t
 
 ### Direct Support
 - **Email:** support@queryra.com
-- **Issues:** [GitHub Issues](https://github.com/queryra/wordpress-plugin/issues) for bug reports
+- **Issues:** [GitHub Issues](https://github.com/GronRafal/queryra-wordpress-plugin/issues) for bug reports
 
 ### Community
-- [GitHub Discussions](https://github.com/queryra/wordpress-plugin/discussions) - Ask questions, share tips
+- [GitHub Discussions](https://github.com/GronRafal/queryra-wordpress-plugin/discussions) - Ask questions, share tips
 
 ## Contributing
 
 We welcome contributions! Here's how you can help:
 
 ### Report Bugs
-Found a bug? [Open an issue](https://github.com/queryra/wordpress-plugin/issues) with:
+Found a bug? [Open an issue](https://github.com/GronRafal/queryra-wordpress-plugin/issues) with:
 - WordPress version
 - PHP version
 - Steps to reproduce
@@ -193,7 +193,7 @@ Have an idea? Email us at support@queryra.com or open a discussion on GitHub.
 ### Development
 ```bash
 # Clone repo
-git clone https://github.com/queryra/wordpress-plugin.git
+git clone https://github.com/GronRafal/queryra-wordpress-plugin.git
 cd wordpress-plugin
 
 # Install dev dependencies (optional)
@@ -266,4 +266,4 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 
 **Made with ❤️ for the WordPress community**
 
-[⭐ Star this repo](https://github.com/queryra/wordpress-plugin) if you find it useful!
+[⭐ Star this repo](https://github.com/GronRafal/queryra-wordpress-plugin) if you find it useful!
