@@ -3,6 +3,7 @@
 [![WordPress Plugin](https://img.shields.io/badge/WordPress-5.8%2B-blue.svg)](https://wordpress.org)
 [![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net)
 [![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](LICENSE)
+[![WordPress.org](https://img.shields.io/badge/WordPress.org-Awaiting%20Review-orange.svg)](https://wordpress.org/plugins/queryra-ai-search/)
 
 🔍 **AI-powered search trained on YOUR content** - not generic ChatGPT
 

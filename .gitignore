@@ -26,3 +26,9 @@ wp-includes/
 wp-admin/
 *.sql
 wp-config.php
+
+# Internal documentation (private notes, not for repo)
+CURRENT_STATUS.md
+TODO.md
+WORK_PLAN.md
+*_DRAFT.md
