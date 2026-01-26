@@ -244,10 +244,16 @@ class Queryra_Search_Integration {
             }
 
             $ids_string = implode(',', array_map('intval', $page_ids));
+
+            // Get allowed post types from settings (same as sync)
+            $post_types = get_option('queryra_post_types', array('post', 'page'));
+            $post_types_string = "'" . implode("','", array_map('esc_sql', $post_types)) . "'";
+
             $results = $wpdb->get_results("
                 SELECT * FROM {$wpdb->posts}
                 WHERE ID IN ($ids_string)
                 AND post_status = 'publish'
+                AND post_type IN ($post_types_string)
                 ORDER BY FIELD(ID, $ids_string)
             ");
 

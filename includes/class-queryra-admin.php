@@ -78,10 +78,31 @@ class Queryra_Admin {
      * Sanitize post types array
      */
     public function sanitize_post_types($value) {
+        // Posts are ALWAYS included (hardcoded)
+        $result = array('post');
+
+        // If not array, just return posts only
         if (!is_array($value)) {
-            return array('post', 'page');
+            return $result;
         }
-        return array_map('sanitize_text_field', $value);
+
+        // Filter to only valid values and remove empty strings
+        $sanitized = array_map('sanitize_text_field', $value);
+        $sanitized = array_filter($sanitized, function($item) {
+            return !empty($item);
+        });
+
+        // Add page if selected
+        if (in_array('page', $sanitized)) {
+            $result[] = 'page';
+        }
+
+        // Add product if selected (WIP)
+        if (in_array('product', $sanitized)) {
+            $result[] = 'product';
+        }
+
+        return $result;
     }
 
     /**
@@ -194,22 +215,88 @@ class Queryra_Admin {
             }
         }
 
+        // Get active tab
+        $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'settings';
+
         ?>
         <div class="wrap">
-            <h1>
-                <span class="dashicons dashicons-search"></span>
-                Queryra Search Settings
-            </h1>
+            <h1>Queryra Search</h1>
+
+            <?php
+            // Show success message after saving settings
+            if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true') {
+                echo '<div class="notice notice-success is-dismissible"><p><strong>Settings saved.</strong></p></div>';
+            }
+            ?>
+
+            <?php settings_errors('queryra_post_types'); ?>
+
+            <!-- Tab Navigation -->
+            <h2 class="nav-tab-wrapper">
+                <a href="?page=queryra-search&tab=settings"
+                   class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-admin-generic" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    Settings
+                </a>
+                <a href="?page=queryra-search&tab=content"
+                   class="nav-tab <?php echo $active_tab === 'content' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-media-document" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    Content
+                </a>
+                <?php if (class_exists('WooCommerce')): ?>
+                <a href="?page=queryra-search&tab=woocommerce"
+                   class="nav-tab <?php echo $active_tab === 'woocommerce' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-cart" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    WooCommerce
+                </a>
+                <?php endif; ?>
+                <a href="?page=queryra-search&tab=records"
+                   class="nav-tab <?php echo $active_tab === 'records' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-list-view" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    Records
+                </a>
+                <a href="?page=queryra-search&tab=sync"
+                   class="nav-tab <?php echo $active_tab === 'sync' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-update" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    Sync
+                </a>
+                <a href="?page=queryra-search&tab=search-history"
+                   class="nav-tab <?php echo $active_tab === 'search-history' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-chart-line" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    Search History
+                </a>
+                <a href="?page=queryra-search&tab=cache"
+                   class="nav-tab <?php echo $active_tab === 'cache' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-performance" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    Cache
+                </a>
+                <a href="?page=queryra-search&tab=support"
+                   class="nav-tab <?php echo $active_tab === 'support' ? 'nav-tab-active' : ''; ?>">
+                    <span class="dashicons dashicons-sos" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
+                    Support
+                </a>
+            </h2>
 
             <div class="queryra-container">
                 <!-- Settings Form -->
                 <div class="queryra-main">
+
+                    <?php if ($active_tab === 'settings'): ?>
+                    <!-- Settings Tab -->
                     <form method="post" action="options.php">
                         <?php settings_fields('queryra_settings'); ?>
+                        <!-- Preserve post types selection -->
+                        <?php foreach ($post_types as $pt): ?>
+                            <input type="hidden" name="queryra_post_types[]" value="<?php echo esc_attr($pt); ?>">
+                        <?php endforeach; ?>
+                        <!-- Preserve auto import setting (configured in Content tab) -->
+                        <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
 
-                        <!-- API Settings -->
                         <div class="queryra-card">
-                            <h2>API Configuration</h2>
+                            <h2>
+                                <span class="dashicons dashicons-admin-generic" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                                Settings
+                            </h2>
                             <p>Get your API key from <a href="https://queryra.com/dashboard" target="_blank">Queryra Dashboard</a></p>
 
                             <table class="form-table">
@@ -240,125 +327,401 @@ class Queryra_Admin {
                                         <p class="description">Default: https://queryra.com</p>
                                     </td>
                                 </tr>
-                            </table>
-
-                            <p>
-                                <button type="button" id="queryra-test-connection" class="button button-secondary">
-                                    Test Connection
-                                </button>
-                                <span id="queryra-connection-status"></span>
-                            </p>
-                        </div>
-
-                        <!-- Send Settings -->
-                        <div class="queryra-card">
-                            <h2>Send Settings</h2>
-
-                            <table class="form-table">
                                 <tr>
-                                    <th scope="row">Auto-Send</th>
-                                    <td>
-                                        <label>
-                                            <input type="checkbox"
-                                                   name="queryra_auto_sync"
-                                                   value="1"
-                                                   <?php checked($auto_sync, '1'); ?>>
-                                            Automatically send posts to Queryra when published or updated
-                                        </label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">AI Search</th>
+                                    <th scope="row">
+                                        Plugin Enabled
+                                    </th>
                                     <td>
                                         <label>
                                             <input type="checkbox"
                                                    name="queryra_ai_search"
                                                    value="1"
                                                    <?php checked($ai_search, '1'); ?>>
-                                            Use Queryra AI for WordPress search
+                                            <strong>Enable Queryra AI Search</strong>
                                         </label>
-
-                                        <?php if ($stats && $status): ?>
-                                            <!-- AI Search Status Info -->
-                                            <div style="margin-top: 10px; padding: 10px; background: <?php
-                                                // Determine status color
-                                                $can_search = true;
-                                                $status_color = '#e7f5e7'; // green
-                                                $border_color = '#46b450';
-
-                                                if ($stats['synced_records'] == 0) {
-                                                    $can_search = false;
-                                                    $status_color = '#fff3cd'; // yellow
-                                                    $border_color = '#f0b849';
-                                                } elseif ($stats['plan'] === 'free' && !$status['available']) {
-                                                    $can_search = false;
-                                                    $status_color = '#fff3cd'; // yellow
-                                                    $border_color = '#f0b849';
-                                                }
-
-                                                echo esc_attr($status_color);
-                                            ?>; border-left: 3px solid <?php echo esc_attr($border_color); ?>; border-radius: 3px;">
-
-                                                <?php if ($can_search): ?>
-                                                    <!-- Can use AI search -->
-                                                    <p style="margin: 0 0 5px 0; color: #46b450;">
-                                                        <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                                        <strong>AI Search Ready</strong>
-                                                    </p>
-                                                    <p style="margin: 0; font-size: 13px; color: #646970;">
-                                                        Plan: <?php echo esc_html(ucfirst($stats['plan'])); ?> |
-                                                        Synced: <?php echo esc_html(number_format($stats['synced_records'])); ?> records
-                                                        <?php if ($stats['plan'] === 'free' && $status['available']): ?>
-                                                            | Window: <?php echo esc_html($status['minutes_left']); ?> min left
-                                                        <?php endif; ?>
-                                                    </p>
-                                                <?php else: ?>
-                                                    <!-- Cannot use AI search -->
-                                                    <p style="margin: 0 0 5px 0; color: #f0b849;">
-                                                        <span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                                        <strong>AI Search Unavailable</strong>
-                                                    </p>
-                                                    <?php if ($stats['synced_records'] == 0): ?>
-                                                        <p style="margin: 0; font-size: 13px; color: #646970;">
-                                                            No synced records. Go to <a href="https://queryra.com/dashboard/sync" target="_blank">Queryra Dashboard</a> to sync.
-                                                        </p>
-                                                    <?php elseif ($stats['plan'] === 'free' && !$status['available']): ?>
-                                                        <p style="margin: 0; font-size: 13px; color: #646970;">
-                                                            Search window closed. Opens in <?php echo esc_html($status['minutes_until_open']); ?> min (<?php echo esc_html($status['next_opens_at']); ?>)
-                                                        </p>
-                                                    <?php endif; ?>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php else: ?>
-                                            <p class="description">
-                                                <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                                When enabled, WordPress search uses AI semantic search. Falls back to standard search if unavailable.
-                                            </p>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Post Types</th>
-                                    <td>
-                                        <?php foreach ($available_post_types as $post_type): ?>
-                                            <label style="display: block; margin-bottom: 5px;">
-                                                <input type="checkbox"
-                                                       name="queryra_post_types[]"
-                                                       value="<?php echo esc_attr($post_type->name); ?>"
-                                                       <?php checked(in_array($post_type->name, $post_types)); ?>>
-                                                <?php echo esc_html($post_type->label); ?>
-                                            </label>
-                                        <?php endforeach; ?>
-                                        <p class="description">Select which post types to send to Queryra and include in AI search results</p>
+                                        <p class="description" style="margin-top: 8px;">
+                                            When enabled, WordPress native search will automatically use Queryra AI for intelligent, semantic search results.
+                                        </p>
                                     </td>
                                 </tr>
                             </table>
                         </div>
 
-                        <?php submit_button(); ?>
+                        <?php submit_button('Save Settings'); ?>
                     </form>
 
-                    <!-- Cache Management -->
+                    <?php elseif ($active_tab === 'content'): ?>
+                    <!-- Content Tab -->
+                    <form method="post" action="options.php">
+                        <?php settings_fields('queryra_settings'); ?>
+                        <!-- Preserve other settings -->
+                        <input type="hidden" name="queryra_api_key" value="<?php echo esc_attr($api_key); ?>">
+                        <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
+                        <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
+                        <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
+                        <!-- Preserve product post type if selected in WooCommerce tab -->
+                        <?php if (in_array('product', $post_types)): ?>
+                            <input type="hidden" name="queryra_post_types[]" value="product">
+                        <?php endif; ?>
+                        <!-- Empty value to ensure callback is called even when no checkboxes selected -->
+                        <input type="hidden" name="queryra_post_types[]" value="">
+
+                        <div class="queryra-card">
+                            <h2>
+                                <span class="dashicons dashicons-media-document" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                                WordPress Content
+                            </h2>
+                            <p>Select which post types to sync with Queryra and include in AI search</p>
+
+                            <table class="form-table">
+                                <tr>
+                                    <th scope="row">Post Types</th>
+                                    <td>
+                                        <!-- Posts always enabled -->
+                                        <label style="display: block; margin-bottom: 8px;">
+                                            <input type="checkbox" checked disabled>
+                                            <strong>Posts</strong>
+                                            <span style="color: #646970; font-size: 13px; margin-left: 8px;">(always enabled)</span>
+                                        </label>
+
+                                        <!-- Pages optional -->
+                                        <label style="display: block; margin-bottom: 8px;">
+                                            <input type="checkbox"
+                                                   name="queryra_post_types[]"
+                                                   value="page"
+                                                   <?php checked(in_array('page', $post_types)); ?>>
+                                            <strong>Pages</strong>
+                                        </label>
+
+                                        <p class="description">
+                                            <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                            Posts are always included. Check Pages to also include them in search.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Auto Import
+                                    </th>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox"
+                                                   name="queryra_auto_sync"
+                                                   value="1"
+                                                   <?php checked($auto_sync, '1'); ?>>
+                                            <strong>Automatically import content to Queryra when published or updated</strong>
+                                        </label>
+                                        <p class="description" style="margin-top: 8px;">
+                                            <span class="dashicons dashicons-chart-line" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                            <strong>Search Boost:</strong> All posts/pages: 0.5 | Sticky posts: 1.0
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <?php submit_button('Save Settings'); ?>
+                    </form>
+
+                    <?php elseif ($active_tab === 'records'): ?>
+                    <!-- Records Tab -->
+                    <div class="queryra-card">
+                        <h2>
+                            <span class="dashicons dashicons-list-view" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                            Records in Queryra
+                        </h2>
+                        <p style="color: #646970;">Records are your WordPress content (posts, pages, products) imported to Queryra. AI uses these records to understand your content and deliver accurate search results.</p>
+
+                        <table class="form-table" style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                            <?php if (!empty($api_key) && $stats): ?>
+                                <!-- Queryra Records -->
+                                <tr>
+                                    <th scope="row" style="padding: 8px 0; width: 180px;">
+                                        <span class="dashicons dashicons-cloud" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                        Imported to Queryra
+                                    </th>
+                                    <td style="padding: 8px 0;">
+                                        <?php
+                                        $total = isset($stats['total_records']) ? $stats['total_records'] : 0;
+                                        $limit = isset($stats['record_limit']) ? $stats['record_limit'] : 0;
+                                        $percentage = isset($stats['usage_percentage']) ? $stats['usage_percentage'] : 0;
+                                        ?>
+                                        <strong style="font-size: 18px;">
+                                            <?php echo esc_html(number_format($total)); ?>
+                                            <?php if ($limit > 0): ?>
+                                                / <?php echo esc_html(number_format($limit)); ?>
+                                                <span style="color: #646970; font-size: 14px;">(<?php echo esc_html($percentage); ?>%)</span>
+                                            <?php endif; ?>
+                                        </strong>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="2" style="padding: 8px 0;">
+                                        <span style="color: #f0b849;">
+                                            <span class="dashicons dashicons-warning" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                            Connect your API key in Settings to view records
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+
+                            <?php
+                            // Get selected post types from settings
+                            $selected_post_types = get_option('queryra_post_types', array('post'));
+                            if (!is_array($selected_post_types)) {
+                                $selected_post_types = array('post');
+                            }
+
+                            // Posts (always active)
+                            $post_count = wp_count_posts('post');
+                            $published_posts = isset($post_count->publish) ? $post_count->publish : 0;
+
+                            // Pages (optional)
+                            $page_count = wp_count_posts('page');
+                            $published_pages = isset($page_count->publish) ? $page_count->publish : 0;
+                            $pages_active = in_array('page', $selected_post_types);
+
+                            // Calculate total active content (posts always + pages if enabled)
+                            $active_count = $published_posts;
+                            if ($pages_active) {
+                                $active_count += $published_pages;
+                            }
+                            ?>
+
+                            <!-- WordPress Active Content -->
+                            <tr>
+                                <th scope="row" style="padding: 8px 0;">
+                                    <span class="dashicons dashicons-wordpress" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                    Active in WordPress
+                                </th>
+                                <td style="padding: 8px 0;">
+                                    <strong style="font-size: 18px;">
+                                        <?php echo esc_html(number_format($active_count)); ?>
+                                    </strong>
+                                    <span style="color: #646970; font-size: 14px; margin-left: 5px;">
+                                        (<?php
+                                        $parts = array();
+                                        if ($published_posts > 0) {
+                                            $parts[] = number_format($published_posts) . ' post' . ($published_posts != 1 ? 's' : '');
+                                        }
+                                        if ($pages_active && $published_pages > 0) {
+                                            $parts[] = number_format($published_pages) . ' page' . ($published_pages != 1 ? 's' : '');
+                                        }
+                                        echo esc_html(implode(', ', $parts));
+                                        ?>)
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <?php if (class_exists('WooCommerce')): ?>
+                                <?php
+                                $product_count = wp_count_posts('product');
+                                $published_products = isset($product_count->publish) ? $product_count->publish : 0;
+                                ?>
+                                <tr>
+                                    <th scope="row" style="padding: 8px 0; color: #ccc;">
+                                        <span class="dashicons dashicons-cart" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                        Products
+                                    </th>
+                                    <td style="padding: 8px 0;">
+                                        <strong style="font-size: 18px; color: #ccc;">
+                                            <?php echo esc_html(number_format($published_products)); ?>
+                                        </strong>
+                                        <span style="background: #f0b849; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; margin-left: 8px;">WIP</span>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+
+                            <!-- Auto Import Status -->
+                            <tr>
+                                <th scope="row" style="padding: 8px 0; border-top: 1px solid #ddd; padding-top: 15px;">
+                                    Auto Import
+                                </th>
+                                <td style="padding: 8px 0; border-top: 1px solid #ddd; padding-top: 15px;">
+                                    <strong style="font-size: 16px;">
+                                        <?php echo $auto_sync === '1' ? 'Enabled' : 'Disabled'; ?>
+                                    </strong>
+                                    <span style="color: #646970; font-size: 14px; margin-left: 8px;">
+                                        (<a href="?page=queryra-search&tab=content">Configure in Content</a>)
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="background: #f0f6fc; border: 1px solid #d0e4f7; border-radius: 5px; padding: 15px; margin: 20px 0;">
+                            <h3 style="margin-top: 0; color: #2271b1;">
+                                <span class="dashicons dashicons-upload" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                Import Content to Queryra
+                            </h3>
+                            <p style="color: #646970; margin: 10px 0;">Send all published posts and pages to Queryra for indexing</p>
+                            <button type="button" id="queryra-sync-all" class="button button-primary" style="margin-top: 10px;">
+                                <span class="dashicons dashicons-upload" style="font-size: 16px; width: 16px; height: 16px; margin-top: 4px;"></span>
+                                Import All to Queryra
+                            </button>
+                            <div id="queryra-sync-status" style="margin-top: 10px;"></div>
+                        </div>
+
+                        <p style="color: #646970; margin-top: 20px;">View all indexed content in Queryra Dashboard:</p>
+                        <ul style="color: #646970; margin-left: 20px;">
+                            <li>Browse all imported posts, pages, and products</li>
+                            <li>View record details (title, content, metadata)</li>
+                            <li>Delete individual records</li>
+                            <li>Filter and search your indexed content</li>
+                        </ul>
+
+                        <p style="margin-top: 20px;">
+                            <a href="https://queryra.com/dashboard/records" target="_blank" class="button button-secondary">
+                                Open Dashboard
+                                <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                            </a>
+                        </p>
+                    </div>
+
+                    <?php elseif ($active_tab === 'sync'): ?>
+                    <!-- Sync Tab -->
+                    <div class="queryra-card">
+                        <h2>
+                            <span class="dashicons dashicons-update" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                            Sync
+                        </h2>
+
+                        <p style="color: #646970; line-height: 1.6;">
+                            Sync prepares your <strong>imported records</strong> (posts, pages, products in Queryra) for AI search.
+                            Only content that has been imported to Records can be synced and made searchable.
+                        </p>
+
+                        <?php if (!empty($api_key) && $stats): ?>
+                            <!-- Sync Status -->
+                            <?php if (isset($stats['synced_records']) && isset($stats['unsynced_records'])): ?>
+                            <table class="form-table" style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                                <tr>
+                                    <th scope="row" style="padding: 8px 0; width: 180px;">
+                                        <span class="dashicons dashicons-yes-alt" style="font-size: 18px; width: 18px; height: 18px; color: #46b450;"></span>
+                                        Synced Records
+                                    </th>
+                                    <td style="padding: 8px 0;">
+                                        <strong style="font-size: 18px; color: #46b450;">
+                                            <?php echo esc_html(number_format($stats['synced_records'])); ?>
+                                        </strong>
+                                        <span style="color: #646970; font-size: 14px; margin-left: 8px;">Ready for AI search</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" style="padding: 8px 0;">
+                                        <span class="dashicons dashicons-clock" style="font-size: 18px; width: 18px; height: 18px; color: #f0b849;"></span>
+                                        Unsynced Records
+                                    </th>
+                                    <td style="padding: 8px 0;">
+                                        <strong style="font-size: 18px; color: #f0b849;">
+                                            <?php echo esc_html(number_format($stats['unsynced_records'])); ?>
+                                        </strong>
+                                        <span style="color: #646970; font-size: 14px; margin-left: 8px;">Waiting to be processed</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div style="background: #fff3cd; border-left: 4px solid #f0b849; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 0;">
+                                    <span class="dashicons dashicons-warning" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    <strong>Connect your API key in Settings to view sync status</strong>
+                                </p>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Important Info Box -->
+                        <div style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 15px; margin: 20px 0; border-radius: 3px;">
+                            <p style="margin: 0 0 10px 0;">
+                                <span class="dashicons dashicons-info" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                <strong style="font-size: 15px;">Sync is a resource-intensive process</strong>
+                            </p>
+                            <p style="margin: 0 0 10px 0; color: #2c3338; line-height: 1.6;">
+                                Sync analyzes and processes your content for AI understanding. This requires significant computing resources,
+                                so it's <strong>limited to once per month</strong> per account.
+                            </p>
+                            <p style="margin: 0; color: #646970; font-size: 14px;">
+                                Next sync available: <strong>Monthly (check Dashboard for exact date)</strong>
+                            </p>
+                        </div>
+
+                        <div style="background: #f0f6fc; border: 1px solid #d0e4f7; border-radius: 5px; padding: 15px; margin: 20px 0;">
+                            <h3 style="margin-top: 0; color: #2271b1;">
+                                <span class="dashicons dashicons-update" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                Run Sync
+                            </h3>
+                            <p style="color: #646970; margin: 10px 0; line-height: 1.6;">
+                                Sync happens in Queryra Dashboard where your records are processed and prepared for AI search.
+                                View sync history, logs, and trigger sync manually.
+                            </p>
+                            <a href="https://queryra.com/dashboard/sync" target="_blank" class="button button-secondary" style="margin-top: 10px;">
+                                Open Dashboard
+                                <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <?php elseif ($active_tab === 'search-history'): ?>
+                    <!-- Search History Tab -->
+                    <div class="queryra-card">
+                        <h2>
+                            <span class="dashicons dashicons-chart-line" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                            Search History
+                        </h2>
+                        <p style="color: #646970;">View search analytics in Queryra Dashboard:</p>
+                        <ul style="color: #646970; margin-left: 20px;">
+                            <li>All user search queries with timestamps</li>
+                            <li>Search results and click-through data</li>
+                            <li>Monthly usage statistics (searches used / limit)</li>
+                            <li>Popular search terms and trends</li>
+                        </ul>
+                        <p style="margin-top: 20px;">
+                            <a href="https://queryra.com/dashboard/search-history" target="_blank" class="button button-secondary">
+                                Open Dashboard
+                                <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                            </a>
+                        </p>
+                    </div>
+
+                    <?php elseif ($active_tab === 'woocommerce' && class_exists('WooCommerce')): ?>
+                    <!-- WooCommerce Tab -->
+                    <form method="post" action="options.php">
+                        <?php settings_fields('queryra_settings'); ?>
+                        <!-- Preserve other settings -->
+                        <input type="hidden" name="queryra_api_key" value="<?php echo esc_attr($api_key); ?>">
+                        <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
+                        <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
+                        <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
+                        <!-- Preserve non-product post types from Content tab -->
+                        <?php foreach ($post_types as $pt): ?>
+                            <?php if ($pt !== 'product'): ?>
+                                <input type="hidden" name="queryra_post_types[]" value="<?php echo esc_attr($pt); ?>">
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+
+                        <div class="queryra-card">
+                            <h2>
+                                <span class="dashicons dashicons-cart" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                                WooCommerce Products
+                            </h2>
+                            <p>WooCommerce integration for AI-powered product search</p>
+
+                            <div style="background: #fff3cd; border-left: 4px solid #f0b849; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 0;">
+                                    <span class="dashicons dashicons-hammer" style="font-size: 20px; width: 20px; height: 20px; margin-right: 5px;"></span>
+                                    <strong>Work in Progress</strong>
+                                </p>
+                                <p style="margin: 10px 0 0 0; font-size: 13px;">
+                                    Advanced WooCommerce features (SKU, categories, tags, attributes) coming in v1.1!
+                                </p>
+                            </div>
+                        </div>
+
+                        <?php submit_button('Save Settings'); ?>
+                    </form>
+
+                    <?php elseif ($active_tab === 'cache'): ?>
+                    <!-- Cache Tab -->
                     <div class="queryra-card">
                         <h2>
                             <span class="dashicons dashicons-performance" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
@@ -381,67 +744,85 @@ class Queryra_Admin {
                             </p>
                         </div>
 
+                        <div style="margin-top: 20px;">
+                            <button type="button" id="queryra-clear-cache" class="button button-secondary">
+                                <span class="dashicons dashicons-trash" style="font-size: 16px; width: 16px; height: 16px; margin-top: 4px;"></span>
+                                Clear All Search Cache
+                            </button>
+                            <span id="queryra-cache-status" style="margin-left: 10px;"></span>
+                            <p class="description" style="margin-top: 8px;">
+                                Clears cached search results. Next search will fetch fresh data from Queryra API.
+                            </p>
+                        </div>
+                    </div>
+
+                    <?php elseif ($active_tab === 'support'): ?>
+                    <!-- Support Tab -->
+                    <div class="queryra-card">
+                        <h2>
+                            <span class="dashicons dashicons-sos" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                            Help & Support
+                        </h2>
+                        <p>Quick links to help you get the most out of Queryra</p>
+
                         <table class="form-table">
                             <tr>
-                                <th scope="row">Cache Status</th>
+                                <th scope="row">
+                                    <span class="dashicons dashicons-dashboard" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    Dashboard
+                                </th>
                                 <td>
-                                    <?php
-                                    global $wpdb;
-                                    $cache_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
-                                    $total_size = $wpdb->get_var("SELECT SUM(LENGTH(option_value)) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
-                                    ?>
-                                    <p style="margin: 0 0 8px 0;">
-                                        <strong><?php echo esc_html((int)$cache_count); ?></strong> cached searches
-                                        (<?php echo esc_html($total_size ? round($total_size / 1024, 1) : 0); ?> KB)
-                                    </p>
-                                    <button type="button" id="queryra-clear-cache" class="button button-secondary">
-                                        Clear All Search Cache
-                                    </button>
-                                    <span id="queryra-cache-status" style="margin-left: 10px;"></span>
-                                    <p class="description" style="margin-top: 8px;">
-                                        Clears cached search results. Next search will fetch fresh data from Queryra API.
-                                    </p>
+                                    <a href="https://queryra.com/dashboard" target="_blank" class="button button-secondary">
+                                        Open Dashboard
+                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                    </a>
+                                    <p class="description">Manage your synced records, view usage stats, and configure settings</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <span class="dashicons dashicons-book" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    Documentation
+                                </th>
+                                <td>
+                                    <a href="https://queryra.com/docs/wordpress-integration" target="_blank" class="button button-secondary">
+                                        View Docs
+                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                    </a>
+                                    <p class="description">Getting started guides, FAQs, and troubleshooting tips</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <span class="dashicons dashicons-format-chat" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    Support Forum
+                                </th>
+                                <td>
+                                    <a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" class="button button-secondary">
+                                        Visit Forum
+                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                    </a>
+                                    <p class="description">Ask questions and get help from the community</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <span class="dashicons dashicons-email" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    Contact Support
+                                </th>
+                                <td>
+                                    <a href="https://queryra.com/contact" target="_blank" class="button button-secondary">
+                                        Send Message
+                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                    </a>
+                                    <p class="description">Get direct support from the Queryra team</p>
                                 </td>
                             </tr>
                         </table>
                     </div>
 
-                    <!-- Send to Queryra -->
-                    <div class="queryra-card">
-                        <h2>Send to Queryra</h2>
-                        <p>Send all published posts and pages to Queryra.</p>
+                    <?php endif; ?>
 
-                        <!-- Info Box -->
-                        <div class="queryra-info-box" style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 12px; margin: 15px 0;">
-                            <p style="margin: 0 0 8px 0;">
-                                <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                <strong>How it works:</strong>
-                            </p>
-                            <ol style="margin: 5px 0 5px 20px; padding: 0;">
-                                <li>Posts are sent to Queryra (happens here)</li>
-                                <li>Generate embeddings in <a href="https://queryra.com/dashboard/sync" target="_blank">Queryra dashboard</a></li>
-                                <li>Records become searchable</li>
-                            </ol>
-                        </div>
-
-                        <!-- Tips Box -->
-                        <div class="queryra-tips-box" style="background: #f0f0f1; border-left: 4px solid #72aee6; padding: 12px; margin: 15px 0;">
-                            <p style="margin: 0 0 8px 0;">
-                                <span class="dashicons dashicons-lightbulb" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                <strong>Tips:</strong>
-                            </p>
-                            <ul style="margin: 5px 0 0 20px; padding: 0;">
-                                <li>To send a single post: Edit it and click "Update"</li>
-                                <li>Manage records in <a href="https://queryra.com/dashboard/records" target="_blank">Queryra dashboard</a></li>
-                                <li>Deleted WordPress posts are automatically removed from Queryra</li>
-                            </ul>
-                        </div>
-
-                        <button type="button" id="queryra-sync-all" class="button button-primary">
-                            Send All Posts
-                        </button>
-                        <div id="queryra-sync-status"></div>
-                    </div>
                 </div>
 
                 <!-- Sidebar -->
@@ -462,84 +843,99 @@ class Queryra_Admin {
                             </p>
                         </div>
                     <?php elseif ($stats): ?>
-                        <!-- API Stats -->
+                        <!-- Connection Status -->
                         <div class="queryra-card">
                             <h3>
-                                <span class="dashicons dashicons-chart-bar"></span>
-                                API Stats
+                                <span class="dashicons dashicons-admin-network"></span>
+                                Connection
                             </h3>
 
-                            <!-- Plan Info -->
-                            <div style="margin: 15px 0; padding: 10px; background: #f6f7f7; border-radius: 4px;">
-                                <p style="margin: 0 0 5px 0;">
-                                    <span class="dashicons dashicons-admin-network" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                    <strong>Plan:</strong> <?php echo esc_html(ucfirst($stats['plan'])); ?>
-                                </p>
-                                <p style="margin: 0;">
-                                    <span class="dashicons dashicons-portfolio" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                    <strong>Records:</strong> <?php echo esc_html(number_format($stats['total_records'])); ?> / <?php echo esc_html(number_format($stats['record_limit'])); ?>
-                                    <span style="color: #646970;">(<?php echo esc_html($stats['usage_percentage']); ?>%)</span>
-                                </p>
-                            </div>
+                            <p style="margin: 10px 0; color: #46b450;">
+                                <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                <strong>Connected to Queryra</strong>
+                            </p>
+                            <p style="margin: 10px 0; font-size: 14px; color: #646970;">
+                                <?php echo esc_html(number_format($stats['synced_records'])); ?> records synced | Plan: <?php echo esc_html(ucfirst($stats['plan'])); ?>
+                            </p>
+                        </div>
 
-                            <!-- Search Window (FREE plan only) -->
-                            <?php if ($status && $stats['plan'] === 'free'): ?>
-                                <div style="margin: 15px 0; padding: 10px; background: <?php echo esc_attr($status['available'] ? '#e7f5e7' : '#fff3cd'); ?>; border-radius: 4px; border-left: 3px solid <?php echo esc_attr($status['available'] ? '#46b450' : '#f0b849'); ?>;">
-                                    <p style="margin: 0 0 5px 0;">
-                                        <span class="dashicons dashicons-search" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                        <strong>Search Window:</strong>
+                        <!-- AI Search Status -->
+                        <div class="queryra-card">
+                            <h3>
+                                <span class="dashicons dashicons-search"></span>
+                                AI Search
+                            </h3>
+
+                            <?php
+                            // Check all conditions for AI search
+                            $plugin_enabled = $ai_search === '1';
+                            $has_synced = $stats['synced_records'] > 0;
+                            $window_open = true; // Default for paid plans
+                            if ($stats['plan'] === 'free' && $status) {
+                                $window_open = $status['available'];
+                            }
+
+                            $can_search = $plugin_enabled && $has_synced && $window_open;
+                            ?>
+
+                            <?php if ($can_search): ?>
+                                <!-- Everything OK -->
+                                <div style="padding: 10px; background: #e7f5e7; border-left: 3px solid #46b450; border-radius: 3px; margin: 10px 0;">
+                                    <p style="margin: 0 0 5px 0; color: #46b450;">
+                                        <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                        <strong>Plugin Configured Correctly</strong>
                                     </p>
-                                    <?php if ($status['available']): ?>
-                                        <p style="margin: 0; color: #46b450;">
-                                            <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                            Active (<?php echo esc_html($status['minutes_left']); ?> min left)
+                                    <p style="margin: 0; font-size: 13px; color: #646970;">
+                                        AI search is active and ready to use
+                                    </p>
+                                </div>
+                            <?php else: ?>
+                                <!-- Issues found -->
+                                <div style="padding: 10px; background: #fff3cd; border-left: 3px solid #f0b849; border-radius: 3px; margin: 10px 0;">
+                                    <p style="margin: 0 0 8px 0; color: #f0b849;">
+                                        <span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                        <strong>AI Search Unavailable</strong>
+                                    </p>
+
+                                    <?php if (!$plugin_enabled): ?>
+                                        <p style="margin: 0 0 5px 0; font-size: 13px; color: #646970;">
+                                            • Plugin is disabled. <a href="?page=queryra-search&tab=settings">Enable in Settings</a>
                                         </p>
-                                    <?php else: ?>
-                                        <p style="margin: 0; color: #f0b849;">
-                                            <span class="dashicons dashicons-clock" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                            Opens in <?php echo esc_html($status['minutes_until_open']); ?> min
+                                    <?php endif; ?>
+
+                                    <?php if (!$has_synced): ?>
+                                        <p style="margin: 0 0 5px 0; font-size: 13px; color: #646970;">
+                                            • No synced records. <a href="https://queryra.com/dashboard/sync" target="_blank">Sync in Dashboard</a>
                                         </p>
-                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #646970;">
-                                            Next: <?php echo esc_html($status['next_opens_at']); ?>
+                                    <?php endif; ?>
+
+                                    <?php if ($plugin_enabled && $has_synced && !$window_open): ?>
+                                        <p style="margin: 0 0 5px 0; font-size: 13px; color: #646970;">
+                                            • Search window closed (FREE plan). Opens in <?php echo esc_html($status['minutes_until_open']); ?> min
                                         </p>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
 
-                            <!-- Sync Status -->
-                            <div style="margin: 15px 0;">
-                                <p style="margin: 0 0 8px 0; font-weight: 600; color: #1d2327;">
-                                    <span class="dashicons dashicons-update" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                    Sync Status
+                            <!-- Status Details -->
+                            <div style="margin: 10px 0; font-size: 13px;">
+                                <p style="margin: 0 0 5px 0; color: #646970;">
+                                    <span class="dashicons dashicons-<?php echo $plugin_enabled ? 'yes' : 'no'; ?>" style="font-size: 14px; width: 14px; height: 14px; color: <?php echo $plugin_enabled ? '#46b450' : '#d63638'; ?>;"></span>
+                                    Plugin: <?php echo $plugin_enabled ? 'Enabled' : 'Disabled'; ?>
                                 </p>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                    <span style="color: #646970;">Synced</span>
-                                    <strong><?php echo esc_html(number_format($stats['synced_records'])); ?></strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: #646970;">Unsynced</span>
-                                    <strong><?php echo esc_html(number_format($stats['unsynced_records'])); ?></strong>
-                                </div>
+                                <p style="margin: 0 0 5px 0; color: #646970;">
+                                    <span class="dashicons dashicons-<?php echo $has_synced ? 'yes' : 'no'; ?>" style="font-size: 14px; width: 14px; height: 14px; color: <?php echo $has_synced ? '#46b450' : '#d63638'; ?>;"></span>
+                                    Synced: <?php echo esc_html(number_format($stats['synced_records'])); ?> records
+                                </p>
+                                <?php if ($stats['plan'] === 'free'): ?>
+                                    <p style="margin: 0; color: #646970;">
+                                        <span class="dashicons dashicons-<?php echo $window_open ? 'yes' : 'no'; ?>" style="font-size: 14px; width: 14px; height: 14px; color: <?php echo $window_open ? '#46b450' : '#d63638'; ?>;"></span>
+                                        Window: <?php echo $window_open ? 'Open' : 'Closed'; ?>
+                                    </p>
+                                <?php endif; ?>
                             </div>
-
-                            <!-- Dashboard Link -->
-                            <?php if ($stats['unsynced_records'] > 0): ?>
-                                <a href="https://queryra.com/dashboard/sync" target="_blank" class="button button-secondary" style="width: 100%; text-align: center; margin-top: 10px;">
-                                    <span class="dashicons dashicons-update" style="font-size: 16px; width: 16px; height: 16px; vertical-align: middle;"></span>
-                                    Sync in Dashboard
-                                </a>
-                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
-
-                    <div class="queryra-card">
-                        <h3>Documentation</h3>
-                        <ul>
-                            <li><a href="https://queryra.com/docs" target="_blank">Getting Started</a></li>
-                            <li><a href="https://queryra.com/docs/wordpress-integration" target="_blank">WordPress Integration</a></li>
-                            <li><a href="https://queryra.com/faq" target="_blank">FAQ</a></li>
-                        </ul>
-                    </div>
 
                     <div class="queryra-card">
                         <h3>Support</h3>
