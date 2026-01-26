@@ -29,6 +29,7 @@ require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-api.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-sync.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-admin.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-search.php';
+require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-setup-wizard.php';
 
 /**
  * Main Plugin Class
@@ -69,6 +70,7 @@ class Queryra_Search {
         // Initialize admin
         if (is_admin()) {
             new Queryra_Admin();
+            new Queryra_Setup_Wizard();
         }
 
         // Initialize sync
@@ -89,6 +91,9 @@ class Queryra_Search {
         if (!get_option('queryra_api_url')) {
             add_option('queryra_api_url', 'https://queryra.com');
         }
+        if (!get_option('queryra_enabled')) {
+            add_option('queryra_enabled', '1'); // Enabled by default
+        }
         if (!get_option('queryra_auto_sync')) {
             add_option('queryra_auto_sync', '1');
         }
@@ -98,6 +103,9 @@ class Queryra_Search {
         if (!get_option('queryra_post_types')) {
             add_option('queryra_post_types', array('post', 'page'));
         }
+
+        // Set transient for first-time activation redirect to wizard
+        set_transient('queryra_activation_redirect', true, 30);
 
         // Flush rewrite rules
         flush_rewrite_rules();

@@ -1,0 +1,336 @@
+/**
+ * Queryra Setup Wizard Styles
+ */
+
+.queryra-wizard-wrap {
+    background: #f0f0f1;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.queryra-wizard-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Header */
+.queryra-wizard-header {
+    background: linear-gradient(135deg, #2271b1 0%, #1a5a8a 100%);
+    color: #fff;
+    padding: 30px;
+    text-align: center;
+}
+
+.queryra-wizard-header h1 {
+    margin: 0 0 20px 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.queryra-wizard-header h1 .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+/* Progress Bar */
+.queryra-wizard-progress {
+    margin-top: 20px;
+}
+
+.queryra-wizard-progress-bar {
+    background: rgba(255,255,255,0.2);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.queryra-wizard-progress-fill {
+    background: #fff;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.queryra-wizard-progress-text {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Content */
+.queryra-wizard-content {
+    padding: 40px;
+}
+
+.queryra-wizard-step h2 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    color: #1d2327;
+}
+
+.queryra-step-subtitle {
+    margin: 0 0 30px 0;
+    font-size: 16px;
+    color: #646970;
+}
+
+/* Welcome Banner */
+.queryra-welcome-banner {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, #f0f6fc 0%, #e7f3ff 100%);
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.queryra-welcome-banner h2 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    color: #2271b1;
+}
+
+.queryra-welcome-subtitle {
+    font-size: 16px;
+    color: #646970;
+    margin: 0;
+}
+
+/* Connect Section */
+.queryra-connect-section {
+    margin-top: 30px;
+}
+
+.queryra-connect-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #1d2327;
+}
+
+.queryra-connection-mode {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.queryra-radio-card {
+    border: 2px solid #dcdcde;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: block;
+}
+
+.queryra-radio-card:hover {
+    border-color: #2271b1;
+}
+
+.queryra-radio-card input[type="radio"] {
+    margin-right: 15px;
+}
+
+.queryra-radio-card input[type="radio"]:checked {
+    accent-color: #2271b1;
+}
+
+.queryra-radio-content {
+    display: inline-block;
+}
+
+.queryra-radio-content strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #1d2327;
+}
+
+.queryra-radio-content span {
+    display: block;
+    font-size: 13px;
+    color: #646970;
+}
+
+/* Forms */
+.queryra-connection-form {
+    margin-top: 20px;
+}
+
+.queryra-form-field {
+    margin-bottom: 20px;
+}
+
+.queryra-form-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1d2327;
+}
+
+.queryra-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.queryra-input:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.queryra-field-note {
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    color: #646970;
+}
+
+.queryra-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.queryra-checkbox input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* Buttons */
+.queryra-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.queryra-button .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.queryra-button-primary {
+    background: #2271b1;
+    color: #fff;
+}
+
+.queryra-button-primary:hover {
+    background: #135e96;
+    color: #fff;
+}
+
+.queryra-button-secondary {
+    background: #f6f7f7;
+    color: #2c3338;
+    border: 1px solid #dcdcde;
+}
+
+.queryra-button-secondary:hover {
+    background: #e7e8e9;
+    color: #2c3338;
+}
+
+.queryra-button-large {
+    padding: 16px 32px;
+    font-size: 16px;
+}
+
+.queryra-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Status Messages */
+#queryra-connection-status {
+    margin: 15px 0;
+}
+
+.queryra-error {
+    background: #fef2f2;
+    border-left: 4px solid #dc3232;
+    padding: 12px;
+    border-radius: 4px;
+    color: #dc3232;
+}
+
+.queryra-success {
+    background: #e7f5e7;
+    border-left: 4px solid #46b450;
+    padding: 12px;
+    border-radius: 4px;
+    color: #46b450;
+}
+
+.queryra-info {
+    background: #e7f3ff;
+    border-left: 4px solid #2271b1;
+    padding: 12px;
+    border-radius: 4px;
+    color: #2271b1;
+}
+
+/* Recover Link */
+.queryra-recover-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #646970;
+}
+
+.queryra-recover-link a {
+    color: #2271b1;
+    text-decoration: none;
+}
+
+.queryra-recover-link a:hover {
+    text-decoration: underline;
+}
+
+/* Animations */
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .queryra-wizard-wrap {
+        padding: 20px 10px;
+    }
+
+    .queryra-wizard-content {
+        padding: 20px;
+    }
+
+    .queryra-connection-mode {
+        grid-template-columns: 1fr;
+    }
+
+    .queryra-button-large {
+        width: 100%;
+        justify-content: center;
+    }
+}
