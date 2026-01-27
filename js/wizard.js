@@ -84,7 +84,7 @@ jQuery(document).ready(function($) {
                 if (response.success) {
                     // Show 100% progress
                     $('#queryra-import-progress-bar').css('width', '100%').text('100%');
-                    $('#queryra-import-info').text(response.data.imported + ' / ' + response.data.imported + ' items');
+                    $('#queryra-import-info').text(response.data.imported + ' / ' + response.data.imported + ' records');
 
                     // Hide progress, show success
                     setTimeout(function() {
@@ -164,54 +164,6 @@ jQuery(document).ready(function($) {
             },
             error: function() {
                 alert('Failed to check status. Please try again.');
-                $button.prop('disabled', false).html(originalText);
-            }
-        });
-    });
-
-    // Step 3: Save Settings
-    $('#queryra-save-settings').on('click', function() {
-        var $button = $(this);
-        var originalText = $button.html();
-
-        // Get settings
-        var enabled = $('#queryra-enabled').is(':checked');
-        var includePages = $('#queryra-include-pages').is(':checked');
-        var autoImport = $('#queryra-auto-import').is(':checked');
-
-        // Disable button
-        $button.prop('disabled', true).html('<span class="dashicons dashicons-update" style="animation: rotation 2s infinite linear;"></span> Saving...');
-
-        // Save settings
-        $.ajax({
-            url: queryraWizard.ajaxUrl,
-            type: 'POST',
-            data: {
-                action: 'queryra_wizard_save_settings',
-                nonce: queryraWizard.nonce,
-                enabled: enabled.toString(),
-                include_pages: includePages.toString(),
-                auto_import: autoImport.toString()
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Show success message
-                    $('#queryra-settings-status').html('<div style="background: #e7f7ed; border-left: 4px solid #00a32a; padding: 12px; border-radius: 4px; color: #1d2327;"><span class="dashicons dashicons-yes-alt" style="color: #00a32a;"></span> ' + response.data.message + '</div>');
-
-                    // Hide success message after 3 seconds
-                    setTimeout(function() {
-                        $('#queryra-settings-status').empty();
-                    }, 3000);
-
-                    // Re-enable button
-                    $button.prop('disabled', false).html(originalText);
-                } else {
-                    alert('Error: ' + response.data.message);
-                    $button.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function() {
-                alert('Failed to save settings. Please try again.');
                 $button.prop('disabled', false).html(originalText);
             }
         });

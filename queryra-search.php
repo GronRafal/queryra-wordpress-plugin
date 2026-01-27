@@ -23,6 +23,7 @@ define('QUERYRA_VERSION', '1.0.0');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
+define('QUERYRA_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 // Include required files
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-api.php';
@@ -30,6 +31,7 @@ require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-sync.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-admin.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-search.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-setup-wizard.php';
+require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-deactivation-survey.php';
 
 /**
  * Main Plugin Class
@@ -71,6 +73,7 @@ class Queryra_Search {
         if (is_admin()) {
             new Queryra_Admin();
             new Queryra_Setup_Wizard();
+            new Queryra_Deactivation_Survey();
         }
 
         // Initialize sync

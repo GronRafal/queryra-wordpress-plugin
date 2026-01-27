@@ -38,7 +38,6 @@ class Queryra_Setup_Wizard {
         add_action('wp_ajax_queryra_wizard_save_api_key', array($this, 'ajax_save_api_key'));
         add_action('wp_ajax_queryra_wizard_import', array($this, 'ajax_import_content'));
         add_action('wp_ajax_queryra_wizard_check_status', array($this, 'ajax_check_status'));
-        add_action('wp_ajax_queryra_wizard_save_settings', array($this, 'ajax_save_settings'));
         add_action('wp_ajax_queryra_wizard_test_search', array($this, 'ajax_test_search'));
     }
 
@@ -215,7 +214,7 @@ class Queryra_Setup_Wizard {
                                value="<?php echo esc_attr($current_api_key); ?>">
                         <p class="queryra-field-note">
                             Enter your Queryra API key. You can find it in your
-                            <a href="https://queryra.com/dashboard/settings" target="_blank">Dashboard Settings</a>.
+                            <a href="https://queryra.com/dashboard/api-keys" target="_blank">Dashboard Settings</a>.
                         </p>
                     </div>
 
@@ -326,12 +325,26 @@ class Queryra_Setup_Wizard {
         $pages_count = wp_count_posts('page');
         $published_pages = isset($pages_count->publish) ? $pages_count->publish : 0;
 
+        // Count products (if WooCommerce is active)
+        $published_products = 0;
+        $has_woocommerce = class_exists('WooCommerce');
+        if ($has_woocommerce) {
+            $products_count = wp_count_posts('product');
+            $published_products = isset($products_count->publish) ? $products_count->publish : 0;
+        }
+
         // Get plan info
         $plan = isset($stats['plan']) ? ucfirst($stats['plan']) : 'Free';
         $limit = isset($stats['record_limit']) ? $stats['record_limit'] : 100;
 
-        // Calculate what will be imported
-        $will_import = min($published_posts, $limit);
+        // Calculate total content available
+        $total_content = $published_posts + $published_pages + $published_products;
+
+        // Calculate what will be imported (all content types, up to limit)
+        $will_import = min($total_content, $limit);
+
+        // Check if we're over limit
+        $is_over_limit = $total_content > $limit;
         ?>
 
         <div class="queryra-wizard-step">
@@ -341,15 +354,21 @@ class Queryra_Setup_Wizard {
             <!-- Site Content Summary -->
             <div style="background: #f6f7f7; padding: 20px; border-radius: 8px; margin: 25px 0;">
                 <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1d2327;">Your WordPress Site:</h3>
-                <div style="display: flex; gap: 30px;">
+                <div style="display: flex; gap: 30px; flex-wrap: wrap;">
                     <div>
                         <span style="font-size: 32px; font-weight: 700; color: #2271b1;"><?php echo number_format($published_posts); ?></span>
                         <p style="margin: 5px 0 0 0; font-size: 14px; color: #646970;">Posts</p>
                     </div>
                     <div>
-                        <span style="font-size: 32px; font-weight: 700; color: #646970;"><?php echo number_format($published_pages); ?></span>
+                        <span style="font-size: 32px; font-weight: 700; color: #2271b1;"><?php echo number_format($published_pages); ?></span>
                         <p style="margin: 5px 0 0 0; font-size: 14px; color: #646970;">Pages</p>
                     </div>
+                    <?php if ($has_woocommerce): ?>
+                    <div>
+                        <span style="font-size: 32px; font-weight: 700; color: #2271b1;"><?php echo number_format($published_products); ?></span>
+                        <p style="margin: 5px 0 0 0; font-size: 14px; color: #646970;">Products</p>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -357,43 +376,63 @@ class Queryra_Setup_Wizard {
             <div style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 20px; border-radius: 4px; margin: 25px 0;">
                 <p style="margin: 0 0 10px 0; font-size: 15px;">
                     <strong>Your Plan: <?php echo esc_html($plan); ?></strong>
-                    <span style="color: #646970;">(<?php echo number_format($limit); ?> items included)</span>
+                    <span style="color: #646970;">(<?php echo number_format($limit); ?> records included)</span>
                 </p>
             </div>
 
             <!-- What Will Be Imported -->
             <div style="background: #fff; border: 2px solid #2271b1; padding: 25px; border-radius: 8px; margin: 25px 0;">
-                <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #1d2327;">
-                    <span class="dashicons dashicons-yes-alt" style="color: #46b450; font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1d2327;">
+                    <span class="dashicons dashicons-upload" style="color: #2271b1; font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
                     What will be imported:
                 </h3>
 
-                <?php if ($published_posts <= $limit): ?>
-                    <!-- All posts fit within limit -->
-                    <p style="margin: 0; font-size: 16px; color: #1d2327;">
-                        ✅ <strong>All <?php echo number_format($published_posts); ?> Posts</strong>
-                    </p>
-                    <p style="margin: 10px 0 0 0; font-size: 14px; color: #646970;">
-                        All your posts will be imported to Queryra for AI search
-                    </p>
-                <?php else: ?>
-                    <!-- Over limit - import newest -->
-                    <p style="margin: 0; font-size: 16px; color: #1d2327;">
-                        ✅ <strong><?php echo number_format($will_import); ?> most recent Posts</strong>
-                    </p>
-                    <p style="margin: 10px 0 0 0; font-size: 14px; color: #646970;">
-                        Sorted by publish date, newest first
-                    </p>
-
-                    <!-- Warning: Not all content -->
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-top: 15px;">
-                        <p style="margin: 0 0 8px 0; color: #856404;">
-                            <span class="dashicons dashicons-info" style="font-size: 18px; width: 18px; height: 18px;"></span>
-                            <strong>Note:</strong> You have <?php echo number_format($published_posts - $will_import); ?> older posts that won't be imported
+                <?php if (!$is_over_limit): ?>
+                    <!-- Everything fits within limit -->
+                    <div style="background: #e7f7ed; padding: 20px; border-radius: 4px; margin-bottom: 15px;">
+                        <p style="margin: 0 0 15px 0; font-size: 16px; color: #1d2327;">
+                            <span style="color: #00a32a; font-size: 24px; margin-right: 8px;">✅</span>
+                            <strong>All your content will be imported!</strong>
                         </p>
-                        <p style="margin: 0; font-size: 13px; color: #856404;">
-                            Pages and older posts will be skipped. Want to import more?
-                            <a href="https://queryra.com/pricing" target="_blank" style="color: #856404; text-decoration: underline;">Upgrade your plan</a>
+                        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                            <?php if ($published_posts > 0): ?>
+                            <div style="text-align: center; min-width: 80px;">
+                                <div style="font-size: 32px; font-weight: 700; color: #00a32a; line-height: 1;"><?php echo number_format($published_posts); ?></div>
+                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #646970;">Posts</p>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ($published_pages > 0): ?>
+                            <div style="text-align: center; min-width: 80px;">
+                                <div style="font-size: 32px; font-weight: 700; color: #00a32a; line-height: 1;"><?php echo number_format($published_pages); ?></div>
+                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #646970;">Pages</p>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ($has_woocommerce && $published_products > 0): ?>
+                            <div style="text-align: center; min-width: 80px;">
+                                <div style="font-size: 32px; font-weight: 700; color: #00a32a; line-height: 1;"><?php echo number_format($published_products); ?></div>
+                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #646970;">Products</p>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <!-- Over limit - show what fits -->
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 4px; margin-bottom: 15px;">
+                        <p style="margin: 0 0 10px 0; font-size: 16px; color: #856404;">
+                            <span class="dashicons dashicons-info" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                            <strong>Plan Limit Reached</strong>
+                        </p>
+                        <p style="margin: 0; font-size: 14px; color: #646970;">
+                            You have <strong><?php echo number_format($total_content); ?> total records</strong>, but your plan allows <strong><?php echo number_format($limit); ?> records</strong>.
+                        </p>
+                        <p style="margin: 10px 0 0 0; font-size: 14px; color: #646970;">
+                            We'll import the <strong><?php echo number_format($will_import); ?> most recent records</strong> (sorted by publish date).
+                        </p>
+                    </div>
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 4px;">
+                        <p style="margin: 0; font-size: 13px; color: #646970;">
+                            Want to import all <?php echo number_format($total_content); ?> records?
+                            <a href="https://queryra.com/pricing" target="_blank" style="color: #2271b1; text-decoration: underline;">Upgrade your plan</a>
                         </p>
                     </div>
                 <?php endif; ?>
@@ -401,10 +440,14 @@ class Queryra_Setup_Wizard {
 
             <!-- Info Box -->
             <div style="background: #f6f7f7; padding: 15px; border-radius: 4px; margin: 25px 0;">
-                <p style="margin: 0; font-size: 13px; color: #646970;">
-                    💡 <strong>Note:</strong> You can change what content types to sync later in Settings → Content.
-                    This import will send your content to Queryra for AI processing.
+                <p style="margin: 0 0 10px 0; font-size: 13px; color: #646970;">
+                    💡 <strong>After import:</strong> You can manage your imported content anytime:
                 </p>
+                <ul style="margin: 0 0 0 20px; padding: 0; font-size: 13px; color: #646970;">
+                    <li>Delete unwanted records from <a href="https://queryra.com/dashboard/records" target="_blank">Queryra Dashboard</a></li>
+                    <li>Import new content from <strong>Settings → Records</strong></li>
+                    <li>Auto-sync keeps everything up to date</li>
+                </ul>
             </div>
 
             <!-- Start Import Button (Top) -->
@@ -425,7 +468,7 @@ class Queryra_Setup_Wizard {
                         <div id="queryra-import-progress-bar" style="background: linear-gradient(90deg, #2271b1 0%, #135e96 100%); height: 100%; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600;"></div>
                     </div>
                     <p id="queryra-import-info" style="margin: 10px 0 0 0; font-size: 14px; color: #646970;">
-                        0 / <?php echo $will_import; ?> items
+                        0 / <?php echo $will_import; ?> records
                     </p>
                 </div>
             </div>
@@ -438,7 +481,7 @@ class Queryra_Setup_Wizard {
                         Import Complete!
                     </p>
                     <p id="queryra-success-message" style="margin: 10px 0 0 0; font-size: 14px; color: #1d2327;">
-                        Successfully imported <?php echo $will_import; ?> items to Queryra
+                        Successfully imported <?php echo $will_import; ?> records to Queryra
                     </p>
                 </div>
             </div>
@@ -494,7 +537,13 @@ class Queryra_Setup_Wizard {
         // Auto-set plugin settings (hidden)
         update_option('queryra_enabled', '1');
         update_option('queryra_auto_sync', '1');
-        update_option('queryra_post_types', array('post', 'page'));
+
+        // Build post types - include products if WooCommerce active
+        $post_types = array('post', 'page');
+        if (class_exists('WooCommerce')) {
+            $post_types[] = 'product';
+        }
+        update_option('queryra_post_types', $post_types);
 
         ?>
         <div class="queryra-wizard-step">
@@ -532,7 +581,7 @@ class Queryra_Setup_Wizard {
                 <ol style="margin: 0; padding-left: 20px; line-height: 1.8;">
                     <li>Open your <strong>Queryra Dashboard</strong></li>
                     <li>Go to the <strong>Sync</strong> page</li>
-                    <li>Click <strong>"Sync Now"</strong> to process your <?php echo number_format($records_in_db); ?> items with AI</li>
+                    <li>Click <strong>"Sync Now"</strong> to process your <?php echo number_format($records_in_db); ?> records with AI</li>
                     <li>Come back here and click <strong>"Check Status"</strong> to verify</li>
                 </ol>
 
@@ -552,7 +601,7 @@ class Queryra_Setup_Wizard {
                     All Records Synced!
                 </h4>
                 <p style="margin: 0; color: #1d2327;">
-                    Your <?php echo number_format($records_in_db); ?> items are ready for AI-powered search.
+                    Your <?php echo number_format($records_in_db); ?> records are ready for AI-powered search.
                 </p>
             </div>
 
@@ -580,7 +629,7 @@ class Queryra_Setup_Wizard {
         <div class="queryra-wizard-step">
             <h2>Test Your AI Search</h2>
             <p class="queryra-step-subtitle">
-                Try a search to see your content in action
+                Direct API test - searches through Queryra without WordPress settings
             </p>
 
             <!-- Success Message -->
@@ -591,6 +640,14 @@ class Queryra_Setup_Wizard {
                 </h4>
                 <p style="margin: 0; color: #1d2327;">
                     Your content is imported and synced. AI-powered search is ready to use.
+                </p>
+            </div>
+
+            <!-- Info Box -->
+            <div style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 15px; margin: 25px 0;">
+                <p style="margin: 0; font-size: 13px; color: #646970;">
+                    💡 <strong>Note:</strong> This test queries the Queryra API directly. It ignores your WordPress AI Search settings (enabled/disabled).
+                    To test with WordPress settings, use the regular search on your site.
                 </p>
             </div>
 
@@ -688,24 +745,32 @@ class Queryra_Setup_Wizard {
         $stats = get_option('queryra_cached_stats');
         $limit = isset($stats['record_limit']) ? $stats['record_limit'] : 100;
 
-        // Get newest posts (up to limit)
-        $posts = get_posts(array(
-            'post_type' => 'post',
+        // Build post types array
+        $post_types = array('post', 'page');
+
+        // Add products if WooCommerce is active
+        if (class_exists('WooCommerce')) {
+            $post_types[] = 'product';
+        }
+
+        // Get all published content (posts, pages, products) up to limit
+        $all_content = get_posts(array(
+            'post_type' => $post_types,
             'post_status' => 'publish',
             'numberposts' => $limit,
             'orderby' => 'date',
             'order' => 'DESC'
         ));
 
-        if (empty($posts)) {
-            wp_send_json_error(array('message' => 'No posts found to import'));
+        if (empty($all_content)) {
+            wp_send_json_error(array('message' => 'No content found to import'));
             return;
         }
 
         // Get post IDs
         $post_ids = array_map(function($post) {
             return $post->ID;
-        }, $posts);
+        }, $all_content);
 
         // Use existing sync functionality
         $sync = new Queryra_Sync();
@@ -716,8 +781,8 @@ class Queryra_Setup_Wizard {
             update_option('queryra_wizard_import_done', '1');
 
             wp_send_json_success(array(
-                'message' => sprintf('Successfully imported %d posts', count($posts)),
-                'imported' => count($posts)
+                'message' => sprintf('Successfully imported %d records', count($all_content)),
+                'imported' => count($all_content)
             ));
         } else {
             wp_send_json_error(array('message' => $result['message']));
@@ -755,37 +820,6 @@ class Queryra_Setup_Wizard {
         ));
     }
 
-    /**
-     * AJAX: Save plugin settings
-     */
-    public function ajax_save_settings() {
-        check_ajax_referer('queryra_wizard', 'nonce');
-
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Unauthorized'));
-            return;
-        }
-
-        // Get settings from POST
-        $enabled = isset($_POST['enabled']) && $_POST['enabled'] === 'true' ? '1' : '0';
-        $auto_import = isset($_POST['auto_import']) && $_POST['auto_import'] === 'true' ? '1' : '0';
-        $include_pages = isset($_POST['include_pages']) && $_POST['include_pages'] === 'true';
-
-        // Build post_types array
-        $post_types = array('post'); // Always include posts
-        if ($include_pages) {
-            $post_types[] = 'page';
-        }
-
-        // Save settings
-        update_option('queryra_enabled', $enabled);
-        update_option('queryra_auto_sync', $auto_import);
-        update_option('queryra_post_types', $post_types);
-
-        wp_send_json_success(array(
-            'message' => 'Settings saved successfully'
-        ));
-    }
 
     /**
      * AJAX: Test search
@@ -810,7 +844,60 @@ class Queryra_Setup_Wizard {
         $result = $api->search($query, 15);
 
         if (is_wp_error($result)) {
-            wp_send_json_error(array('message' => $result->get_error_message()));
+            $error_data = $result->get_error_data();
+            $error_message = $result->get_error_message();
+
+            // Check if message is JSON (happens when API returns complex error)
+            $json_decoded = json_decode($error_message, true);
+            if ($json_decoded && isset($json_decoded['error'])) {
+                // Message is JSON - use decoded data
+                $error_info = $json_decoded;
+            } elseif ($error_data && isset($error_data['data']['errors']['api_error'][0])) {
+                // Standard error structure
+                $error_info = $error_data['data']['errors']['api_error'][0];
+            } else {
+                // Unknown structure - return default message
+                wp_send_json_error(array('message' => $error_message));
+                return;
+            }
+
+            // Handle FREE_PLAN_WINDOW_CLOSED
+            if (isset($error_info['error']) && $error_info['error'] === 'FREE_PLAN_WINDOW_CLOSED') {
+                // Extract info
+                $minutes = isset($error_info['minutes_until_open']) ? $error_info['minutes_until_open'] : 0;
+                $next_time = isset($error_info['next_available_at']) ? $error_info['next_available_at'] : '';
+
+                // Build user-friendly message
+                $hours = floor($minutes / 60);
+                $mins = $minutes % 60;
+                $time_text = '';
+
+                if ($hours > 0) {
+                    $time_text = sprintf('%d hour%s %d minute%s',
+                        $hours,
+                        $hours > 1 ? 's' : '',
+                        $mins,
+                        $mins != 1 ? 's' : ''
+                    );
+                } else {
+                    $time_text = sprintf('%d minute%s', $mins, $mins != 1 ? 's' : '');
+                }
+
+                $friendly_message = sprintf(
+                    '<strong>FREE Plan Search Window Closed</strong><br><br>' .
+                    'Your FREE plan allows AI search for <strong>1 hour every 3 hours</strong>.<br><br>' .
+                    '⏰ Next search window opens in: <strong>%s</strong> (at %s UTC)<br><br>' .
+                    '💡 Want unlimited 24/7 access? <a href="https://queryra.com/pricing" target="_blank" style="color: #2271b1; font-weight: 600;">Upgrade to STARTER plan</a>',
+                    $time_text,
+                    $next_time
+                );
+
+                wp_send_json_error(array('message' => $friendly_message));
+                return;
+            }
+
+            // Default error handling for other errors
+            wp_send_json_error(array('message' => $error_message));
             return;
         }
 

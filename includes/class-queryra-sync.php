@@ -224,6 +224,61 @@ class Queryra_Sync {
             $description_parts[] = "Tags: " . implode(', ', $tags);
         }
 
+        // WooCommerce Product Enhancement
+        $price = 0.0;
+        $stock = 0;
+        if ($post->post_type === 'product' && class_exists('WooCommerce')) {
+            $product = wc_get_product($post->ID);
+
+            if ($product) {
+                // 1. Real Price
+                $price = (float) $product->get_price();
+
+                // 2. Stock Quantity
+                $stock = (int) $product->get_stock_quantity();
+
+                // 3. Short Description (WooCommerce excerpt)
+                $short_desc = $product->get_short_description();
+                if (!empty($short_desc)) {
+                    $description_parts[] = "Product Info: " . wp_strip_all_tags($short_desc);
+                }
+
+                // 4. SKU
+                $sku = $product->get_sku();
+                if (!empty($sku)) {
+                    $description_parts[] = "SKU: " . $sku;
+                }
+
+                // 5. Product Categories (taxonomy: product_cat)
+                $product_cats = get_the_terms($post->ID, 'product_cat');
+                if ($product_cats && !is_wp_error($product_cats)) {
+                    $cat_names = wp_list_pluck($product_cats, 'name');
+                    $description_parts[] = "Product Categories: " . implode(', ', $cat_names);
+                }
+
+                // 6. Product Tags (taxonomy: product_tag)
+                $product_tags = get_the_terms($post->ID, 'product_tag');
+                if ($product_tags && !is_wp_error($product_tags)) {
+                    $tag_names = wp_list_pluck($product_tags, 'name');
+                    $description_parts[] = "Product Tags: " . implode(', ', $tag_names);
+                }
+
+                // 7. Product Attributes (Color, Size, Material, etc.)
+                $attributes = $product->get_attributes();
+                if (!empty($attributes)) {
+                    foreach ($attributes as $attribute) {
+                        if (is_a($attribute, 'WC_Product_Attribute')) {
+                            $name = wc_attribute_label($attribute->get_name());
+                            $values = $product->get_attribute($attribute->get_name());
+                            if (!empty($values)) {
+                                $description_parts[] = $name . ": " . $values;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Combine all parts with double line breaks
         $full_description = implode("\n\n", $description_parts);
 
@@ -232,16 +287,26 @@ class Queryra_Sync {
 
         // Calculate margin based on post importance
         // Sticky posts (featured) = 100%, normal posts = 50%
-        $margin = is_sticky($post->ID) ? 1.0 : 0.5;
+        // WooCommerce: Featured products = 100%
+        $margin = 0.5;
+        if (is_sticky($post->ID)) {
+            $margin = 1.0;
+        } elseif ($post->post_type === 'product' && class_exists('WooCommerce')) {
+            $product = wc_get_product($post->ID);
+            if ($product && $product->is_featured()) {
+                $margin = 1.0;
+            }
+        }
 
         // Build record - only fields that backend expects
         $record = array(
             'id' => 'wp-' . $post->ID,
             'name' => $post->post_title,
             'description' => $full_description,
-            'price' => 0.0,
+            'price' => $price,
             'url' => get_permalink($post->ID),
             'image_url' => $image_url ?: '',
+            'stock' => $stock,
             'margin' => $margin
         );
 

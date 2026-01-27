@@ -245,8 +245,10 @@ class Queryra_Search_Integration {
 
             $ids_string = implode(',', array_map('intval', $page_ids));
 
-            // Get allowed post types from settings (same as sync)
+            // Get allowed post types from settings
+            // Only show content types that user enabled in settings
             $post_types = get_option('queryra_post_types', array('post', 'page'));
+
             $post_types_string = "'" . implode("','", array_map('esc_sql', $post_types)) . "'";
 
             $results = $wpdb->get_results("

@@ -97,7 +97,7 @@ class Queryra_Admin {
             $result[] = 'page';
         }
 
-        // Add product if selected (WIP)
+        // Add product if selected
         if (in_array('product', $sanitized)) {
             $result[] = 'product';
         }
@@ -243,13 +243,11 @@ class Queryra_Admin {
                     <span class="dashicons dashicons-media-document" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
                     Content
                 </a>
-                <?php if (class_exists('WooCommerce')): ?>
                 <a href="?page=queryra-search&tab=woocommerce"
                    class="nav-tab <?php echo $active_tab === 'woocommerce' ? 'nav-tab-active' : ''; ?>">
                     <span class="dashicons dashicons-cart" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
                     WooCommerce
                 </a>
-                <?php endif; ?>
                 <a href="?page=queryra-search&tab=records"
                    class="nav-tab <?php echo $active_tab === 'records' ? 'nav-tab-active' : ''; ?>">
                     <span class="dashicons dashicons-list-view" style="font-size: 16px; width: 16px; height: 16px; margin-top: 6px;"></span>
@@ -297,7 +295,6 @@ class Queryra_Admin {
                                 <span class="dashicons dashicons-admin-generic" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
                                 Settings
                             </h2>
-                            <p>Get your API key from <a href="https://queryra.com/dashboard" target="_blank">Queryra Dashboard</a></p>
 
                             <table class="form-table">
                                 <tr>
@@ -345,6 +342,13 @@ class Queryra_Admin {
                                     </td>
                                 </tr>
                             </table>
+
+                            <p style="margin-top: 20px;">
+                                <a href="https://queryra.com/dashboard/api-keys" target="_blank" class="button button-secondary">
+                                    Open Dashboard
+                                    <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                </a>
+                            </p>
                         </div>
 
                         <?php submit_button('Save Settings'); ?>
@@ -445,14 +449,33 @@ class Queryra_Admin {
                                         $total = isset($stats['total_records']) ? $stats['total_records'] : 0;
                                         $limit = isset($stats['record_limit']) ? $stats['record_limit'] : 0;
                                         $percentage = isset($stats['usage_percentage']) ? $stats['usage_percentage'] : 0;
+
+                                        // Determine progress bar color based on usage
+                                        $bar_color = '#00a32a'; // Green (< 70%)
+                                        if ($percentage >= 90) {
+                                            $bar_color = '#d63638'; // Red (>= 90%)
+                                        } elseif ($percentage >= 70) {
+                                            $bar_color = '#f0b849'; // Yellow (70-89%)
+                                        }
                                         ?>
-                                        <strong style="font-size: 18px;">
-                                            <?php echo esc_html(number_format($total)); ?>
-                                            <?php if ($limit > 0): ?>
-                                                / <?php echo esc_html(number_format($limit)); ?>
-                                                <span style="color: #646970; font-size: 14px;">(<?php echo esc_html($percentage); ?>%)</span>
-                                            <?php endif; ?>
-                                        </strong>
+                                        <div style="margin-bottom: 8px;">
+                                            <strong style="font-size: 18px;">
+                                                <?php echo esc_html(number_format($total)); ?>
+                                                <?php if ($limit > 0): ?>
+                                                    / <?php echo esc_html(number_format($limit)); ?>
+                                                    <span style="color: #646970; font-size: 14px;">(<?php echo esc_html($percentage); ?>%)</span>
+                                                <?php else: ?>
+                                                    <span style="color: #646970; font-size: 14px;">(Unlimited)</span>
+                                                <?php endif; ?>
+                                            </strong>
+                                        </div>
+
+                                        <?php if ($limit > 0): ?>
+                                            <!-- Progress Bar -->
+                                            <div style="background: #f0f0f1; border-radius: 4px; height: 12px; overflow: hidden; max-width: 300px; position: relative;">
+                                                <div style="background: <?php echo esc_attr($bar_color); ?>; height: 100%; width: <?php echo esc_attr($percentage); ?>%; transition: width 0.3s ease, background-color 0.3s ease; border-radius: 4px;"></div>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php else: ?>
@@ -482,10 +505,22 @@ class Queryra_Admin {
                             $published_pages = isset($page_count->publish) ? $page_count->publish : 0;
                             $pages_active = in_array('page', $selected_post_types);
 
-                            // Calculate total active content (posts always + pages if enabled)
+                            // Products (optional, WooCommerce)
+                            $published_products = 0;
+                            $products_active = false;
+                            if (class_exists('WooCommerce')) {
+                                $product_count = wp_count_posts('product');
+                                $published_products = isset($product_count->publish) ? $product_count->publish : 0;
+                                $products_active = in_array('product', $selected_post_types);
+                            }
+
+                            // Calculate total active content (posts always + pages/products if enabled)
                             $active_count = $published_posts;
                             if ($pages_active) {
                                 $active_count += $published_pages;
+                            }
+                            if ($products_active) {
+                                $active_count += $published_products;
                             }
                             ?>
 
@@ -508,35 +543,20 @@ class Queryra_Admin {
                                         if ($pages_active && $published_pages > 0) {
                                             $parts[] = number_format($published_pages) . ' page' . ($published_pages != 1 ? 's' : '');
                                         }
+                                        if ($products_active && $published_products > 0) {
+                                            $parts[] = number_format($published_products) . ' product' . ($published_products != 1 ? 's' : '');
+                                        }
                                         echo esc_html(implode(', ', $parts));
                                         ?>)
                                     </span>
                                 </td>
                             </tr>
 
-                            <?php if (class_exists('WooCommerce')): ?>
-                                <?php
-                                $product_count = wp_count_posts('product');
-                                $published_products = isset($product_count->publish) ? $product_count->publish : 0;
-                                ?>
-                                <tr>
-                                    <th scope="row" style="padding: 8px 0; color: #ccc;">
-                                        <span class="dashicons dashicons-cart" style="font-size: 18px; width: 18px; height: 18px;"></span>
-                                        Products
-                                    </th>
-                                    <td style="padding: 8px 0;">
-                                        <strong style="font-size: 18px; color: #ccc;">
-                                            <?php echo esc_html(number_format($published_products)); ?>
-                                        </strong>
-                                        <span style="background: #f0b849; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; margin-left: 8px;">WIP</span>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-
-                            <!-- Auto Import Status -->
+                            <!-- Auto Import Status - Posts & Pages -->
                             <tr>
                                 <th scope="row" style="padding: 8px 0; border-top: 1px solid #ddd; padding-top: 15px;">
-                                    Auto Import
+                                    <span class="dashicons dashicons-media-document" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                    Auto Import (Posts & Pages)
                                 </th>
                                 <td style="padding: 8px 0; border-top: 1px solid #ddd; padding-top: 15px;">
                                     <strong style="font-size: 16px;">
@@ -547,6 +567,24 @@ class Queryra_Admin {
                                     </span>
                                 </td>
                             </tr>
+
+                            <!-- Auto Import Status - Products -->
+                            <?php if (class_exists('WooCommerce')): ?>
+                                <tr>
+                                    <th scope="row" style="padding: 8px 0;">
+                                        <span class="dashicons dashicons-cart" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                        Auto Import (Products)
+                                    </th>
+                                    <td style="padding: 8px 0;">
+                                        <strong style="font-size: 16px;">
+                                            <?php echo ($auto_sync === '1' && $products_active) ? 'Enabled' : 'Disabled'; ?>
+                                        </strong>
+                                        <span style="color: #646970; font-size: 14px; margin-left: 8px;">
+                                            (<a href="?page=queryra-search&tab=woocommerce">Configure in WooCommerce</a>)
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                         </table>
 
                         <div style="background: #f0f6fc; border: 1px solid #d0e4f7; border-radius: 5px; padding: 15px; margin: 20px 0;">
@@ -594,7 +632,43 @@ class Queryra_Admin {
                         <?php if (!empty($api_key) && $stats): ?>
                             <!-- Sync Status -->
                             <?php if (isset($stats['synced_records']) && isset($stats['unsynced_records'])): ?>
+                            <?php
+                                // Calculate sync progress
+                                $synced = $stats['synced_records'];
+                                $unsynced = $stats['unsynced_records'];
+                                $total_sync = $synced + $unsynced;
+                                $sync_percentage = $total_sync > 0 ? round(($synced / $total_sync) * 100) : 100;
+
+                                // Determine sync progress bar color
+                                $sync_bar_color = '#00a32a'; // Green (complete or nearly complete)
+                                if ($sync_percentage < 50) {
+                                    $sync_bar_color = '#d63638'; // Red (< 50%)
+                                } elseif ($sync_percentage < 100) {
+                                    $sync_bar_color = '#f0b849'; // Yellow (50-99%)
+                                }
+                            ?>
+
                             <table class="form-table" style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                                <!-- Sync Progress Overview -->
+                                <tr>
+                                    <th scope="row" style="padding: 8px 0; width: 180px;">
+                                        <span class="dashicons dashicons-update" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                        Sync Progress
+                                    </th>
+                                    <td style="padding: 8px 0;">
+                                        <div style="margin-bottom: 8px;">
+                                            <strong style="font-size: 18px;">
+                                                <?php echo esc_html(number_format($synced)); ?> / <?php echo esc_html(number_format($total_sync)); ?>
+                                                <span style="color: #646970; font-size: 14px;">(<?php echo esc_html($sync_percentage); ?>%)</span>
+                                            </strong>
+                                        </div>
+                                        <!-- Sync Progress Bar -->
+                                        <div style="background: #f0f0f1; border-radius: 4px; height: 12px; overflow: hidden; max-width: 300px; position: relative;">
+                                            <div style="background: <?php echo esc_attr($sync_bar_color); ?>; height: 100%; width: <?php echo esc_attr($sync_percentage); ?>%; transition: width 0.3s ease, background-color 0.3s ease; border-radius: 4px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+
                                 <tr>
                                     <th scope="row" style="padding: 8px 0; width: 180px;">
                                         <span class="dashicons dashicons-yes-alt" style="font-size: 18px; width: 18px; height: 18px; color: #46b450;"></span>
@@ -683,42 +757,123 @@ class Queryra_Admin {
                         </p>
                     </div>
 
-                    <?php elseif ($active_tab === 'woocommerce' && class_exists('WooCommerce')): ?>
+                    <?php elseif ($active_tab === 'woocommerce'): ?>
                     <!-- WooCommerce Tab -->
-                    <form method="post" action="options.php">
-                        <?php settings_fields('queryra_settings'); ?>
-                        <!-- Preserve other settings -->
-                        <input type="hidden" name="queryra_api_key" value="<?php echo esc_attr($api_key); ?>">
-                        <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
-                        <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
-                        <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
-                        <!-- Preserve non-product post types from Content tab -->
-                        <?php foreach ($post_types as $pt): ?>
-                            <?php if ($pt !== 'product'): ?>
-                                <input type="hidden" name="queryra_post_types[]" value="<?php echo esc_attr($pt); ?>">
-                            <?php endif; ?>
-                        <?php endforeach; ?>
+                    <?php if (class_exists('WooCommerce')): ?>
+                        <!-- WooCommerce Active -->
+                        <form method="post" action="options.php">
+                            <?php settings_fields('queryra_settings'); ?>
+                            <!-- Preserve other settings -->
+                            <input type="hidden" name="queryra_api_key" value="<?php echo esc_attr($api_key); ?>">
+                            <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
+                            <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
+                            <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
+                            <!-- Preserve non-product post types from Content tab -->
+                            <?php foreach ($post_types as $pt): ?>
+                                <?php if ($pt !== 'product'): ?>
+                                    <input type="hidden" name="queryra_post_types[]" value="<?php echo esc_attr($pt); ?>">
+                                <?php endif; ?>
+                            <?php endforeach; ?>
 
+                            <div class="queryra-card">
+                                <h2>
+                                    <span class="dashicons dashicons-cart" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                                    WooCommerce Products
+                                </h2>
+
+                                <!-- WooCommerce Detected -->
+                                <div style="background: #e7f7ed; border-left: 4px solid #00a32a; padding: 15px; margin: 20px 0;">
+                                    <p style="margin: 0;">
+                                        <span class="dashicons dashicons-yes-alt" style="font-size: 20px; width: 20px; height: 20px; margin-right: 5px; color: #00a32a;"></span>
+                                        <strong>WooCommerce Detected</strong>
+                                    </p>
+                                    <p style="margin: 10px 0 0 0; font-size: 13px;">
+                                        WooCommerce plugin is active. Enable product search below.
+                                    </p>
+                                </div>
+
+                                <table class="form-table">
+                                    <tr>
+                                        <th scope="row">
+                                            Include Products
+                                        </th>
+                                        <td>
+                                            <label>
+                                                <input type="checkbox"
+                                                       name="queryra_post_types[]"
+                                                       value="product"
+                                                       <?php checked(in_array('product', $post_types)); ?>>
+                                                <strong>Enable Product Search</strong>
+                                            </label>
+                                            <p class="description" style="margin-top: 8px;">
+                                                Include WooCommerce products in AI search results and sync them to Queryra.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- What's Included -->
+                                <div style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 15px; margin: 20px 0;">
+                                    <h4 style="margin: 0 0 10px 0; font-size: 14px;">
+                                        <span class="dashicons dashicons-info" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                                        What's Automatically Included for Products
+                                    </h4>
+                                    <p style="margin: 0 0 10px 0; font-size: 13px;">
+                                        When you enable product search, Queryra automatically includes these fields in AI embeddings:
+                                    </p>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8;">
+                                        <li><strong>Product Title & Description</strong> - Full product content</li>
+                                        <li><strong>Short Description</strong> - Product summary</li>
+                                        <li><strong>SKU</strong> - Product code for exact matches</li>
+                                        <li><strong>Price & Stock</strong> - Current pricing and availability</li>
+                                        <li><strong>Product Categories & Tags</strong> - Taxonomy classification</li>
+                                        <li><strong>Attributes</strong> - Color, Size, Material, and custom attributes</li>
+                                        <li><strong>Featured Products</strong> - Boosted ranking (like sticky posts)</li>
+                                    </ul>
+                                </div>
+
+                            </div>
+
+                            <?php submit_button('Save Settings'); ?>
+                        </form>
+                    <?php else: ?>
+                        <!-- WooCommerce Not Active -->
                         <div class="queryra-card">
                             <h2>
                                 <span class="dashicons dashicons-cart" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
                                 WooCommerce Products
                             </h2>
-                            <p>WooCommerce integration for AI-powered product search</p>
 
+                            <!-- WooCommerce Not Detected -->
                             <div style="background: #fff3cd; border-left: 4px solid #f0b849; padding: 15px; margin: 20px 0;">
                                 <p style="margin: 0;">
-                                    <span class="dashicons dashicons-hammer" style="font-size: 20px; width: 20px; height: 20px; margin-right: 5px;"></span>
-                                    <strong>Work in Progress</strong>
+                                    <span class="dashicons dashicons-warning" style="font-size: 20px; width: 20px; height: 20px; margin-right: 5px; color: #f0b849;"></span>
+                                    <strong>WooCommerce Not Detected</strong>
                                 </p>
                                 <p style="margin: 10px 0 0 0; font-size: 13px;">
-                                    Advanced WooCommerce features (SKU, categories, tags, attributes) coming in v1.1!
+                                    WooCommerce plugin is not active. Install and activate WooCommerce to enable product search.
+                                </p>
+                            </div>
+
+                            <!-- Information about WooCommerce integration -->
+                            <div style="background: #f0f0f1; padding: 15px; margin: 20px 0; border-radius: 3px;">
+                                <h3 style="margin-top: 0;">About WooCommerce Integration</h3>
+                                <p>When you install and activate WooCommerce, you'll be able to:</p>
+                                <ul style="line-height: 1.8;">
+                                    <li>Include products in AI search results</li>
+                                    <li>Automatically sync product data (title, description, SKU, categories, tags, attributes)</li>
+                                    <li>Boost featured products in search rankings</li>
+                                    <li>Enable customers to find products using natural language queries</li>
+                                </ul>
+                                <p style="margin-bottom: 0;">
+                                    <a href="https://wordpress.org/plugins/woocommerce/" target="_blank" class="button button-secondary">
+                                        Learn More About WooCommerce
+                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                    </a>
                                 </p>
                             </div>
                         </div>
-
-                        <?php submit_button('Save Settings'); ?>
-                    </form>
+                    <?php endif; ?>
 
                     <?php elseif ($active_tab === 'cache'): ?>
                     <!-- Cache Tab -->
@@ -795,27 +950,14 @@ class Queryra_Admin {
                             <tr>
                                 <th scope="row">
                                     <span class="dashicons dashicons-format-chat" style="font-size: 20px; width: 20px; height: 20px;"></span>
-                                    Support Forum
+                                    Community Help
                                 </th>
                                 <td>
                                     <a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" class="button button-secondary">
                                         Visit Forum
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
-                                    <p class="description">Ask questions and get help from the community</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">
-                                    <span class="dashicons dashicons-email" style="font-size: 20px; width: 20px; height: 20px;"></span>
-                                    Contact Support
-                                </th>
-                                <td>
-                                    <a href="https://queryra.com/contact" target="_blank" class="button button-secondary">
-                                        Send Message
-                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
-                                    </a>
-                                    <p class="description">Get direct support from the Queryra team</p>
+                                    <p class="description">Independent community support on WordPress.org</p>
                                 </td>
                             </tr>
                         </table>
