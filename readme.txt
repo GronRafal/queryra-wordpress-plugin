@@ -1,4 +1,4 @@
-=== Queryra - AI-Powered Search for WordPress ===
+=== Queryra - AI Search ===
 Contributors: queryra
 Tags: search, ai, semantic search, site search, ai search
 Requires at least: 5.8

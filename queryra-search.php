@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Queryra Search for WordPress
+ * Plugin Name: Queryra - AI Search
  * Plugin URI: https://queryra.com
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
  * Version: 1.0.3
