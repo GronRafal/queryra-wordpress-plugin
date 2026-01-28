@@ -243,13 +243,34 @@ class Queryra_Search_Integration {
                 return array();
             }
 
-            $ids_string = implode(',', array_map('intval', $page_ids));
-            $results = $wpdb->get_results("
-                SELECT * FROM {$wpdb->posts}
-                WHERE ID IN ($ids_string)
-                AND post_status = 'publish'
-                ORDER BY FIELD(ID, $ids_string)
-            ");
+            // Sanitize IDs and prepare query with placeholders
+            $page_ids = array_map('intval', $page_ids);
+            $placeholders = implode(',', array_fill(0, count($page_ids), '%d'));
+
+            // Prepare query with proper escaping
+            $query = $wpdb->prepare(
+                "SELECT * FROM {$wpdb->posts}
+                WHERE ID IN ($placeholders)
+                AND post_status = %s",
+                array_merge($page_ids, array('publish'))
+            );
+
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $results = $wpdb->get_results($query);
+
+            // Sort results to match API order
+            if (!empty($results)) {
+                $ordered_results = array();
+                foreach ($page_ids as $id) {
+                    foreach ($results as $result) {
+                        if ($result->ID == $id) {
+                            $ordered_results[] = $result;
+                            break;
+                        }
+                    }
+                }
+                $results = $ordered_results;
+            }
 
 
             // CRITICAL: Set pagination properties directly on query object

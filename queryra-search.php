@@ -3,7 +3,7 @@
  * Plugin Name: Queryra Search for WordPress
  * Plugin URI: https://queryra.com
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.0.0
+ * Version: 1.0.3
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.0.0');
+define('QUERYRA_VERSION', '1.0.3');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);

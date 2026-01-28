@@ -356,9 +356,23 @@ class Queryra_Admin {
                                 <th scope="row">Cache Status</th>
                                 <td>
                                     <?php
-                                    global $wpdb;
-                                    $cache_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
-                                    $total_size = $wpdb->get_var("SELECT SUM(LENGTH(option_value)) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
+                                    // Cache stats (cached for 1 minute to avoid repeated DB queries)
+                                    $cache_key = 'queryra_cache_stats';
+                                    $stats = wp_cache_get($cache_key);
+
+                                    if (false === $stats) {
+                                        global $wpdb;
+                                        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+                                        $cache_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
+                                        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+                                        $total_size = $wpdb->get_var("SELECT SUM(LENGTH(option_value)) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
+
+                                        $stats = array('count' => $cache_count, 'size' => $total_size);
+                                        wp_cache_set($cache_key, $stats, '', 60); // Cache for 1 minute
+                                    } else {
+                                        $cache_count = $stats['count'];
+                                        $total_size = $stats['size'];
+                                    }
                                     ?>
                                     <p style="margin: 0 0 8px 0;">
                                         <strong><?php echo esc_html((int)$cache_count); ?></strong> cached searches
