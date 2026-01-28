@@ -207,6 +207,15 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.1.0 (2026-01-28)
+✨ **Enhanced user experience and onboarding**
+- New: Setup Wizard - 4-step guided onboarding for new users
+- New: Tabbed admin interface - organized settings for better UX
+- New: Exit survey - collect feedback on plugin deactivation
+- Enhanced: WooCommerce product indexing improvements
+- Improved: Admin panel UI/UX with better organization
+- Fixed: Various bug fixes and stability improvements
+
 ### 1.0.0 (2026-01-23)
 🚀 **Initial public release**
 - Production-ready AI search trained on your content
