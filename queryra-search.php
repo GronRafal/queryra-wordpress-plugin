@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name: Queryra - AI Search
- * Plugin URI: https://queryra.com
+ * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
  * Version: 1.0.3
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: queryra-search
+ * Text Domain: queryra-ai-search
  * Requires at least: 5.8
  * Requires PHP: 7.4
  */
@@ -76,9 +76,6 @@ class Queryra_Search {
 
         // Initialize search integration (AI-powered search)
         new Queryra_Search_Integration();
-
-        // Load text domain
-        load_plugin_textdomain('queryra-search', false, dirname(plugin_basename(__FILE__)) . '/languages/');
     }
 
     /**

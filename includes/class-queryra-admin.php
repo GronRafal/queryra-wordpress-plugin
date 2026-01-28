@@ -47,11 +47,34 @@ class Queryra_Admin {
      * Register settings
      */
     public function register_settings() {
-        register_setting('queryra_settings', 'queryra_api_key');
-        register_setting('queryra_settings', 'queryra_api_url');
-        register_setting('queryra_settings', 'queryra_auto_sync');
-        register_setting('queryra_settings', 'queryra_ai_search');
-        register_setting('queryra_settings', 'queryra_post_types');
+        register_setting('queryra_settings', 'queryra_api_key', array(
+            'sanitize_callback' => 'sanitize_text_field'
+        ));
+        register_setting('queryra_settings', 'queryra_api_url', array(
+            'sanitize_callback' => 'esc_url_raw'
+        ));
+        register_setting('queryra_settings', 'queryra_auto_sync', array(
+            'sanitize_callback' => 'sanitize_text_field'
+        ));
+        register_setting('queryra_settings', 'queryra_ai_search', array(
+            'sanitize_callback' => 'sanitize_text_field'
+        ));
+        register_setting('queryra_settings', 'queryra_post_types', array(
+            'sanitize_callback' => array($this, 'sanitize_post_types')
+        ));
+    }
+
+    /**
+     * Sanitize post types array
+     *
+     * @param mixed $value Input value
+     * @return array Sanitized array
+     */
+    public function sanitize_post_types($value) {
+        if (!is_array($value)) {
+            return array('post', 'page');
+        }
+        return array_map('sanitize_text_field', $value);
     }
 
     /**
