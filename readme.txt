@@ -3,7 +3,7 @@ Contributors: queryra
 Tags: search, ai, semantic search, site search, ai search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -160,6 +160,11 @@ Queryra supports semantic search in all major languages. The AI model works with
 4. Auto-sync in action - posts sync automatically when published
 
 == Changelog ==
+
+= 1.0.5 (2026-01-28) =
+* 🐛 Fix: Variable name collision in Cache Status overwriting API stats
+* 🐛 Fix: Admin dashboard now correctly displays Plan and Records
+* 🔧 Improved: Added null checks for API stats array keys (PHP 8+ compatibility)
 
 = 1.0.4 (2026-01-28) =
 * 📦 WordPress.org: Removed "WordPress" from plugin name (compliance)

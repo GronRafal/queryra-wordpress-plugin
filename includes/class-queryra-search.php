@@ -256,7 +256,9 @@ class Queryra_Search_Integration {
             );
 
             // Prepare query with proper escaping
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
             $query = $wpdb->prepare(
+                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
                 $query_template,
                 array_merge($page_ids, array('publish'))
             );

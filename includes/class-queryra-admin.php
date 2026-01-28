@@ -279,11 +279,11 @@ class Queryra_Admin {
                                                 $status_color = '#e7f5e7'; // green
                                                 $border_color = '#46b450';
 
-                                                if ($stats['synced_records'] == 0) {
+                                                if (isset($stats['synced_records']) && $stats['synced_records'] == 0) {
                                                     $can_search = false;
                                                     $status_color = '#fff3cd'; // yellow
                                                     $border_color = '#f0b849';
-                                                } elseif ($stats['plan'] === 'free' && !$status['available']) {
+                                                } elseif (isset($stats['plan']) && $stats['plan'] === 'free' && !$status['available']) {
                                                     $can_search = false;
                                                     $status_color = '#fff3cd'; // yellow
                                                     $border_color = '#f0b849';
@@ -299,10 +299,10 @@ class Queryra_Admin {
                                                         <strong>AI Search Ready</strong>
                                                     </p>
                                                     <p style="margin: 0; font-size: 13px; color: #646970;">
-                                                        Plan: <?php echo esc_html(ucfirst($stats['plan'])); ?> |
-                                                        Synced: <?php echo esc_html(number_format($stats['synced_records'])); ?> records
-                                                        <?php if ($stats['plan'] === 'free' && $status['available']): ?>
-                                                            | Window: <?php echo esc_html($status['minutes_left']); ?> min left
+                                                        Plan: <?php echo esc_html(ucfirst($stats['plan'] ?? 'unknown')); ?> |
+                                                        Synced: <?php echo esc_html(number_format($stats['synced_records'] ?? 0)); ?> records
+                                                        <?php if (isset($stats['plan']) && $stats['plan'] === 'free' && $status['available']): ?>
+                                                            | Window: <?php echo esc_html($status['minutes_left'] ?? 0); ?> min left
                                                         <?php endif; ?>
                                                     </p>
                                                 <?php else: ?>
@@ -311,11 +311,11 @@ class Queryra_Admin {
                                                         <span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px;"></span>
                                                         <strong>AI Search Unavailable</strong>
                                                     </p>
-                                                    <?php if ($stats['synced_records'] == 0): ?>
+                                                    <?php if (isset($stats['synced_records']) && $stats['synced_records'] == 0): ?>
                                                         <p style="margin: 0; font-size: 13px; color: #646970;">
                                                             No synced records. Go to <a href="https://queryra.com/dashboard/sync" target="_blank">Queryra Dashboard</a> to sync.
                                                         </p>
-                                                    <?php elseif ($stats['plan'] === 'free' && !$status['available']): ?>
+                                                    <?php elseif (isset($stats['plan']) && $stats['plan'] === 'free' && !$status['available']): ?>
                                                         <p style="margin: 0; font-size: 13px; color: #646970;">
                                                             Search window closed. Opens in <?php echo esc_html($status['minutes_until_open']); ?> min (<?php echo esc_html($status['next_opens_at']); ?>)
                                                         </p>
@@ -381,20 +381,20 @@ class Queryra_Admin {
                                     <?php
                                     // Cache stats (cached for 1 minute to avoid repeated DB queries)
                                     $cache_key = 'queryra_cache_stats';
-                                    $stats = wp_cache_get($cache_key);
+                                    $cache_stats = wp_cache_get($cache_key);
 
-                                    if (false === $stats) {
+                                    if (false === $cache_stats) {
                                         global $wpdb;
                                         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                                         $cache_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
                                         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                                         $total_size = $wpdb->get_var("SELECT SUM(LENGTH(option_value)) FROM {$wpdb->options} WHERE option_name LIKE '_transient_queryra_search_%' AND option_name NOT LIKE '_transient_timeout_%'");
 
-                                        $stats = array('count' => $cache_count, 'size' => $total_size);
-                                        wp_cache_set($cache_key, $stats, '', 60); // Cache for 1 minute
+                                        $cache_stats = array('count' => $cache_count, 'size' => $total_size);
+                                        wp_cache_set($cache_key, $cache_stats, '', 60); // Cache for 1 minute
                                     } else {
-                                        $cache_count = $stats['count'];
-                                        $total_size = $stats['size'];
+                                        $cache_count = $cache_stats['count'];
+                                        $total_size = $cache_stats['size'];
                                     }
                                     ?>
                                     <p style="margin: 0 0 8px 0;">
