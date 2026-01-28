@@ -573,6 +573,7 @@ class Queryra_Admin {
         global $wpdb;
 
         // Delete all Queryra search transients
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $deleted = $wpdb->query("
             DELETE FROM {$wpdb->options}
             WHERE option_name LIKE '_transient_queryra_search_%'

@@ -247,15 +247,21 @@ class Queryra_Search_Integration {
             $page_ids = array_map('intval', $page_ids);
             $placeholders = implode(',', array_fill(0, count($page_ids), '%d'));
 
+            // Build query string with placeholders (sprintf before prepare)
+            $query_template = sprintf(
+                "SELECT * FROM {$wpdb->posts}
+                WHERE ID IN (%s)
+                AND post_status = %%s",
+                $placeholders
+            );
+
             // Prepare query with proper escaping
             $query = $wpdb->prepare(
-                "SELECT * FROM {$wpdb->posts}
-                WHERE ID IN ($placeholders)
-                AND post_status = %s",
+                $query_template,
                 array_merge($page_ids, array('publish'))
             );
 
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
             $results = $wpdb->get_results($query);
 
             // Sort results to match API order
