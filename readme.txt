@@ -1,9 +1,9 @@
 === Queryra - AI Search ===
 Contributors: queryra
-Tags: search, ai, ai search, woocommerce, semantic search, smart search, site search, search plugin, woocommerce search, product search
+Tags: search, ai, semantic search, site search, ai search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.0
+Stable tag: 1.0.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -163,13 +163,12 @@ Queryra supports semantic search in all major languages. The AI model works with
 
 == Changelog ==
 
-= 1.1.0 (2026-01-28) =
-* ✨ New: Setup Wizard - 4-step guided onboarding for new users
-* ✨ New: Tabbed admin interface - organized settings for better UX
-* ✨ New: Exit survey - collect feedback on plugin deactivation
-* 🛒 Enhanced: WooCommerce product indexing improvements
-* 🔧 Improved: Admin panel UI/UX with better organization
-* 🐛 Fix: Various bug fixes and stability improvements
+= 1.0.2 (2026-01-28) =
+* 🔒 Security: Fixed SQL injection vulnerability in search query
+* 🧹 Cleanup: Removed debug error_log() calls from production code
+* 📦 WordPress.org: Reduced tags from 10 to 5 (compliance)
+* ⚡ Performance: Added database query caching for admin stats
+* 🔧 Code Quality: Added proper phpcs:ignore comments for direct queries
 
 = 1.0.0 (2026-01-23) =
 * 🚀 Initial public release
