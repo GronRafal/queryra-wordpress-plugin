@@ -24,9 +24,10 @@ No ChatGPT API key needed. Works with any theme. See results in 5 minutes.
 
 ### Core Features
 - 🤖 **Semantic AI Search** - Understands meaning, not just keywords
+- 🛒 **WooCommerce Integration** - Indexes products with prices, stock, and featured status
 - 🔄 **Auto-Sync** - Posts sync automatically when published or updated
 - 📝 **Custom Post Types** - Works with posts, pages, and any custom type
-- ⭐ **Sticky Post Priority** - Important posts rank higher
+- ⭐ **Sticky Post Priority** - Important posts and featured products rank higher
 - 🎨 **Theme Compatible** - Works with any WordPress theme
 - 📦 **Bulk Operations** - Send all existing posts with one click
 

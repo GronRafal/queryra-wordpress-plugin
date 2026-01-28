@@ -1,6 +1,6 @@
 === Queryra - AI Search ===
 Contributors: queryra
-Tags: search, ai, ai search, chatgpt, semantic search, smart search, site search, search plugin, machine learning, artificial intelligence
+Tags: search, ai, ai search, woocommerce, semantic search, smart search, site search, search plugin, woocommerce search, product search
 Requires at least: 5.8
 Tested up to: 6.9
 Stable tag: 1.0.0
@@ -43,9 +43,10 @@ Simple freemium model - start free, upgrade when you grow. No hidden fees, no "c
 
 * AI-powered semantic search (understands meaning, not just keywords)
 * Automatic synchronization of posts, pages, and custom post types
+* **WooCommerce integration** - Indexes products with prices, stock status, and descriptions
 * Replace WordPress default search with Queryra
-* Sticky posts get priority in search results
-* Full content indexing (title, content, categories, tags)
+* Sticky posts and featured products get priority in search results
+* Full content indexing (title, content, categories, tags, product details)
 * Real-time sync when content is published or updated
 * Simple dashboard for monitoring sync status
 * Free plan available with 500 records
@@ -62,6 +63,7 @@ New posts are automatically synced when published. Your visitors will see dramat
 
 = Use Cases =
 
+* **WooCommerce Stores** - Customers find products by describing what they need, not exact product names
 * **Blogs & News Sites** - Help readers find relevant articles even with vague queries
 * **Documentation Sites** - Find answers by describing the problem, not exact keywords
 * **Knowledge Bases** - Semantic search for support articles and FAQs
