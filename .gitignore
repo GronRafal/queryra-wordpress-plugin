@@ -26,3 +26,12 @@ wp-includes/
 wp-admin/
 *.sql
 wp-config.php
+
+# Documentation (personal notes, not for distribution)
+docs/
+
+# WordPress.org SVN repository (local checkout)
+queryra-ai-search/
+
+# local scripts
+scripts/

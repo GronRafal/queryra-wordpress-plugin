@@ -3,7 +3,7 @@ Contributors: queryra
 Tags: search, ai, semantic search, site search, ai search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.0.5
+Stable tag: 1.0.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -34,7 +34,7 @@ Test with up to 500 records and thousands of searches per month - forever free. 
 Other plugins require you to create a ChatGPT account and manage API keys. Queryra includes everything - just paste one API key and you're done.
 
 **WordPress-Native Design**
-Built specifically for WordPress, not adapted from a generic solution. Auto-syncs when you publish, supports sticky posts, works with any theme. [Learn more about features](https://queryra.com/features).
+Built specifically for WordPress, not adapted from a generic solution. Auto-syncs when you publish, supports sticky posts, works with any theme.
 
 **Transparent Pricing**
 Simple freemium model - start free, upgrade when you grow. No hidden fees, no "contact sales", no surprises. [View pricing](https://queryra.com/pricing).
@@ -85,6 +85,7 @@ Queryra offers a generous free tier perfect for personal blogs and small sites. 
 * No tracking scripts or cookies
 * Content is processed only for search indexing
 * You can delete all your data anytime from the dashboard
+* Read our [Privacy Policy](https://queryra.com/privacy) and [Terms of Service](https://queryra.com/terms)
 
 == Installation ==
 
@@ -112,45 +113,11 @@ Queryra offers a generous free tier perfect for personal blogs and small sites. 
 5. Click "Send All Posts to Queryra" to sync existing content
 6. Enable "Use Queryra AI for WordPress search" to replace default search
 
-**That's it!** Your search is now powered by AI trained on your content. [Learn more about setup](https://queryra.com/docs/wordpress-setup).
+**That's it!** Your search is now powered by AI trained on your content. [Learn more about setup](https://queryra.com/docs/wordpress-integration).
 
 == Frequently Asked Questions ==
 
-= Do I need a Queryra account? =
-
-Yes, you need to [sign up for free at queryra.com](https://queryra.com/signup) to get an API key. No credit card required. The free tier is perfect for testing and small sites.
-
-= What content is synchronized? =
-
-By default, the plugin syncs posts and pages. You can configure which post types to sync in the settings. Content includes title, body text, categories, and tags.
-
-= How often is content synced? =
-
-New and updated content is synced automatically when published. You can also manually sync all content from the plugin settings page.
-
-= Does it work with my theme? =
-
-Yes! Queryra works with any WordPress theme. It hooks into WordPress's standard search functionality.
-
-= Will it slow down my site? =
-
-No. Search queries are processed by Queryra's servers, so there's no impact on your WordPress hosting. The plugin only sends data when content is published or updated.
-
-= What happens if I deactivate the plugin? =
-
-Search returns to WordPress default behavior. Your data remains in Queryra's system until you delete it from the dashboard.
-
-= How is this different from ChatGPT search? =
-
-Generic AI plugins use the same ChatGPT model for every website. Queryra trains a custom model specifically on YOUR content, making results more relevant to your site. Plus, you don't need a ChatGPT API key - everything is included.
-
-= Is my content secure? =
-
-Yes. All data is transmitted over HTTPS and stored securely. [Read our privacy policy](https://queryra.com/privacy). You can delete your data anytime from the Queryra dashboard.
-
-= What languages are supported? =
-
-Queryra supports semantic search in all major languages. The AI model works with English, Spanish, French, German, Italian, Portuguese, Polish, and many others.
+For answers to common questions, please visit our [FAQ page](https://queryra.com/faq).
 
 == Screenshots ==
 
@@ -160,6 +127,20 @@ Queryra supports semantic search in all major languages. The AI model works with
 4. Auto-sync in action - posts sync automatically when published
 
 == Changelog ==
+
+= 1.0.7 (2026-01-29) =
+* 🎨 Assets: Added plugin icon, banner, and screenshots
+* 🔧 Fixed: CSS/JS file paths (assets/ → css/ and js/ folders)
+* 📝 FAQ: Simplified FAQ section with link to website
+* 📦 Structure: Reorganized assets for WordPress.org compliance
+
+= 1.0.6 (2026-01-29) =
+* 📝 Documentation: Fixed incorrect documentation links
+* 🔗 Updated: GitHub repository URL corrected
+* 🔗 Updated: API documentation link (api-docs → api/docs)
+* 🔗 Updated: FAQ link (help → faq)
+* 🔗 Added: Privacy Policy and Terms of Service links
+* 🧹 Cleanup: Removed non-existent page links (features, blog, how-it-works)
 
 = 1.0.5 (2026-01-28) =
 * 🐛 Fix: Variable name collision in Cache Status overwriting API stats
@@ -234,14 +215,14 @@ Initial release of Queryra AI-powered search for WordPress.
 = Support =
 
 * [Complete Documentation](https://queryra.com/docs) - Setup guides and tutorials
-* [API Reference](https://queryra.com/api-docs) - Technical documentation
-* [FAQ & Troubleshooting](https://queryra.com/help) - Common questions answered
+* [API Reference](https://queryra.com/api/docs) - Technical documentation
+* [FAQ & Troubleshooting](https://queryra.com/faq) - Common questions answered
 * Email: support@queryra.com
-* GitHub: [github.com/queryra/wordpress-plugin](https://github.com/queryra/wordpress-plugin)
+* GitHub: [github.com/GronRafal/queryra-wordpress-plugin](https://github.com/GronRafal/queryra-wordpress-plugin)
 
 = Contributing =
 
-We welcome contributions! Visit our [GitHub repository](https://github.com/queryra/wordpress-plugin) to report issues or submit pull requests.
+We welcome contributions! Visit our [GitHub repository](https://github.com/GronRafal/queryra-wordpress-plugin) to report issues or submit pull requests.
 
 = About Queryra =
 
@@ -249,8 +230,7 @@ Queryra is a semantic search platform powered by artificial intelligence. We hel
 
 **Get Started:**
 * [Sign up free](https://queryra.com/signup) - No credit card required
-* [See how it works](https://queryra.com/how-it-works) - Learn about custom AI training
+* [View documentation](https://queryra.com/docs) - Learn about setup and integration
 * [Compare plans](https://queryra.com/pricing) - Find the right plan for your site
-* [Read our blog](https://queryra.com/blog) - AI search tips and best practices
 
 Learn more at [queryra.com](https://queryra.com)

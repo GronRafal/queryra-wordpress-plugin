@@ -85,8 +85,8 @@ class Queryra_Admin {
             return;
         }
 
-        wp_enqueue_style('queryra-admin', QUERYRA_PLUGIN_URL . 'assets/admin.css', array(), QUERYRA_VERSION);
-        wp_enqueue_script('queryra-admin', QUERYRA_PLUGIN_URL . 'assets/admin.js', array('jquery'), QUERYRA_VERSION, true);
+        wp_enqueue_style('queryra-admin', QUERYRA_PLUGIN_URL . 'css/admin.css', array(), QUERYRA_VERSION);
+        wp_enqueue_script('queryra-admin', QUERYRA_PLUGIN_URL . 'js/admin.js', array('jquery'), QUERYRA_VERSION, true);
 
         wp_localize_script('queryra-admin', 'queryraData', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
