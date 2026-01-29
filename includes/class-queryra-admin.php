@@ -444,6 +444,19 @@ class Queryra_Admin {
                             </ul>
                         </div>
 
+                        <!-- Warning Box -->
+                        <div class="queryra-warning-box" style="background: #fff3cd; border-left: 4px solid #f0b849; padding: 12px; margin: 15px 0;">
+                            <p style="margin: 0 0 8px 0;">
+                                <span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px; color: #f0b849;"></span>
+                                <strong>Important:</strong>
+                            </p>
+                            <ul style="margin: 5px 0 0 20px; padding: 0;">
+                                <li><strong>"Send All Posts"</strong> button clears the sync queue (optimized for bulk operations)</li>
+                                <li><strong>To manually update a single post/page:</strong> Edit and click "Update" in WordPress (preserves sync queue)</li>
+                                <li><strong>To delete records:</strong> Use <a href="https://queryra.com/dashboard/records" target="_blank">Queryra Dashboard</a> for manual management</li>
+                            </ul>
+                        </div>
+
                         <button type="button" id="queryra-sync-all" class="button button-primary">
                             Send All Posts
                         </button>
