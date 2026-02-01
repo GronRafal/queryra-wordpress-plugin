@@ -80,6 +80,7 @@ class Queryra_Setup_Wizard {
             delete_transient('queryra_activation_redirect');
 
             // Don't redirect on bulk activation or AJAX
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Standard WP activation check
             if (!isset($_GET['activate-multi']) && !wp_doing_ajax()) {
                 wp_safe_redirect(admin_url('admin.php?page=queryra-setup-wizard'));
                 exit;
@@ -92,6 +93,7 @@ class Queryra_Setup_Wizard {
      */
     public function render_wizard() {
         // Get current step from URL
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Step display only, no data modification
         $this->step = isset($_GET['step']) ? absint($_GET['step']) : 1;
         $this->step = max(1, min($this->step, $this->total_steps));
 
@@ -112,10 +114,10 @@ class Queryra_Setup_Wizard {
                     <!-- Progress Bar -->
                     <div class="queryra-wizard-progress">
                         <div class="queryra-wizard-progress-bar">
-                            <div class="queryra-wizard-progress-fill" style="width: <?php echo $progress; ?>%"></div>
+                            <div class="queryra-wizard-progress-fill" style="width: <?php echo esc_attr( $progress ); ?>%"></div>
                         </div>
                         <p class="queryra-wizard-progress-text">
-                            Step <?php echo $this->step; ?> of <?php echo $this->total_steps; ?>
+                            Step <?php echo esc_html( $this->step ); ?> of <?php echo esc_html( $this->total_steps ); ?>
                         </p>
                     </div>
                 </div>
@@ -468,7 +470,7 @@ class Queryra_Setup_Wizard {
                         <div id="queryra-import-progress-bar" style="background: linear-gradient(90deg, #2271b1 0%, #135e96 100%); height: 100%; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600;"></div>
                     </div>
                     <p id="queryra-import-info" style="margin: 10px 0 0 0; font-size: 14px; color: #646970;">
-                        0 / <?php echo $will_import; ?> records
+                        0 / <?php echo esc_html( $will_import ); ?> records
                     </p>
                 </div>
             </div>
@@ -481,7 +483,7 @@ class Queryra_Setup_Wizard {
                         Import Complete!
                     </p>
                     <p id="queryra-success-message" style="margin: 10px 0 0 0; font-size: 14px; color: #1d2327;">
-                        Successfully imported <?php echo $will_import; ?> records to Queryra
+                        Successfully imported <?php echo esc_html( $will_import ); ?> records to Queryra
                     </p>
                 </div>
             </div>
@@ -706,7 +708,7 @@ class Queryra_Setup_Wizard {
             return;
         }
 
-        $api_key = isset($_POST['api_key']) ? sanitize_text_field($_POST['api_key']) : '';
+        $api_key = isset($_POST['api_key']) ? sanitize_text_field(wp_unslash($_POST['api_key'])) : '';
 
         if (empty($api_key)) {
             wp_send_json_error(array('message' => 'API key is required'));
@@ -832,7 +834,7 @@ class Queryra_Setup_Wizard {
             return;
         }
 
-        $query = isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '';
+        $query = isset($_POST['query']) ? sanitize_text_field(wp_unslash($_POST['query'])) : '';
 
         if (empty($query)) {
             wp_send_json_error(array('message' => 'Search query is required'));

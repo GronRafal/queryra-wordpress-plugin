@@ -243,21 +243,32 @@ class Queryra_Search_Integration {
                 return array();
             }
 
-            $ids_string = implode(',', array_map('intval', $page_ids));
+            // Sanitize IDs (integers only)
+            $page_ids = array_map('intval', $page_ids);
+            $ids_string = implode(',', $page_ids);
 
             // Get allowed post types from settings
-            // Only show content types that user enabled in settings
             $post_types = get_option('queryra_post_types', array('post', 'page'));
 
-            $post_types_string = "'" . implode("','", array_map('esc_sql', $post_types)) . "'";
+            // Generate placeholders for post types
+            $type_placeholders = implode(',', array_fill(0, count($post_types), '%s'));
 
-            $results = $wpdb->get_results("
-                SELECT * FROM {$wpdb->posts}
-                WHERE ID IN ($ids_string)
-                AND post_status = 'publish'
-                AND post_type IN ($post_types_string)
-                ORDER BY FIELD(ID, $ids_string)
-            ");
+            // Direct query required for custom FIELD() ordering - IDs are intval() sanitized
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            // phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+            $results = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM {$wpdb->posts}
+                    WHERE ID IN ($ids_string)
+                    AND post_status = 'publish'
+                    AND post_type IN ($type_placeholders)
+                    ORDER BY FIELD(ID, $ids_string)",
+                    ...$post_types
+                )
+            );
+            // phpcs:enable
 
 
             // CRITICAL: Set pagination properties directly on query object

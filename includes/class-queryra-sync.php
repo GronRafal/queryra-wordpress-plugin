@@ -45,36 +45,26 @@ class Queryra_Sync {
      * @param bool $update Whether this is an update
      */
     public function sync_post_on_save($post_id, $post, $update) {
-        error_log("🔄 QUERYRA AUTO-SYNC: save_post triggered for ID: $post_id, update: " . ($update ? 'YES' : 'NO'));
-
         // Skip autosaves
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-            error_log("🔄 QUERYRA AUTO-SYNC: Skipping autosave");
             return;
         }
 
         // Skip revisions
         if (wp_is_post_revision($post_id)) {
-            error_log("🔄 QUERYRA AUTO-SYNC: Skipping revision");
             return;
         }
 
         // Check if post type should be synced
         $post_types = get_option('queryra_post_types', array('post', 'page'));
         if (!in_array($post->post_type, $post_types)) {
-            error_log("🔄 QUERYRA AUTO-SYNC: Skipping post type: " . $post->post_type);
             return;
         }
 
         // Only sync published posts
         if ($post->post_status !== 'publish') {
-            error_log("🔄 QUERYRA AUTO-SYNC: Skipping status: " . $post->post_status);
             return;
         }
-
-        $is_sticky = is_sticky($post_id);
-        $margin = $is_sticky ? 1.0 : 0.5;
-        error_log("🔄 QUERYRA AUTO-SYNC: Syncing post $post_id, sticky: " . ($is_sticky ? 'YES' : 'NO') . ", margin: $margin");
 
         // Sync this post
         $this->sync_posts(array($post_id));
@@ -87,26 +77,18 @@ class Queryra_Sync {
      * @param int $post_id Post ID
      */
     public function sync_post_sticky_change($post_id) {
-        error_log("🔄 QUERYRA AUTO-SYNC: Sticky status changed for ID: $post_id");
-
         $post = get_post($post_id);
 
         // Check if post type should be synced
         $post_types = get_option('queryra_post_types', array('post', 'page'));
         if (!in_array($post->post_type, $post_types)) {
-            error_log("🔄 QUERYRA AUTO-SYNC: Skipping post type: " . $post->post_type);
             return;
         }
 
         // Only sync published posts
         if ($post->post_status !== 'publish') {
-            error_log("🔄 QUERYRA AUTO-SYNC: Skipping status: " . $post->post_status);
             return;
         }
-
-        $is_sticky = is_sticky($post_id);
-        $margin = $is_sticky ? 1.0 : 0.5;
-        error_log("🔄 QUERYRA AUTO-SYNC: Syncing sticky change, sticky: " . ($is_sticky ? 'YES' : 'NO') . ", margin: $margin");
 
         // Sync this post with updated margin
         $this->sync_posts(array($post_id));

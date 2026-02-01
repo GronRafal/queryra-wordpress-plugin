@@ -291,8 +291,8 @@ class Queryra_Deactivation_Survey {
     public function ajax_handle_feedback() {
         check_ajax_referer('queryra_deactivation', 'nonce');
 
-        $reason = isset($_POST['reason']) ? sanitize_text_field($_POST['reason']) : '';
-        $details = isset($_POST['details']) ? sanitize_textarea_field($_POST['details']) : '';
+        $reason = isset($_POST['reason']) ? sanitize_text_field(wp_unslash($_POST['reason'])) : '';
+        $details = isset($_POST['details']) ? sanitize_textarea_field(wp_unslash($_POST['details'])) : '';
 
         // Store feedback locally (optional - can also send to API)
         $feedback_data = array(
@@ -349,7 +349,7 @@ class Queryra_Deactivation_Survey {
         // Email headers
         $headers = array(
             'Content-Type: text/plain; charset=UTF-8',
-            'From: WordPress <wordpress@' . parse_url(get_site_url(), PHP_URL_HOST) . '>'
+            'From: WordPress <wordpress@' . wp_parse_url(get_site_url(), PHP_URL_HOST) . '>'
         );
 
         // Send email (non-blocking - if it fails, don't break deactivation)

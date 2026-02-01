@@ -35,3 +35,9 @@ WORK_PLAN.md
 
 # Development scripts (local testing only)
 scripts/
+
+# Documentation (dev only)
+docs/
+
+# SVN checkout folder
+queryra-ai-search/

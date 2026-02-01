@@ -1,245 +1,205 @@
-=== Queryra - AI Search ===
+=== AI Product Search for WooCommerce – Semantic Search & Smart Results by Queryra ===
 Contributors: queryra
-Tags: search, ai, ai search, woocommerce, semantic search, smart search, site search, search plugin, woocommerce search, product search
+Tags: WooCommerce, product search, AI search, semantic search, ecommerce
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-AI search trained on YOUR content. No ChatGPT key needed. Better results than keyword search - understands meaning, not just words.
+Stop losing sales to "no results found". AI search that understands what customers MEAN. Works with WooCommerce products. Free forever.
 
 == Description ==
 
-**Queryra is AI search that's trained on YOUR content.**
+**Your customer types "gift for dad who likes gardening". WordPress search returns: 0 results.**
 
-Unlike generic AI search that uses the same model for every website, Queryra creates a custom search experience based on YOUR articles, YOUR writing style, and YOUR site structure. The more you publish, the smarter your search becomes.
+Frustrated, they open ChatGPT. It perfectly understands what they need – garden gloves, plant pots, seed kits. But the links? Amazon. Etsy. Your competitors.
 
-**✅ Test FREE with up to 500 posts - No credit card required**
-**✅ No ChatGPT API key needed - Everything included**
-**✅ See results in 5 minutes - Auto-sync on publish**
+You had the products. You lost the sale.
 
-Instead of simple keyword matching, Queryra understands the *meaning* of search queries and finds truly relevant content - because it learns from your specific content.
+**Queryra is different.** It thinks like AI but only knows YOUR store. When someone searches "gift for dad who likes gardening", Queryra finds YOUR garden gloves, plant pots, and seed kits.
 
-= Why Queryra vs Other AI Search? =
+= The Problem With WordPress Search =
 
-**Trained on YOUR Content**
-Generic AI plugins use the same model for every site. Queryra builds a custom AI model from YOUR content, making search results more relevant and personalized to your site.
+Default WooCommerce search only matches exact keywords. If your product is called "Premium Leather Garden Gloves" but someone searches "gardening gift", they get nothing.
 
-**True Free Tier**
-Test with up to 500 records and thousands of searches per month - forever free. No credit card required, no surprise limits. [Sign up free](https://queryra.com/signup).
+Real searches that return 0 results in most stores:
 
-**No ChatGPT Setup**
-Other plugins require you to create a ChatGPT account and manage API keys. Queryra includes everything - just paste one API key and you're done.
+* "something warm for winter" → Sweaters, jackets, scarves
+* "gift for mom" → Jewelry, candles, kitchen gadgets
+* "comfy work shoes" → Office loafers, cushioned flats
+* "blue top" → Navy blouses, azure shirts, teal tees
+* "healthy snacks" → Protein bars, nuts, dried fruit
 
-**WordPress-Native Design**
-Built specifically for WordPress, not adapted from a generic solution. Auto-syncs when you publish, supports sticky posts, works with any theme. [Learn more about features](https://queryra.com/features).
+**Queryra understands these searches and finds the right products.**
 
-**Transparent Pricing**
-Simple freemium model - start free, upgrade when you grow. No hidden fees, no "contact sales", no surprises. [View pricing](https://queryra.com/pricing).
+= How Queryra Works =
 
-= Features =
+1. Your products are analyzed and converted into AI embeddings
+2. When customers search, their query is understood semantically
+3. Results are ranked by meaning, not just keyword matching
+4. Customers find products even with vague or natural language searches
 
-* AI-powered semantic search (understands meaning, not just keywords)
-* Automatic synchronization of posts, pages, and custom post types
-* **WooCommerce integration** - Indexes products with prices, stock status, and descriptions
-* Replace WordPress default search with Queryra
-* Sticky posts and featured products get priority in search results
-* Full content indexing (title, content, categories, tags, product details)
-* Real-time sync when content is published or updated
-* Simple dashboard for monitoring sync status
-* Free plan available with 500 records
+= Built for WooCommerce =
 
-= How It Works =
+* **Product Search** – Search by title, description, SKU, categories, tags, and attributes
+* **Smart Product Ranking** – AI understands which products best match the query
+* **Boost Control** – Promote high-margin products or slow-moving inventory like an experienced salesperson who knows when to recommend alternatives
+* **Live Search Results** – Instant AJAX-powered search suggestions
+* **Auto-Sync** – New products indexed automatically when published
+
+= 5-Minute Setup with Guided Wizard =
+
+No coding required. No OpenAI account needed.
 
 1. Install and activate the plugin
-2. Get your free API key from [queryra.com](https://queryra.com)
-3. Enter your API key in Settings → Queryra
-4. Click "Send All Posts" to sync existing content
-5. Done! Your search is now AI-powered
+2. Follow the Setup Wizard – it guides you step by step
+3. Get your FREE API key (no credit card required)
+4. One-click import of all your products
+5. Done! Your search now understands customers
 
-New posts are automatically synced when published. Your visitors will see dramatically better search results.
+= Perfect For Any WooCommerce Store =
 
-= Use Cases =
+* **Fashion** – Find items by style, occasion, or color family
+* **Electronics** – Search by features, not just model numbers
+* **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
+* **Food & Beverage** – "healthy snacks" finds protein bars, nuts
+* **Any catalog** – Works with any product type
 
-* **WooCommerce Stores** - Customers find products by describing what they need, not exact product names
-* **Blogs & News Sites** - Help readers find relevant articles even with vague queries
-* **Documentation Sites** - Find answers by describing the problem, not exact keywords
-* **Knowledge Bases** - Semantic search for support articles and FAQs
-* **Portfolios & Galleries** - Find projects by description, not just titles
-* **Business Sites** - Help visitors discover relevant services and content
+= Free Forever =
 
-= Try It Free =
+100 products and 500 searches per month – free, forever. No credit card. No trial that expires. Just install and use.
 
-**Test Queryra on YOUR actual content before deciding.**
+= Founders Club =
 
-1. Install the plugin
-2. Get your FREE API key from [Queryra](https://queryra.com) (no credit card)
-3. Search your content and see the difference
-4. Upgrade only if you love it
+Early supporters get exclusive benefits:
 
-Queryra offers a generous free tier perfect for personal blogs and small sites. Paid plans available for larger sites that need more capacity. [Compare plans](https://queryra.com/pricing).
+* **+100 bonus products** – 200 total instead of 100 on free plan
+* **Personal setup assistance** – We help you configure everything
+* **Priority support** – Direct access to the development team
+
+[Join Founders Club](https://queryra.com/signup) – limited time offer.
+
+= Why Queryra vs Other Search Plugins? =
+
+**Trained on YOUR Store**
+Generic AI plugins use the same model for everyone. Queryra builds a custom AI model from YOUR products, YOUR descriptions, YOUR categories.
+
+**No ChatGPT Key Required**
+Other plugins require you to create an OpenAI account and manage API keys. Queryra includes everything – one API key, no extra accounts.
+
+**WordPress-Native**
+Built specifically for WordPress and WooCommerce. Auto-syncs on publish, supports product variations, works with any theme.
 
 = Privacy & Security =
 
-* Data is transmitted over encrypted HTTPS connections
-* No tracking scripts or cookies
-* Content is processed only for search indexing
-* You can delete all your data anytime from the dashboard
+* All data encrypted over HTTPS
+* No tracking scripts or cookies on your store
+* Delete all data anytime from your dashboard
+* GDPR compliant
+* [Privacy Policy](https://queryra.com/privacy) | [Terms of Service](https://queryra.com/terms)
 
 == Installation ==
 
-= Automatic Installation =
+= Quick Start (5 minutes) =
 
-1. Go to Plugins → Add New in your WordPress admin
-2. Search for "Queryra"
-3. Click "Install Now" and then "Activate"
-4. Go to Settings → Queryra to configure
+1. **Install**: Plugins → Add New → Search "Queryra" → Install → Activate
+2. **Setup Wizard**: Follow the guided wizard that appears automatically
+3. **Get API Key**: Create free account at [queryra.com/signup](https://queryra.com/signup)
+4. **Import Products**: One-click import syncs all your WooCommerce products
+5. **Enable**: Turn on AI search and you're done!
 
-= Manual Installation =
+No coding required. The Setup Wizard guides you through every step.
 
-1. Download the plugin ZIP file
-2. Go to Plugins → Add New → Upload Plugin
-3. Choose the ZIP file and click "Install Now"
-4. Activate the plugin
-5. Go to Settings → Queryra to configure
+= Works With =
 
-= Configuration =
-
-1. [Create your free account](https://queryra.com/signup) (no credit card required)
-2. Copy your API key from the dashboard
-3. In WordPress, go to Settings → Queryra
-4. Paste your API key and save
-5. Click "Send All Posts to Queryra" to sync existing content
-6. Enable "Use Queryra AI for WordPress search" to replace default search
-
-**That's it!** Your search is now powered by AI trained on your content. [Learn more about setup](https://queryra.com/docs/wordpress-setup).
+* WooCommerce products, variations, and virtual products
+* Product SKUs, categories, tags, and custom attributes
+* Regular WordPress posts and pages
+* Any WordPress theme
 
 == Frequently Asked Questions ==
 
-= Do I need a Queryra account? =
+= Does this work with WooCommerce product search? =
 
-Yes, you need to [sign up for free at queryra.com](https://queryra.com/signup) to get an API key. No credit card required. The free tier is perfect for testing and small sites.
+Yes! Queryra is optimized for WooCommerce. It indexes all your products including titles, descriptions, SKUs, categories, tags, and attributes. Customers can search naturally and find the right products.
 
-= What content is synchronized? =
+= How is this different from ChatGPT plugins? =
 
-By default, the plugin syncs posts and pages. You can configure which post types to sync in the settings. Content includes title, body text, categories, and tags.
+ChatGPT plugins require you to create an OpenAI account, manage API keys, and pay per request. Queryra includes everything – one simple API key, no extra accounts, predictable pricing.
 
-= How often is content synced? =
+= What's the Founders Club? =
 
-New and updated content is synced automatically when published. You can also manually sync all content from the plugin settings page.
+Early users get +100 bonus product slots (200 total instead of 100) plus personal setup assistance. [Sign up now](https://queryra.com/signup) while it lasts.
 
-= Does it work with my theme? =
+= Will this slow down my WooCommerce store? =
 
-Yes! Queryra works with any WordPress theme. It hooks into WordPress's standard search functionality.
+No. Search queries are processed in milliseconds via our optimized API. Products are indexed in the background without affecting your store performance.
 
-= Will it slow down my site? =
+= Can I try before committing? =
 
-No. Search queries are processed by Queryra's servers, so there's no impact on your WordPress hosting. The plugin only sends data when content is published or updated.
+Yes! The free plan is forever free with 100 products (200 with Founders Club). No credit card required, no trial expiration.
 
-= What happens if I deactivate the plugin? =
+= Does it work with live search / AJAX search? =
 
-Search returns to WordPress default behavior. Your data remains in Queryra's system until you delete it from the dashboard.
+Yes. Queryra provides instant search results as customers type, with smart suggestions and product thumbnails.
 
-= How is this different from ChatGPT search? =
+= What if I have more than 100 products? =
 
-Generic AI plugins use the same ChatGPT model for every website. Queryra trains a custom model specifically on YOUR content, making results more relevant to your site. Plus, you don't need a ChatGPT API key - everything is included.
-
-= Is my content secure? =
-
-Yes. All data is transmitted over HTTPS and stored securely. [Read our privacy policy](https://queryra.com/privacy). You can delete your data anytime from the Queryra dashboard.
-
-= What languages are supported? =
-
-Queryra supports semantic search in all major languages. The AI model works with English, Spanish, French, German, Italian, Portuguese, Polish, and many others.
+Paid plans start at $9/month for 500 products. Visit [queryra.com/pricing](https://queryra.com/pricing) for all options.
 
 == Screenshots ==
 
-1. Plugin settings page - configure API key, enable AI search, and manage sync options
-2. WordPress default search fails to find relevant content for semantic queries like "mindfulness"
-3. Queryra AI search succeeds - finds semantically related article "The Quiet Strength of a Balanced Mind"
-4. Dashboard to manage indexed records and monitor usage across all your content
+1. AI-powered search demo – find "12 Angry Men" by searching "jury decides if young man is guilty"
+2. WooCommerce integration – enable product search with automatic SKU, price, and attribute indexing
+3. Queryra Dashboard – cyberpunk-styled admin panel with real-time search statistics
+4. Setup Wizard – import your posts, pages, and products in one click
+5. Plugin Settings – configure API key and enable AI search
 
 == Changelog ==
 
-= 1.1.0 (2026-01-28) =
-* ✨ New: Setup Wizard - 4-step guided onboarding for new users
-* ✨ New: Tabbed admin interface - organized settings for better UX
-* ✨ New: Exit survey - collect feedback on plugin deactivation
-* 🛒 Enhanced: WooCommerce product indexing improvements
-* 🔧 Improved: Admin panel UI/UX with better organization
-* 🐛 Fix: Various bug fixes and stability improvements
+= 1.1.1 (2026-02-01) =
+* Added: Full WooCommerce product search support
+* Added: Product SKU, price, and attribute indexing
+* Added: Smart product boost controls
+* Improved: Setup Wizard with one-click product import
+* Improved: Search relevance algorithm
+
+= 1.0.7 (2026-01-29) =
+* Added: Plugin icon, banner, and screenshots
+* Fixed: Asset file paths for WordPress.org compliance
+* Improved: FAQ section with direct links
+
+= 1.0.6 (2026-01-29) =
+* Fixed: Documentation links
+* Added: Privacy Policy and Terms of Service links
+
+= 1.0.5 (2026-01-28) =
+* Fixed: Dashboard stats display issue
+* Improved: PHP 8+ compatibility
 
 = 1.0.0 (2026-01-23) =
-* 🚀 Initial public release
-* Production-ready AI search trained on your content
-* Stable API with 99.9% uptime
-* WordPress.org directory submission
-
-= 0.9.0 (2026-01-15) - Beta 2 =
-* Improved relevance scoring with cosine similarity
-* Added adaptive threshold filtering for better results
-* Enhanced embedding generation with title weighting
-* Fixed sync issues with large content libraries
-* Performance optimizations for faster searches
-
-= 0.8.0 (2026-01-08) - Beta 1 =
-* Public beta release
-* AI model training improvements
-* Custom post type support
-* Sticky post priority in search results
-* Real-time sync on publish/update
-* Settings dashboard with sync status
-* Testing with 50+ beta users
-
-= 0.7.0 (2025-12-20) - Alpha 3 =
-* ChromaDB integration for vector storage
-* Sentence transformer embeddings (all-MiniLM-L6-v2)
-* Semantic search algorithm refinements
-* Auto-sync functionality
-* API key authentication system
-
-= 0.6.0 (2025-12-10) - Alpha 2 =
-* Initial AI model training on WordPress content
-* Embedding generation pipeline
-* Search relevance testing and tuning
-* Categories and tags support
-
-= 0.5.0 (2025-12-01) - Alpha 1 =
-* First working prototype
-* Basic semantic search functionality
-* Manual sync of posts and pages
-* WordPress search hook integration
-* Internal testing phase
+* Initial public release
+* AI semantic search for WordPress and WooCommerce
+* Auto-sync on publish
+* Free tier with 100 products
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-Initial release of Queryra AI-powered search for WordPress.
+= 1.1.1 =
+Major update: Full WooCommerce product search with SKU, price, and attribute support. Smart boost controls added.
 
 == Additional Information ==
 
 = Support =
 
-* [Complete Documentation](https://queryra.com/docs) - Setup guides and tutorials
-* [API Reference](https://queryra.com/api-docs) - Technical documentation
-* [FAQ & Troubleshooting](https://queryra.com/help) - Common questions answered
+* [Documentation](https://queryra.com/docs)
+* [FAQ](https://queryra.com/faq)
 * Email: support@queryra.com
-* GitHub: [github.com/queryra/wordpress-plugin](https://github.com/queryra/wordpress-plugin)
 
-= Contributing =
+= Links =
 
-We welcome contributions! Visit our [GitHub repository](https://github.com/queryra/wordpress-plugin) to report issues or submit pull requests.
-
-= About Queryra =
-
-Queryra is a semantic search platform powered by artificial intelligence. We help websites provide better search experiences using modern AI technology trained on your specific content.
-
-**Get Started:**
-* [Sign up free](https://queryra.com/signup) - No credit card required
-* [See how it works](https://queryra.com/how-it-works) - Learn about custom AI training
-* [Compare plans](https://queryra.com/pricing) - Find the right plan for your site
-* [Read our blog](https://queryra.com/blog) - AI search tips and best practices
-
-Learn more at [queryra.com](https://queryra.com)
+* [Live Demo](https://queryra.com/demo) – Try semantic search on Wikipedia articles
+* [Pricing](https://queryra.com/pricing) – Plans for stores of all sizes
+* [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)

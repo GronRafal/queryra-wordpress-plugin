@@ -3,22 +3,58 @@
 [![WordPress Plugin](https://img.shields.io/badge/WordPress-5.8%2B-blue.svg)](https://wordpress.org)
 [![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net)
 [![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](LICENSE)
-[![WordPress.org](https://img.shields.io/badge/WordPress.org-Awaiting%20Review-orange.svg)](https://wordpress.org/plugins/queryra-ai-search/)
+[![WordPress.org](https://img.shields.io/badge/WordPress.org-Live-brightgreen.svg)](https://wordpress.org/plugins/queryra-ai-search/)
 
-🔍 **AI-powered search trained on YOUR content** - not generic ChatGPT
+**Your customer types "gift for dad who likes gardening". WordPress search returns: 0 results.**
 
-Transform WordPress search from keyword matching to intelligent, context-aware discovery.
-No ChatGPT API key needed. Works with any theme. See results in 5 minutes.
+Frustrated, they open ChatGPT. It perfectly understands what they need – garden gloves, plant pots, seed kits. But the links? Amazon. Etsy. Your competitors.
+
+You had the products. You lost the sale.
+
+**Queryra is different.** It thinks like AI but only knows YOUR store. When someone searches "gift for dad who likes gardening", Queryra finds YOUR garden gloves, plant pots, and seed kits.
 
 [Get Started](https://queryra.com/signup) • [Documentation](https://queryra.com/docs) • [FAQ](https://queryra.com/faq)
 
-## Why Queryra?
+## The Problem With WordPress Search
 
-- 🎯 **Custom AI Training** - Learns from YOUR content, not generic for every site
-- ⚡ **No Setup Hassle** - No ChatGPT account, no API keys to manage
-- 🔒 **Privacy First** - Your data stays secure, HTTPS encrypted
-- 🚀 **WordPress Native** - Auto-sync on publish, works with any theme
-- 💚 **Free to Start** - Test on your actual content before deciding
+Default WooCommerce search only matches exact keywords. If your product is called "Premium Leather Garden Gloves" but someone searches "gardening gift", they get nothing.
+
+Real searches that return 0 results in most stores:
+
+* "something warm for winter" → Sweaters, jackets, scarves
+* "gift for mom" → Jewelry, candles, kitchen gadgets
+* "comfy work shoes" → Office loafers, cushioned flats
+* "blue top" → Navy blouses, azure shirts, teal tees
+* "healthy snacks" → Protein bars, nuts, dried fruit
+
+**Queryra understands these searches and finds the right products.**
+
+## Why Queryra vs Other Search Plugins?
+
+**Trained on YOUR Store**
+Generic AI plugins use the same model for everyone. Queryra builds a custom AI model from YOUR products, YOUR descriptions, YOUR categories.
+
+**No ChatGPT Key Required**
+Other plugins require you to create an OpenAI account and manage API keys. Queryra includes everything – one API key, no extra accounts.
+
+**WordPress-Native**
+Built specifically for WordPress and WooCommerce. Auto-syncs on publish, supports product variations, works with any theme.
+
+## Built for WooCommerce
+
+* **Product Search** – Search by title, description, SKU, categories, tags, and attributes
+* **Smart Product Ranking** – AI understands which products best match the query
+* **Boost Control** – Promote high-margin products or slow-moving inventory like an experienced salesperson who knows when to recommend alternatives
+* **Live Search Results** – Instant AJAX-powered search suggestions
+* **Auto-Sync** – New products indexed automatically when published
+
+## Perfect For Any WooCommerce Store
+
+* **Fashion** – Find items by style, occasion, or color family
+* **Electronics** – Search by features, not just model numbers
+* **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
+* **Food & Beverage** – "healthy snacks" finds protein bars, nuts
+* **Any catalog** – Works with any product type
 
 ## Features
 
@@ -60,11 +96,9 @@ graph LR
 ### 1. Install Plugin
 
 **Option A: WordPress Dashboard (Recommended)**
-1. Download the plugin ZIP file
-2. Go to **Plugins → Add New** in WordPress
-3. Click **Upload Plugin**
-4. Choose the ZIP file and click **Install Now**
-5. Activate the plugin
+1. Go to **Plugins → Add New** in WordPress
+2. Search for **"Queryra"**
+3. Click **Install Now** then **Activate**
 
 **Option B: Manual Installation**
 ```bash
@@ -109,7 +143,7 @@ Your search is now powered by AI trained on your content.
 | HTTPS | Recommended |
 
 **Tested with:**
-- WordPress 6.7.1, 6.6, 6.5
+- WordPress 6.9, 6.8, 6.7
 - PHP 8.2, 8.1, 8.0, 7.4
 - Popular themes: Twenty Twenty-Four, Astra, Kadence, GeneratePress
 
@@ -207,6 +241,14 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.1.1 (2026-02-01)
+🛒 **Full WooCommerce product search support**
+- New: Product SKU, price, and attribute indexing
+- New: Smart product boost controls
+- Improved: Setup Wizard with one-click product import
+- Improved: Search relevance algorithm
+- Fixed: WordPress Plugin Checker compliance
+
 ### 1.1.0 (2026-01-28)
 ✨ **Enhanced user experience and onboarding**
 - New: Setup Wizard - 4-step guided onboarding for new users
@@ -267,6 +309,7 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 
 ## Links
 
+- [WordPress.org Plugin Page](https://wordpress.org/plugins/queryra-ai-search/)
 - [Queryra Homepage](https://queryra.com)
 - [Sign Up Free](https://queryra.com/signup)
 - [Documentation](https://queryra.com/docs)

@@ -216,7 +216,8 @@ class Queryra_Admin {
         }
 
         // Get active tab
-        $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'settings';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce not needed for tab display
+        $active_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'settings';
 
         ?>
         <div class="wrap">
@@ -224,6 +225,7 @@ class Queryra_Admin {
 
             <?php
             // Show success message after saving settings
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Standard WP settings API pattern
             if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true') {
                 echo '<div class="notice notice-success is-dismissible"><p><strong>Settings saved.</strong></p></div>';
             }
@@ -1104,6 +1106,7 @@ class Queryra_Admin {
         global $wpdb;
 
         // Delete all Queryra search transients
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Bulk transient cleanup
         $deleted = $wpdb->query("
             DELETE FROM {$wpdb->options}
             WHERE option_name LIKE '_transient_queryra_search_%'
