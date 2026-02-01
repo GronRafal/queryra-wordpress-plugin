@@ -49,7 +49,7 @@ class Queryra_Deactivation_Survey {
         wp_localize_script('queryra-deactivation-survey', 'queryraDeactivation', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('queryra_deactivation'),
-            'pluginSlug' => QUERYRA_PLUGIN_BASENAME // Dynamic: queryra-wordpress-plugin/queryra-search.php
+            'pluginSlug' => QUERYRA_PLUGIN_BASENAME // Dynamic: queryra-ai-search/queryra-ai-search.php
         ));
     }
 
