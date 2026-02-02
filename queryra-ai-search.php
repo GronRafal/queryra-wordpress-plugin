@@ -3,7 +3,7 @@
  * Plugin Name: AI Product Search for WooCommerce – Semantic Search & Smart Results by Queryra
  * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.1.1');
+define('QUERYRA_VERSION', '1.1.2');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -32,6 +32,7 @@ require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-admin.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-search.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-setup-wizard.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-deactivation-survey.php';
+require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-analytics.php';
 
 /**
  * Main Plugin Class
@@ -112,12 +113,18 @@ class Queryra_Search {
 
         // Flush rewrite rules
         flush_rewrite_rules();
+
+        // Track activation (anonymous)
+        Queryra_Analytics::track('plugin_activated');
     }
 
     /**
      * Deactivation
      */
     public function deactivate() {
+        // Track deactivation (anonymous)
+        Queryra_Analytics::track('plugin_deactivated');
+
         // Flush rewrite rules
         flush_rewrite_rules();
     }

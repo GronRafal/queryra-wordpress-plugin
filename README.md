@@ -241,6 +241,13 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.1.2 (2026-02-02)
+📊 **Anonymous usage analytics**
+- New: Anonymous event tracking to understand user flow
+- New: Opt-out via `define('QUERYRA_DISABLE_ANALYTICS', true);` in wp-config.php
+- Privacy: No personal data collected (UUID only, no IP, no site URL)
+- See: [Privacy Policy section 1.6](https://queryra.com/privacy)
+
 ### 1.1.1 (2026-02-01)
 🛒 **Full WooCommerce product search support**
 - New: Product SKU, price, and attribute indexing

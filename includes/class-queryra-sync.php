@@ -321,10 +321,15 @@ class Queryra_Sync {
             wp_send_json_error(array('message' => 'No posts found'));
         }
 
+        // Track sync start
+        Queryra_Analytics::track('sync_started');
+
         // Sync posts
         $result = $this->sync_posts($post_ids);
 
         if ($result['success']) {
+            // Track sync completion
+            Queryra_Analytics::track('sync_completed');
             wp_send_json_success($result);
         } else {
             wp_send_json_error($result);

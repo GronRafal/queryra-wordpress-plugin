@@ -200,6 +200,12 @@ class Queryra_Search_Integration {
                     }
                 }
 
+                // Track first search (only once per installation)
+                if (!get_option('queryra_first_search_tracked')) {
+                    Queryra_Analytics::track('first_search');
+                    update_option('queryra_first_search_tracked', true);
+                }
+
                 // Cache the results (10 minutes)
                 set_transient($cache_key, $all_ids, $this->cache_duration);
 

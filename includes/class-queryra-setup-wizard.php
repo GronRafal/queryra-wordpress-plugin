@@ -97,6 +97,12 @@ class Queryra_Setup_Wizard {
         $this->step = isset($_GET['step']) ? absint($_GET['step']) : 1;
         $this->step = max(1, min($this->step, $this->total_steps));
 
+        // Track wizard opened (only on first step, first visit)
+        if ($this->step === 1 && !get_transient('queryra_wizard_opened_tracked')) {
+            Queryra_Analytics::track('wizard_opened');
+            set_transient('queryra_wizard_opened_tracked', true, DAY_IN_SECONDS);
+        }
+
         // Calculate progress percentage
         $progress = ($this->step / $this->total_steps) * 100;
 
@@ -726,6 +732,9 @@ class Queryra_Setup_Wizard {
             wp_send_json_error(array('message' => 'Invalid API key or connection failed'));
             return;
         }
+
+        // Track signup completed (API key successfully connected)
+        Queryra_Analytics::track('signup_completed');
 
         wp_send_json_success(array(
             'message' => 'API key saved successfully'

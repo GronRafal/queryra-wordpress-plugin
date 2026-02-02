@@ -3,7 +3,7 @@ Contributors: queryra
 Tags: WooCommerce, product search, AI search, semantic search, ecommerce
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -159,6 +159,11 @@ Paid plans start at $9/month for 500 products. Visit [queryra.com/pricing](https
 
 == Changelog ==
 
+= 1.1.2 (2026-02-02) =
+* Added: Anonymous usage analytics to improve the plugin
+* Added: Opt-out option via QUERYRA_DISABLE_ANALYTICS constant
+* Privacy: No personal data collected (see queryra.com/privacy section 1.6)
+
 = 1.1.1 (2026-02-01) =
 * Added: Full WooCommerce product search support
 * Added: Product SKU, price, and attribute indexing
@@ -200,6 +205,6 @@ Major update: Full WooCommerce product search with SKU, price, and attribute sup
 
 = Links =
 
-* [Live Demo](https://queryra.com/demo) – Try semantic search on Wikipedia articles
+* [Live Demo](https://queryra.com/playground/wiki) – Try semantic search on Wikipedia articles
 * [Pricing](https://queryra.com/pricing) – Plans for stores of all sizes
 * [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)
