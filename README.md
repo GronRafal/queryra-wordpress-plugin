@@ -5,27 +5,29 @@
 [![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](LICENSE)
 [![WordPress.org](https://img.shields.io/badge/WordPress.org-Live-brightgreen.svg)](https://wordpress.org/plugins/queryra-ai-search/)
 
-**Your customer types "gift for dad who likes gardening". WordPress search returns: 0 results.**
+**Your customer types "present for my girlfriend". Your store returns: 0 results.**
 
-Frustrated, they open ChatGPT. It perfectly understands what they need – garden gloves, plant pots, seed kits. But the links? Amazon. Etsy. Your competitors.
+You sell gift boxes, perfumes, skincare sets — exactly what she'd love. But WooCommerce search can't connect "present for girlfriend" to "Gift Box".
 
-You had the products. You lost the sale.
+Your customer leaves. Sale lost. This happens every day.
 
-**Queryra is different.** It thinks like AI but only knows YOUR store. When someone searches "gift for dad who likes gardening", Queryra finds YOUR garden gloves, plant pots, and seed kits.
+**Queryra is different.** It thinks like AI but only knows YOUR store. When someone searches "present for my girlfriend", Queryra finds YOUR gift boxes, perfume sets, and skincare bundles.
+
+👉 **[Try it live → WooCommerce Demo Store](https://woo.queryra.com)** — over 200 products across 10 brands. Search naturally and see the difference.
 
 [Get Started](https://queryra.com/signup) • [Documentation](https://queryra.com/docs) • [FAQ](https://queryra.com/faq)
 
 ## The Problem With WordPress Search
 
-Default WooCommerce search only matches exact keywords. If your product is called "Premium Leather Garden Gloves" but someone searches "gardening gift", they get nothing.
+Default WooCommerce search only matches exact keywords. If your product is called "Maison Blanc Gift Box" but someone searches "present for my girlfriend", they get nothing.
 
 Real searches that return 0 results in most stores:
 
-* "something warm for winter" → Sweaters, jackets, scarves
-* "gift for mom" → Jewelry, candles, kitchen gadgets
-* "comfy work shoes" → Office loafers, cushioned flats
-* "blue top" → Navy blouses, azure shirts, teal tees
-* "healthy snacks" → Protein bars, nuts, dried fruit
+* "my skin looks tired" → Night creams, recovery oils, eye patches
+* "gift for mom who loves candles" → Scented candles, home fragrance sets
+* "looking older than my age" → Anti-aging serums, firming creams
+* "before wedding skincare" → Bridal kits, radiance creams, ritual sets
+* "postpartum hair loss" → Hair rescue sets, growth serums
 
 **Queryra understands these searches and finds the right products.**
 
@@ -50,6 +52,7 @@ Built specifically for WordPress and WooCommerce. Auto-syncs on publish, support
 
 ## Perfect For Any WooCommerce Store
 
+* **Beauty & Skincare** – "my skin looks tired" finds night creams and recovery oils
 * **Fashion** – Find items by style, occasion, or color family
 * **Electronics** – Search by features, not just model numbers
 * **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
@@ -151,6 +154,9 @@ Your search is now powered by AI trained on your content.
 
 ## FAQ
 
+### Can I see it working before I install?
+Yes! We run a live WooCommerce demo store: **[woo.queryra.com](https://woo.queryra.com)** — over 200 beauty products across 10 brands. Try searching "present for my girlfriend" or "my skin looks tired" and see the difference.
+
 ### Do I need a Queryra account?
 Yes, [sign up free](https://queryra.com/signup) to get an API key. No credit card required.
 
@@ -158,19 +164,16 @@ Yes, [sign up free](https://queryra.com/signup) to get an API key. No credit car
 WordPress uses basic SQL keyword matching. Queryra uses AI trained on YOUR content to understand meaning and context.
 
 ### How is this different from generic ChatGPT plugins?
-Generic plugins use the same ChatGPT model for every site. Queryra trains a custom model specifically on YOUR content, making results more relevant.
+Generic plugins use the same ChatGPT model for every site. Queryra trains a custom model specifically on YOUR content, making results more relevant. No OpenAI account needed.
 
 ### Does it work with my theme?
 Yes! Works with any WordPress theme. Hooks into standard WordPress search functionality.
 
-### Does it work with Gutenberg/Classic Editor?
-Both! Works with any editor that creates WordPress posts.
-
-### Is it secure?
-Yes. All data transmitted over HTTPS. Plugin follows WordPress security standards (nonces, sanitization, escaping).
+### Is it really free?
+Yes. 100 products and 500 searches/month — free forever. No credit card, no trial expiration. Founders Club members get 200 products free.
 
 ### Will it slow down my site?
-No. Search queries are processed by Queryra's servers, so there's no impact on your WordPress hosting.
+No. Search queries are processed by Queryra's servers in milliseconds. No impact on your WordPress hosting.
 
 ### What happens to my data if I deactivate the plugin?
 Search returns to WordPress default. Your data stays in Queryra until you delete it from the dashboard.
@@ -240,6 +243,14 @@ phpcs --standard=WordPress
 ```
 
 ## Changelog
+
+### 1.1.3 (2026-02-12)
+🏪 **WooCommerce demo store & updated documentation**
+- New: Live WooCommerce demo store at woo.queryra.com
+- Improved: Plugin description with tested search examples from demo store
+- Improved: FAQ with demo store links
+- Improved: Simplified search integration for better theme compatibility
+- Updated: Screenshots descriptions
 
 ### 1.1.2 (2026-02-02)
 📊 **Anonymous usage analytics**
@@ -317,6 +328,8 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 ## Links
 
 - [WordPress.org Plugin Page](https://wordpress.org/plugins/queryra-ai-search/)
+- [WooCommerce Live Demo](https://woo.queryra.com) — Demo beauty store with over 200 products
+- [Knowledge Base Demo](https://queryra.com/playground/wiki) — Semantic search on Wikipedia articles
 - [Queryra Homepage](https://queryra.com)
 - [Sign Up Free](https://queryra.com/signup)
 - [Documentation](https://queryra.com/docs)

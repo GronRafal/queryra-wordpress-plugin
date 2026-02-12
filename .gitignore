@@ -33,8 +33,7 @@ TODO.md
 WORK_PLAN.md
 *_DRAFT.md
 
-# Development scripts (local testing only)
-scripts/
+# Keep scripts/ in Git (release.sh etc.)
 
 # Documentation (dev only)
 docs/

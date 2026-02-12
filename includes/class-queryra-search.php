@@ -34,17 +34,11 @@ class Queryra_Search_Integration {
     /**
      * Override WordPress search with Queryra AI
      *
-     * Smart Strategy:
-     * 1. Pre-flight checks (avoid unnecessary API calls):
-     *    - AI Search enabled?
-     *    - Synced records > 0?
-     *    - FREE plan + window open?
-     * 2. Pagination with smart caching:
-     *    - Page 1: Fetch 11 results, cache, show 10
-     *    - Page 2: Check cache, fetch 21 if needed, show 11-20
-     *    - Page 3: Check cache, fetch 31 if needed, show 21-30
-     *    - Pattern: limit = (page × 10) + 1
-     * 3. Fallback: If any check fails or API down → WordPress MySQL search
+     * Simple Strategy:
+     * 1. Pre-flight checks (avoid unnecessary API calls)
+     * 2. Fetch all matching IDs from Queryra API (limit=999)
+     * 3. Set post__in with IDs, let WordPress/WooCommerce handle pagination
+     * 4. Fallback: If any check fails or API down → WordPress MySQL search
      *
      * @param WP_Query $query WordPress query object
      */
@@ -68,30 +62,19 @@ class Queryra_Search_Integration {
         }
 
         // Get cached stats and status from WordPress DB (saved by admin page)
-        // Search integration ONLY reads from DB, never calls API directly
         $stats = get_option('queryra_cached_stats');
         $status = get_option('queryra_cached_status');
-
 
         // Pre-flight check: No synced records?
         if ($stats && isset($stats['synced_records']) && $stats['synced_records'] == 0) {
             return; // No records in Queryra at all
         }
 
-        // Get pagination info
-        $paged = max(1, (int) $query->get('paged'));
-        $per_page = 10; // WordPress default posts per page
-        $needed = $paged * $per_page;
-
         // Cache key (unique per search term)
         $cache_key = 'queryra_search_' . md5($search_term);
 
         // Check cache FIRST - even if stale, it's better than SQL
         $cached_ids = get_transient($cache_key);
-
-        if ($cached_ids) {
-        } else {
-        }
 
         // SMART STRATEGY for FREE plan:
         // If window closed BUT we have cache → use cache (even if stale)
@@ -109,211 +92,107 @@ class Queryra_Search_Integration {
             // If window closed BUT we have cache → use it!
             if ($window_closed && $cached_ids && count($cached_ids) > 0) {
                 // Don't fetch from API, just use cache below
-                // This saves requests and gives better results
             } elseif ($window_closed && !$cached_ids) {
                 // No cache available, must fallback to SQL
                 return;
             }
         }
 
-        // If cache doesn't have enough results, fetch from API
-        // BUT: If FREE plan window closed and we have SOME cache, use what we have
-        $should_fetch_api = false;
-
-        if (!$cached_ids || count($cached_ids) < $needed) {
-            // Check if we should skip API call (FREE plan window closed with partial cache)
+        // If no cache, fetch from API
+        if (!$cached_ids) {
+            // Check if we should skip API call (FREE plan window closed)
             $skip_api = false;
 
             if ($stats && isset($stats['plan']) && $stats['plan'] === 'free' && $status) {
                 if ((isset($status['available']) && $status['available'] === false) ||
                     (isset($status['minutes_until_open']) && $status['minutes_until_open'] > 2)) {
+                    $skip_api = true;
+                }
+            }
 
-                    if ($cached_ids && count($cached_ids) > 0) {
-                        // We have some cache - use it instead of making API call that will fail
-                        $skip_api = true;
+            if ($skip_api) {
+                return; // Fallback to WordPress search
+            }
+
+            // Fetch all matching results from API (API filters by relevance threshold)
+            $results = $this->api->search($search_term, 999);
+
+            // If API fails or returns error, fallback to WordPress search
+            if (is_wp_error($results)) {
+                $error_msg = $results->get_error_message();
+                $error_data = $results->get_error_data();
+
+                // Special handling for FREE plan window closed
+                if (strpos($error_msg, 'FREE plan') !== false || strpos($error_msg, 'window') !== false) {
+                    if ($error_data && isset($error_data['data']['errors']['api_error'][0])) {
+                        $error_info = $error_data['data']['errors']['api_error'][0];
+
+                        $updated_status = array(
+                            'available' => false,
+                            'plan' => 'free',
+                            'minutes_left' => 0,
+                            'message' => isset($error_info['message']) ? $error_info['message'] : 'Search window closed',
+                            'next_available_at' => isset($error_info['next_available_at']) ? $error_info['next_available_at'] : null,
+                            'minutes_until_open' => isset($error_info['minutes_until_open']) ? $error_info['minutes_until_open'] : null
+                        );
+
+                        update_option('queryra_cached_status', $updated_status);
+                    }
+                }
+
+                return; // Let WordPress handle search normally
+            }
+
+            if (empty($results['results'])) {
+                return; // Let WordPress handle search normally
+            }
+
+            // Extract post IDs from results
+            // Convert "wp-123" → 123, filter out non-WordPress records
+            $all_ids = array();
+            foreach ($results['results'] as $result) {
+                if (strpos($result['id'], 'wp-') === 0) {
+                    $id = (int) str_replace('wp-', '', $result['id']);
+                    if ($id > 0) {
+                        $all_ids[] = $id;
                     }
                 }
             }
 
-            if (!$skip_api) {
-                // Calculate how many we need: (page × 10) + 1
-                // Page 1: 11, Page 2: 21, Page 3: 31, etc.
-                $limit = ($paged * 10) + 1;
+            // Track first search (only once per installation)
+            if (!get_option('queryra_first_search_tracked')) {
+                Queryra_Analytics::track('first_search');
+                update_option('queryra_first_search_tracked', true);
+            }
 
+            // Cache the results (10 minutes)
+            set_transient($cache_key, $all_ids, $this->cache_duration);
 
-                // Call Queryra API
-                $results = $this->api->search($search_term, $limit);
+            $cached_ids = $all_ids;
+        }
 
-
-                // If API fails or returns error, fallback to WordPress search
-                if (is_wp_error($results)) {
-                    $error_msg = $results->get_error_message();
-                    $error_data = $results->get_error_data();
-
-                    // Log detailed error info
-                    if ($error_data && isset($error_data['status'])) {
-                    }
-
-                    // Special handling for FREE plan window closed
-                    if (strpos($error_msg, 'FREE plan') !== false || strpos($error_msg, 'window') !== false) {
-
-                        // Update cached status so we don't try again until window opens
-                        if ($error_data && isset($error_data['data']['errors']['api_error'][0])) {
-                            $error_info = $error_data['data']['errors']['api_error'][0];
-
-                            // Build updated status
-                            $updated_status = array(
-                                'available' => false,
-                                'plan' => 'free',
-                                'minutes_left' => 0,
-                                'message' => isset($error_info['message']) ? $error_info['message'] : 'Search window closed',
-                                'next_available_at' => isset($error_info['next_available_at']) ? $error_info['next_available_at'] : null,
-                                'minutes_until_open' => isset($error_info['minutes_until_open']) ? $error_info['minutes_until_open'] : null
-                            );
-
-                            // Cache for 5 minutes (will be updated by admin page sooner)
-                            update_option('queryra_cached_status', $updated_status);
-                        }
-                    }
-
-                    // Let WordPress handle search normally
-                    return;
-                }
-
-                if (empty($results['results'])) {
-                    // Let WordPress handle search normally
-                    return;
-                }
-
-
-                // Extract post IDs from results
-                // Convert "wp-123" → 123, filter out non-WordPress records
-                $all_ids = array();
-                foreach ($results['results'] as $result) {
-                    // Only process WordPress records (id starts with "wp-")
-                    if (strpos($result['id'], 'wp-') === 0) {
-                        $id = (int) str_replace('wp-', '', $result['id']);
-                        if ($id > 0) {
-                            $all_ids[] = $id;
-                        }
-                    } else {
-                    }
-                }
-
-                // Track first search (only once per installation)
-                if (!get_option('queryra_first_search_tracked')) {
-                    Queryra_Analytics::track('first_search');
-                    update_option('queryra_first_search_tracked', true);
-                }
-
-                // Cache the results (10 minutes)
-                set_transient($cache_key, $all_ids, $this->cache_duration);
-
-                $cached_ids = $all_ids;
-            } // end if (!$skip_api)
-        } // end if (!$cached_ids || count($cached_ids) < $needed)
-
-        // If no results, show empty
+        // If no results from API, show empty
         if (empty($cached_ids)) {
-            $query->set('post__in', array(0)); // No results
+            $query->set('post__in', array(0));
             return;
         }
 
-        // Get IDs for current page
-        // Page 1: IDs 0-9, Page 2: IDs 10-19, etc.
-        $offset = ($paged - 1) * $per_page;
-        $page_ids = array_slice($cached_ids, $offset, $per_page);
-
-        // If no IDs for this page (beyond available results), show empty
-        if (empty($page_ids)) {
-            $query->set('post__in', array(0)); // No results
-            return;
-        }
-
-        // Override WordPress query with AI results
+        // === SIMPLE APPROACH ===
+        // Just set the IDs and let WordPress/WooCommerce handle everything else
+        // (pagination, posts_per_page, sorting display)
 
         // Flag that we used AI search (for attribution footer)
         $query->set('queryra_ai_used', true);
 
-        // NUCLEAR OPTION: Use posts_pre_query to bypass WordPress query entirely
-        // This is most reliable - theme/plugins can't override it
-        add_filter('posts_pre_query', function($posts, $query_obj) use ($query, $page_ids, $cached_ids, $per_page) {
-            if ($query_obj !== $query) {
-                return $posts; // Not our query
-            }
+        // Tell WordPress: only show these posts, in this exact order
+        $query->set('post__in', $cached_ids);
+        $query->set('orderby', 'post__in');
 
+        // Don't filter by search term anymore (we have exact IDs)
+        // But keep 's' parameter for theme to display "Search results for: X"
+        $query->set('s', '');
 
-            // Fetch posts directly (bypass WP_Query)
-            global $wpdb;
-            if (empty($page_ids)) {
-                return array();
-            }
-
-            // Sanitize IDs (integers only)
-            $page_ids = array_map('intval', $page_ids);
-            $ids_string = implode(',', $page_ids);
-
-            // Get allowed post types from settings
-            $post_types = get_option('queryra_post_types', array('post', 'page'));
-
-            // Generate placeholders for post types
-            $type_placeholders = implode(',', array_fill(0, count($post_types), '%s'));
-
-            // Direct query required for custom FIELD() ordering - IDs are intval() sanitized
-            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
-            // phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            // phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-            $results = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT * FROM {$wpdb->posts}
-                    WHERE ID IN ($ids_string)
-                    AND post_status = 'publish'
-                    AND post_type IN ($type_placeholders)
-                    ORDER BY FIELD(ID, $ids_string)",
-                    ...$post_types
-                )
-            );
-            // phpcs:enable
-
-
-            // CRITICAL: Set pagination properties directly on query object
-            // When bypassing query with posts_pre_query, we must set these manually
-            $total_results = count($cached_ids);
-            $query_obj->found_posts = $total_results;
-            $query_obj->max_num_pages = ceil($total_results / $per_page);
-
-
-            return $results;
-        }, 10, 2);
-
-        // Don't clear 's' - keep search term for display in theme
-        // WordPress won't use it for SQL query because we set post__in
-        // $query->set('s', ''); // <-- Removed to preserve search term display
-
-        // Set posts per page to match what we're showing
-        $query->set('posts_per_page', $per_page); // Always 10, not count($page_ids)
-
-
-        // For pagination to work, set found_posts and max_num_pages
-        add_filter('found_posts', function($found_posts, $query_obj) use ($cached_ids, $query) {
-            if ($query_obj === $query) {
-                $total = count($cached_ids);
-                return $total;
-            }
-            return $found_posts;
-        }, 10, 2);
-
-        // Debug: Log what WordPress actually found
-        add_action('pre_get_posts', function($q) use ($query) {
-            if ($q === $query) {
-                add_filter('posts_results', function($posts) use ($query) {
-                    if (count($posts) > 0) {
-                        $post_ids = array_map(function($p) { return $p->ID; }, $posts);
-                    }
-                    return $posts;
-                }, 999, 1);
-            }
-        }, 999);
+        // Store original search term for themes that need it
+        $query->set('queryra_search_term', $search_term);
     }
 }
