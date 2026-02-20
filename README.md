@@ -170,8 +170,8 @@ Yes! We run a live WooCommerce demo store: **[woo.queryra.com](https://woo.query
 We have 4 live demos you can try right now:
 - **WooCommerce store** (200+ products): [woo.queryra.com](https://woo.queryra.com)
 - **Wikipedia search** (3,000+ articles): [queryra.com/playground/wiki](https://queryra.com/playground/wiki)
-- **Blog search**: [queryra.com/playground/blog](https://queryra.com/playground/blog)
-- **FAQ search**: [queryra.com/playground/faq](https://queryra.com/playground/faq)
+- **Blog search**: [queryra.com/blog](https://queryra.com/blog)
+- **FAQ search**: [queryra.com/faq](https://queryra.com/faq) — this page is powered by Queryra
 
 Try searching "jury decides if young man is guilty" in the Wikipedia demo — it finds "12 Angry Men".
 
