@@ -1,0 +1,29 @@
+*** Queryra – AI Semantic Search Changelog ***
+
+2026-02-13 - version 1.1.3
+* Added - Live WooCommerce demo store at woo.queryra.com
+* Update - Plugin description with real product examples
+* Added - New FAQ entries with demo store links
+
+2026-02-10 - version 1.1.2
+* Fixed - Search results display and pagination
+* Update - AJAX live search performance improvements
+* Fixed - Minor bug fixes and stability improvements
+
+2026-02-05 - version 1.1.1
+* Added - WooCommerce variations support
+* Fixed - Product sync reliability improvements
+* Update - Search relevance scoring
+
+2026-02-01 - version 1.1.0
+* Added - Setup Wizard for guided onboarding
+* Added - Auto-sync for new products
+* Added - Search analytics dashboard
+* Update - Compatibility with popular themes
+
+2026-01-29 - version 1.0.0
+* Added - Initial release
+* Added - AI semantic search for WooCommerce products
+* Added - AJAX live search with instant results
+* Added - One-click product import
+* Added - Support for posts, pages, and WooCommerce products

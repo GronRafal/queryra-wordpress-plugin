@@ -48,6 +48,11 @@ class Queryra_Search_Integration {
             return;
         }
 
+        // Skip during cron - prevents cache warmers from burning API credits
+        if (wp_doing_cron()) {
+            return;
+        }
+
         $search_term = $query->get('s');
 
         // Check if AI search is enabled in settings

@@ -1,9 +1,9 @@
 # Queryra - AI Search for WordPress
 
 [![WordPress Plugin](https://img.shields.io/badge/WordPress-5.8%2B-blue.svg)](https://wordpress.org)
-[![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net)
+[![Rating](https://img.shields.io/badge/Rating-★★★★★%205%2F5-yellow.svg)](https://wordpress.org/plugins/queryra-ai-search/)
+[![Active Installs](https://img.shields.io/badge/WordPress.org-Live-brightgreen.svg)](https://wordpress.org/plugins/queryra-ai-search/)
 [![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](LICENSE)
-[![WordPress.org](https://img.shields.io/badge/WordPress.org-Live-brightgreen.svg)](https://wordpress.org/plugins/queryra-ai-search/)
 
 **Your customer types "present for my girlfriend". Your store returns: 0 results.**
 
@@ -13,9 +13,9 @@ Your customer leaves. Sale lost. This happens every day.
 
 **Queryra is different.** It thinks like AI but only knows YOUR store. When someone searches "present for my girlfriend", Queryra finds YOUR gift boxes, perfume sets, and skincare bundles.
 
-👉 **[Try it live → WooCommerce Demo Store](https://woo.queryra.com)** — over 200 products across 10 brands. Search naturally and see the difference.
+👉 **[Live WooCommerce AI Search Demo](https://woo.queryra.com)** — over 200 products across 10 brands. Search naturally and see the difference.
 
-[Get Started](https://queryra.com/signup) • [Documentation](https://queryra.com/docs) • [FAQ](https://queryra.com/faq)
+[Get Free AI Search for WooCommerce](https://queryra.com/signup) • [AI Search Documentation](https://queryra.com/docs) • [Queryra FAQ](https://queryra.com/faq)
 
 ## The Problem With WordPress Search
 
@@ -92,7 +92,7 @@ graph LR
 3. **Sync** - Auto-sync posts or bulk send existing content
 4. **Search** - AI-powered results appear instantly
 
-[Detailed setup guide →](https://queryra.com/docs/wordpress-integration)
+[How to Install AI Search on WooCommerce](https://queryra.com/docs/wordpress-integration)
 
 ## Quick Start
 
@@ -112,7 +112,7 @@ cd /wp-content/plugins/
 
 ### 2. Get API Key
 
-[Sign up free](https://queryra.com/signup) at Queryra → Copy API key from dashboard
+[Get free WooCommerce AI search](https://queryra.com/signup) → Copy API key from dashboard
 
 ### 3. Configure Plugin
 
@@ -134,7 +134,7 @@ cd /wp-content/plugins/
 
 Your search is now powered by AI trained on your content.
 
-[View full documentation →](https://queryra.com/docs/wordpress-integration)
+[WooCommerce AI Search Setup Guide](https://queryra.com/docs/wordpress-integration)
 
 ## Requirements
 
@@ -150,15 +150,39 @@ Your search is now powered by AI trained on your content.
 - PHP 8.2, 8.1, 8.0, 7.4
 - Popular themes: Twenty Twenty-Four, Astra, Kadence, GeneratePress
 
-**Need an account?** [Sign up free at Queryra](https://queryra.com/signup)
+**Need an account?** [Free AI Search Plugin for WooCommerce](https://queryra.com/signup)
+
+## Pricing
+
+| Plan | Products | Searches/mo | Price |
+|------|----------|-------------|-------|
+| Free | 100 | 500 | $0 forever |
+| Pro | 500+ | 5,000+ | From $9.99/mo |
+
+No ChatGPT API key costs. No hidden fees. [WooCommerce AI Search Pricing](https://queryra.com/pricing)
 
 ## FAQ
 
 ### Can I see it working before I install?
 Yes! We run a live WooCommerce demo store: **[woo.queryra.com](https://woo.queryra.com)** — over 200 beauty products across 10 brands. Try searching "present for my girlfriend" or "my skin looks tired" and see the difference.
 
+### What demos are available?
+We have 4 live demos you can try right now:
+- **WooCommerce store** (200+ products): [woo.queryra.com](https://woo.queryra.com)
+- **Wikipedia search** (3,000+ articles): [queryra.com/playground/wiki](https://queryra.com/playground/wiki)
+- **Blog search**: [queryra.com/playground/blog](https://queryra.com/playground/blog)
+- **FAQ search**: [queryra.com/playground/faq](https://queryra.com/playground/faq)
+
+Try searching "jury decides if young man is guilty" in the Wikipedia demo — it finds "12 Angry Men".
+
+### How is Queryra different from Algolia?
+Algolia costs $50-500/month and requires developer setup. Queryra trains a custom AI model on YOUR store's products, starts free, and takes 5 minutes to install.
+
+### How does Queryra handle large catalogs?
+Our Wikipedia demo searches 3,000+ articles in under 500ms. Plans support up to 20,000 products.
+
 ### Do I need a Queryra account?
-Yes, [sign up free](https://queryra.com/signup) to get an API key. No credit card required.
+Yes, [get free AI search API key](https://queryra.com/signup). No credit card required.
 
 ### How is this different from WordPress default search?
 WordPress uses basic SQL keyword matching. Queryra uses AI trained on YOUR content to understand meaning and context.
@@ -178,7 +202,7 @@ No. Search queries are processed by Queryra's servers in milliseconds. No impact
 ### What happens to my data if I deactivate the plugin?
 Search returns to WordPress default. Your data stays in Queryra until you delete it from the dashboard.
 
-[More questions? Check our FAQ →](https://queryra.com/faq)
+[WooCommerce Semantic Search FAQ](https://queryra.com/faq)
 
 ## Roadmap
 
@@ -331,7 +355,7 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 - [WooCommerce Live Demo](https://woo.queryra.com) — Demo beauty store with over 200 products
 - [Knowledge Base Demo](https://queryra.com/playground/wiki) — Semantic search on Wikipedia articles
 - [Queryra Homepage](https://queryra.com)
-- [Sign Up Free](https://queryra.com/signup)
+- [Free AI Search for WooCommerce](https://queryra.com/signup)
 - [Documentation](https://queryra.com/docs)
 - [WordPress Integration Guide](https://queryra.com/docs/wordpress-integration)
 - [FAQ](https://queryra.com/faq)
@@ -340,4 +364,4 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 
 **Made with ❤️ for the WordPress community**
 
-[⭐ Star this repo](https://github.com/GronRafal/queryra-wordpress-plugin) if you find it useful!
+[⭐ Star Queryra AI Search Plugin](https://github.com/GronRafal/queryra-wordpress-plugin) if you find it useful!

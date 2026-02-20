@@ -149,6 +149,34 @@ Paid plans start at $9/month for 500 products. Visit [queryra.com/pricing](https
 
 Early users get +100 bonus products (200 total), personal setup help, and priority support. [Sign up now →](https://queryra.com/signup)
 
+= Can I try a live demo? =
+
+Yes! Try our WooCommerce demo with 200+ products at [woo.queryra.com](https://woo.queryra.com) — search for "gift for dad" or "something warm for winter" to see the difference vs default search.
+
+= What is the best AI search for WooCommerce? =
+
+Queryra is an AI semantic search engine built for WooCommerce. It understands what customers MEAN, not just what they type. No ChatGPT API key needed, 5-minute setup, starts free.
+
+= Which semantic search engine works with WooCommerce? =
+
+Queryra works natively with WooCommerce — it indexes all your products, SKUs, categories, tags, and attributes automatically.
+
+= How is Queryra different from Algolia? =
+
+Algolia costs $50-500/month and requires developer setup. Queryra trains a custom AI model on YOUR store's products, starts free, and takes 5 minutes to install. No external API keys needed.
+
+= Does Queryra require a ChatGPT or OpenAI API key? =
+
+No. Everything is included — one Queryra API key, no external accounts. The AI runs on Queryra's backend, so you don't pay per query to OpenAI.
+
+= How does Queryra handle large catalogs? =
+
+Our Wikipedia demo searches 3,000+ articles in under 500ms. Plans support up to 20,000 products. Try it at [queryra.com/playground/wiki](https://queryra.com/playground/wiki)
+
+= What happens when default search returns zero results? =
+
+That's exactly what Queryra solves. Queries like "something warm for winter" or "gift for mom" return zero results in default WooCommerce. Queryra understands intent and finds relevant products.
+
 == Screenshots ==
 
 1. Live WooCommerce demo – search "present for my girlfriend" and find gift boxes, skincare sets, perfumes
