@@ -3,7 +3,7 @@ Contributors: queryra
 Tags: WooCommerce, product search, AI search, semantic search, ecommerce
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -36,7 +36,7 @@ Queryra replaces WooCommerce's keyword search with AI that understands **meaning
 
 = Free Forever. No Catch. =
 
-✅ 100 products included (200 with Founders Club)
+✅ 100 products included — enough for most small stores (200 with Founders Club)
 ✅ 500 searches per month
 ✅ No credit card required
 ✅ No trial that expires
@@ -60,6 +60,8 @@ No coding. No configuration headaches. The wizard handles everything.
 * **Boost Control** – Promote products you want to sell more of
 * **Live Search** – Instant AJAX-powered suggestions as customers type
 * **Auto-Sync** – New products indexed automatically on publish
+* **Smart Context Detection** – Automatically searches only products in WooCommerce shop pages, posts elsewhere. No configuration needed
+* **Search Analytics** – See what customers search for, including zero-result queries. Find gaps in your inventory before customers leave
 
 = Works With Any Store =
 
@@ -68,6 +70,16 @@ No coding. No configuration headaches. The wizard handles everything.
 * **Electronics** – "good laptop for video editing" finds the right specs
 * **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
 * **Food & Beverage** – "healthy snacks for kids" finds the right products
+
+= Beyond WooCommerce =
+
+Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for:
+
+* **Knowledge Bases** – Help customers find answers across hundreds of articles
+* **Blogs** – Readers search by topic, not exact titles
+* **FAQ Sections** – Natural questions find the right answers
+
+👉 **[Try it on 3,000+ Wikipedia articles →](https://queryra.com/playground/wiki)** — search "how do black holes form" or "history of jazz music" to see semantic search on non-product content.
 
 = Why Not Default Search? =
 
@@ -177,6 +189,14 @@ Our Wikipedia demo searches 3,000+ articles in under 500ms. Plans support up to 
 
 That's exactly what Queryra solves. Queries like "something warm for winter" or "gift for mom" return zero results in default WooCommerce. Queryra understands intent and finds relevant products.
 
+= Does it support multiple languages? =
+
+Queryra works best with English content. The AI model understands semantic meaning in English with high accuracy. Support for more languages is on the roadmap — [contact us](mailto:support@queryra.com) if you need a specific language.
+
+= Can I customize how search results look? =
+
+Queryra works with your existing theme — it doesn't override your templates or styling. Search results appear exactly as your theme displays them, so there's nothing to configure. If your theme has a search results template, Queryra respects it.
+
 == Screenshots ==
 
 1. Live WooCommerce demo – search "present for my girlfriend" and find gift boxes, skincare sets, perfumes
@@ -187,6 +207,13 @@ That's exactly what Queryra solves. Queries like "something warm for winter" or 
 6. Settings – simple configuration, one API key, no OpenAI account needed
 
 == Changelog ==
+
+= 1.1.4 (2026-02-25) =
+* Added: Configurable cache duration (1 minute to forever)
+* Added: Record type (post/page/product) and platform metadata
+* Added: Search filtering by content type
+* Improved: Search Analytics with top queries and zero-result queries
+* Improved: Cache settings UI in admin panel
 
 = 1.1.3 (2026-02-12) =
 * Added: Live WooCommerce demo store at woo.queryra.com
@@ -227,6 +254,9 @@ That's exactly what Queryra solves. Queries like "something warm for winter" or 
 
 == Upgrade Notice ==
 
+= 1.1.4 =
+Configurable cache duration and content type filtering. Re-import and sync recommended for type filtering.
+
 = 1.1.3 =
 Live WooCommerce demo store now available at woo.queryra.com. Updated description and FAQ.
 
@@ -247,3 +277,4 @@ Major update: Full WooCommerce product search with SKU, price, and attribute sup
 * [Knowledge Base Demo](https://queryra.com/playground/wiki) – Search Wikipedia articles semantically
 * [Pricing](https://queryra.com/pricing) – Plans for stores of all sizes
 * [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)
+* [Blog](https://queryra.com/blog) – Tips on WooCommerce search optimization and AI product discovery

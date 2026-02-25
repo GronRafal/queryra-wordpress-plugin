@@ -3,7 +3,7 @@
  * Plugin Name: AI Product Search for WooCommerce – Semantic Search & Smart Results by Queryra
  * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.1.3');
+define('QUERYRA_VERSION', '1.1.4');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -75,6 +75,10 @@ class Queryra_Search {
             new Queryra_Admin();
             new Queryra_Setup_Wizard();
             new Queryra_Deactivation_Survey();
+
+            // 1.1.4 upgrade notice
+            add_action('admin_notices', array($this, 'upgrade_notice_114'));
+            add_action('wp_ajax_queryra_dismiss_114_notice', array($this, 'dismiss_114_notice'));
         }
 
         // Initialize sync
@@ -82,6 +86,50 @@ class Queryra_Search {
 
         // Initialize search integration (AI-powered search)
         new Queryra_Search_Integration();
+    }
+
+    /**
+     * Show upgrade notice for 1.1.4
+     */
+    public function upgrade_notice_114() {
+        // Only show if not dismissed and API key is set
+        if (get_option('queryra_114_notice_dismissed')) {
+            return;
+        }
+        if (!get_option('queryra_api_key')) {
+            return;
+        }
+        // Only show on Queryra pages
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
+        if (strpos($page, 'queryra') === false) {
+            return;
+        }
+        ?>
+        <div class="notice notice-info is-dismissible queryra-114-notice">
+            <p>
+                <strong>Queryra 1.1.4:</strong>
+                This update adds content type filtering (post/page/product).
+                To use this feature, please <strong>re-import your content</strong> and <strong>run sync</strong>.
+                <a href="<?php echo esc_url(admin_url('admin.php?page=queryra-search&tab=records')); ?>">Go to Records →</a>
+            </p>
+        </div>
+        <script>
+        jQuery(document).ready(function($) {
+            $('.queryra-114-notice').on('click', '.notice-dismiss', function() {
+                $.post(ajaxurl, { action: 'queryra_dismiss_114_notice' });
+            });
+        });
+        </script>
+        <?php
+    }
+
+    /**
+     * Dismiss 1.1.4 notice
+     */
+    public function dismiss_114_notice() {
+        update_option('queryra_114_notice_dismissed', true);
+        wp_die();
     }
 
     /**

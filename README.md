@@ -49,6 +49,8 @@ Built specifically for WordPress and WooCommerce. Auto-syncs on publish, support
 * **Boost Control** – Promote high-margin products or slow-moving inventory like an experienced salesperson who knows when to recommend alternatives
 * **Live Search Results** – Instant AJAX-powered search suggestions
 * **Auto-Sync** – New products indexed automatically when published
+* **Smart Context Detection** – Automatically searches only products in WooCommerce shop pages, posts elsewhere. No configuration needed
+* **Search Analytics** – See what customers search for, including zero-result queries. Find gaps in your inventory before customers leave
 
 ## Perfect For Any WooCommerce Store
 
@@ -58,6 +60,16 @@ Built specifically for WordPress and WooCommerce. Auto-syncs on publish, support
 * **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
 * **Food & Beverage** – "healthy snacks" finds protein bars, nuts
 * **Any catalog** – Works with any product type
+
+## Beyond WooCommerce
+
+Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for:
+
+* **Knowledge Bases** – Help customers find answers across hundreds of articles
+* **Blogs** – Readers search by topic, not exact titles
+* **FAQ Sections** – Natural questions find the right answers
+
+👉 **[Try it on 3,000+ Wikipedia articles →](https://queryra.com/playground/wiki)** — search "how do black holes form" or "history of jazz music" to see semantic search on non-product content.
 
 ## Features
 
@@ -69,6 +81,7 @@ Built specifically for WordPress and WooCommerce. Auto-syncs on publish, support
 - ⭐ **Sticky Post Priority** - Important posts and featured products rank higher
 - 🎨 **Theme Compatible** - Works with any WordPress theme
 - 📦 **Bulk Operations** - Send all existing posts with one click
+- 📊 **Search Analytics** - See top searches and zero-result queries (find inventory gaps)
 
 ### Developer Features
 - 🔐 **Secure** - WordPress nonces, HTTPS, input sanitization
@@ -194,7 +207,7 @@ Generic plugins use the same ChatGPT model for every site. Queryra trains a cust
 Yes! Works with any WordPress theme. Hooks into standard WordPress search functionality.
 
 ### Is it really free?
-Yes. 100 products and 500 searches/month — free forever. No credit card, no trial expiration. Founders Club members get 200 products free.
+Yes. 100 products (enough for most small stores) and 500 searches/month — free forever. No credit card, no trial expiration. Founders Club members get 200 products free.
 
 ### Will it slow down my site?
 No. Search queries are processed by Queryra's servers in milliseconds. No impact on your WordPress hosting.
@@ -267,6 +280,14 @@ phpcs --standard=WordPress
 ```
 
 ## Changelog
+
+### 1.1.4 (2026-02-25)
+⚙️ **Configurable cache & content type filtering**
+- New: Configurable cache duration (1 minute to forever)
+- New: Record type (post/page/product) and platform metadata
+- New: Search filtering by content type
+- Improved: Search Analytics with top queries and zero-result queries
+- Improved: Cache settings UI in admin panel
 
 ### 1.1.3 (2026-02-12)
 🏪 **WooCommerce demo store & updated documentation**
@@ -359,6 +380,7 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 - [Documentation](https://queryra.com/docs)
 - [WordPress Integration Guide](https://queryra.com/docs/wordpress-integration)
 - [FAQ](https://queryra.com/faq)
+- [Blog](https://queryra.com/blog) — Tips on WooCommerce search optimization and AI product discovery
 
 ---
 

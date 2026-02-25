@@ -17,15 +17,18 @@ class Queryra_Search_Integration {
     private $api;
 
     /**
-     * Cache duration in seconds (10 minutes)
+     * Cache duration in seconds
      */
-    private $cache_duration = 600;
+    private $cache_duration;
 
     /**
      * Constructor
      */
     public function __construct() {
         $this->api = new Queryra_API();
+
+        // Get cache duration from settings (default: 1 day)
+        $this->cache_duration = intval(get_option('queryra_cache_duration', 86400));
 
         // Override WordPress search with Queryra
         add_action('pre_get_posts', array($this, 'override_search'));
@@ -170,8 +173,15 @@ class Queryra_Search_Integration {
                 update_option('queryra_first_search_tracked', true);
             }
 
-            // Cache the results (10 minutes)
-            set_transient($cache_key, $all_ids, $this->cache_duration);
+            // Cache the results based on settings
+            if ($this->cache_duration === -1) {
+                // Forever = 10 years
+                set_transient($cache_key, $all_ids, YEAR_IN_SECONDS * 10);
+            } elseif ($this->cache_duration > 0) {
+                // Normal cache duration
+                set_transient($cache_key, $all_ids, $this->cache_duration);
+            }
+            // cache_duration === 0 means disabled, don't cache
 
             $cached_ids = $all_ids;
         }

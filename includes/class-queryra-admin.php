@@ -12,9 +12,16 @@ if (!defined('ABSPATH')) {
 class Queryra_Admin {
 
     /**
+     * API client
+     */
+    private $api;
+
+    /**
      * Constructor
      */
     public function __construct() {
+        $this->api = new Queryra_API();
+
         // Add admin menu
         add_action('admin_menu', array($this, 'add_admin_menu'));
 
@@ -71,6 +78,11 @@ class Queryra_Admin {
             'type' => 'array',
             'sanitize_callback' => array($this, 'sanitize_post_types'),
             'default' => array('post', 'page')
+        ));
+        register_setting('queryra_settings', 'queryra_cache_duration', array(
+            'type' => 'integer',
+            'sanitize_callback' => 'intval',
+            'default' => 86400
         ));
     }
 
@@ -739,21 +751,111 @@ class Queryra_Admin {
 
                     <?php elseif ($active_tab === 'search-history'): ?>
                     <!-- Search History Tab -->
+                    <?php
+                    // Fetch search stats from API (cached for 10 minutes)
+                    $search_stats = null;
+                    if (!empty($api_key)) {
+                        $cache_key = 'queryra_search_stats';
+                        $search_stats = get_transient($cache_key);
+
+                        if ($search_stats === false) {
+                            $search_stats = $this->api->get_search_stats('30');
+                            if (!is_wp_error($search_stats)) {
+                                set_transient($cache_key, $search_stats, 10 * MINUTE_IN_SECONDS);
+                            } else {
+                                $search_stats = null;
+                            }
+                        }
+                    }
+                    ?>
                     <div class="queryra-card">
                         <h2>
                             <span class="dashicons dashicons-chart-line" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
-                            Search History
+                            Search Analytics
                         </h2>
-                        <p style="color: #646970;">View search analytics in Queryra Dashboard:</p>
-                        <ul style="color: #646970; margin-left: 20px;">
-                            <li>All user search queries with timestamps</li>
-                            <li>Search results and click-through data</li>
-                            <li>Monthly usage statistics (searches used / limit)</li>
-                            <li>Popular search terms and trends</li>
-                        </ul>
+
+                        <?php if (!$api_key): ?>
+                            <div style="background: #fff3cd; border-left: 4px solid #f0b849; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 0;">
+                                    <span class="dashicons dashicons-warning"></span>
+                                    <strong>Connect your API key in Settings to view search analytics</strong>
+                                </p>
+                            </div>
+                        <?php elseif (!$search_stats): ?>
+                            <div style="background: #fff3cd; border-left: 4px solid #f0b849; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 0;">
+                                    <span class="dashicons dashicons-warning"></span>
+                                    <strong>Unable to load search analytics. Check your API connection.</strong>
+                                </p>
+                            </div>
+                        <?php else: ?>
+                            <!-- Total Searches Card -->
+                            <div style="background: #f0f6fc; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; margin-bottom: 20px;">
+                                <span style="font-size: 36px; font-weight: 600; color: #1d2327;">
+                                    <?php echo esc_html(number_format($search_stats['total_searches'])); ?>
+                                </span>
+                                <p style="margin: 5px 0 0 0; color: #646970;">
+                                    searches in the last 30 days
+                                </p>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <!-- Top 10 Searches -->
+                                <div style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">
+                                    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                                        <span class="dashicons dashicons-star-filled" style="color: #f0b849;"></span>
+                                        Top 10 Searches
+                                    </h3>
+                                    <?php if (empty($search_stats['top_queries'])): ?>
+                                        <p style="color: #646970;">No searches yet.</p>
+                                    <?php else: ?>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <?php foreach (array_slice($search_stats['top_queries'], 0, 10) as $i => $query): ?>
+                                                <tr style="border-bottom: 1px solid #f0f0f1;">
+                                                    <td style="padding: 8px 0; color: #646970; width: 30px;"><?php echo esc_html($i + 1); ?>.</td>
+                                                    <td style="padding: 8px 0;"><?php echo esc_html($query['query']); ?></td>
+                                                    <td style="padding: 8px 0; text-align: right; color: #646970;">
+                                                        <strong><?php echo esc_html($query['count']); ?></strong>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </table>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Zero Results (Opportunity!) -->
+                                <div style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">
+                                    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                                        <span class="dashicons dashicons-warning" style="color: #d63638;"></span>
+                                        Zero Results (Opportunity!)
+                                    </h3>
+                                    <p style="color: #646970; font-size: 13px; margin-bottom: 15px;">
+                                        Customers searched for these but found nothing.
+                                    </p>
+                                    <?php if (empty($search_stats['zero_results_queries'])): ?>
+                                        <p style="color: #00a32a;">
+                                            <span class="dashicons dashicons-yes-alt"></span>
+                                            All searches returned results.
+                                        </p>
+                                    <?php else: ?>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <?php foreach (array_slice($search_stats['zero_results_queries'], 0, 10) as $query): ?>
+                                                <tr style="border-bottom: 1px solid #f0f0f1;">
+                                                    <td style="padding: 8px 0;"><?php echo esc_html($query['query']); ?></td>
+                                                    <td style="padding: 8px 0; text-align: right; color: #d63638;">
+                                                        <strong><?php echo esc_html($query['count']); ?></strong>×
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </table>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <p style="margin-top: 20px;">
-                            <a href="https://queryra.com/dashboard/search-history" target="_blank" class="button button-secondary">
-                                Open Dashboard
+                            <a href="https://queryra.com/dashboard/searches" target="_blank" class="button button-secondary">
+                                View Full Analytics in Dashboard
                                 <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                             </a>
                         </p>
@@ -879,39 +981,79 @@ class Queryra_Admin {
 
                     <?php elseif ($active_tab === 'cache'): ?>
                     <!-- Cache Tab -->
-                    <div class="queryra-card">
-                        <h2>
-                            <span class="dashicons dashicons-performance" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
-                            Search Cache
-                        </h2>
+                    <?php $cache_duration = get_option('queryra_cache_duration', 86400); ?>
+                    <form method="post" action="options.php">
+                        <?php settings_fields('queryra_settings'); ?>
+                        <!-- Preserve other settings -->
+                        <input type="hidden" name="queryra_api_key" value="<?php echo esc_attr($api_key); ?>">
+                        <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
+                        <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
+                        <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
+                        <?php foreach ($post_types as $pt): ?>
+                            <input type="hidden" name="queryra_post_types[]" value="<?php echo esc_attr($pt); ?>">
+                        <?php endforeach; ?>
 
-                        <div class="queryra-info-box" style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 15px; margin: 15px 0;">
-                            <p style="margin: 0 0 12px 0;">
-                                <strong>How cache reduces API calls:</strong>
-                            </p>
-                            <ul style="margin: 5px 0 5px 20px; padding: 0; list-style: disc;">
-                                <li><strong>Without cache:</strong> Every search = 1 API call</li>
-                                <li><strong>With cache (10 min):</strong> Same search repeated = 0 API calls</li>
-                                <li><strong>Result:</strong> 10x-100x fewer API calls, faster responses</li>
-                            </ul>
-                            <p style="margin: 12px 0 0 0; font-size: 13px; color: #646970;">
-                                Cache is managed automatically by WordPress.
-                                Default: 10 minutes per search term.
-                                <a href="https://developer.wordpress.org/apis/transients/" target="_blank" style="color: #2271b1;">Learn about WordPress Transients →</a>
-                            </p>
-                        </div>
+                        <div class="queryra-card">
+                            <h2>
+                                <span class="dashicons dashicons-performance" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                                Search Cache
+                            </h2>
 
-                        <div style="margin-top: 20px;">
+                            <div class="queryra-info-box" style="background: #e7f3ff; border-left: 4px solid #2271b1; padding: 15px; margin: 15px 0;">
+                                <p style="margin: 0 0 12px 0;">
+                                    <strong>How cache reduces API calls:</strong>
+                                </p>
+                                <ul style="margin: 5px 0 5px 20px; padding: 0; list-style: disc;">
+                                    <li><strong>Without cache:</strong> Every search = 1 API call</li>
+                                    <li><strong>With cache:</strong> Same search repeated = 0 API calls</li>
+                                    <li><strong>Result:</strong> 10x-100x fewer API calls, faster responses</li>
+                                </ul>
+                                <p style="margin: 12px 0 0 0; font-size: 13px; color: #646970;">
+                                    Cache is managed automatically by WordPress using Transients API.
+                                    <a href="https://developer.wordpress.org/apis/transients/" target="_blank" style="color: #2271b1;">Learn about WordPress Transients →</a>
+                                </p>
+                            </div>
+
+                            <table class="form-table">
+                                <tr>
+                                    <th scope="row">
+                                        <label for="queryra_cache_duration">Cache Duration</label>
+                                    </th>
+                                    <td>
+                                        <select name="queryra_cache_duration" id="queryra_cache_duration" style="min-width: 200px;">
+                                            <option value="0" <?php selected($cache_duration, 0); ?>>Disabled (no cache)</option>
+                                            <option value="60" <?php selected($cache_duration, 60); ?>>1 minute</option>
+                                            <option value="600" <?php selected($cache_duration, 600); ?>>10 minutes</option>
+                                            <option value="3600" <?php selected($cache_duration, 3600); ?>>1 hour</option>
+                                            <option value="86400" <?php selected($cache_duration, 86400); ?>>1 day (recommended)</option>
+                                            <option value="604800" <?php selected($cache_duration, 604800); ?>>1 week</option>
+                                            <option value="-1" <?php selected($cache_duration, -1); ?>>Forever (until cleared)</option>
+                                        </select>
+                                        <p class="description" style="margin-top: 8px;">
+                                            How long to cache search results. Longer = fewer API calls, but slower updates when content changes.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <?php submit_button('Save Settings'); ?>
+
+                            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+
+                            <h3 style="margin-top: 0;">
+                                <span class="dashicons dashicons-trash" style="font-size: 20px; width: 20px; height: 20px; margin-right: 8px;"></span>
+                                Clear Cache
+                            </h3>
+                            <p style="color: #646970; margin-bottom: 15px;">
+                                Clears all cached search results. Next search will fetch fresh data from Queryra API.
+                            </p>
                             <button type="button" id="queryra-clear-cache" class="button button-secondary">
                                 <span class="dashicons dashicons-trash" style="font-size: 16px; width: 16px; height: 16px; margin-top: 4px;"></span>
                                 Clear All Search Cache
                             </button>
                             <span id="queryra-cache-status" style="margin-left: 10px;"></span>
-                            <p class="description" style="margin-top: 8px;">
-                                Clears cached search results. Next search will fetch fresh data from Queryra API.
-                            </p>
                         </div>
-                    </div>
+                    </form>
 
                     <?php elseif ($active_tab === 'support'): ?>
                     <!-- Support Tab -->

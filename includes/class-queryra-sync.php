@@ -285,6 +285,8 @@ class Queryra_Sync {
             'id' => 'wp-' . $post->ID,
             'name' => $post->post_title,
             'description' => $full_description,
+            'type' => $post->post_type,
+            'platform' => 'wordpress',
             'price' => $price,
             'url' => get_permalink($post->ID),
             'image_url' => $image_url ?: '',

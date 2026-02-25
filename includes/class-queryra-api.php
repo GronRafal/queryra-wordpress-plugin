@@ -227,4 +227,23 @@ class Queryra_API {
 
         return $response;
     }
+
+    /**
+     * Get search analytics/stats
+     *
+     * @param string $period Time period: "7", "30", or "all"
+     * @return array Response with search stats
+     */
+    public function get_search_stats($period = '30') {
+        if (empty($this->api_key)) {
+            return new WP_Error('no_api_key', 'API key is required');
+        }
+
+        $response = $this->request('GET', '/api/v1/records/search-stats', array(
+            'key' => $this->api_key,
+            'period' => $period
+        ));
+
+        return $response;
+    }
 }
