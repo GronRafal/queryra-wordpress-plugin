@@ -109,6 +109,7 @@ rsync -av --delete \
     --exclude='node_modules' \
     --exclude='vendor' \
     --exclude='.DS_Store' \
+    --exclude='.claude' \
     "$PLUGIN_DIR/" "$SVN_DIR/trunk/"
 
 # Restore readme.txt (WordPress.org needs it)
