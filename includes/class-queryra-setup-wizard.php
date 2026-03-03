@@ -39,6 +39,7 @@ class Queryra_Setup_Wizard {
         add_action('wp_ajax_queryra_wizard_import', array($this, 'ajax_import_content'));
         add_action('wp_ajax_queryra_wizard_check_status', array($this, 'ajax_check_status'));
         add_action('wp_ajax_queryra_wizard_test_search', array($this, 'ajax_test_search'));
+        add_action('wp_ajax_queryra_wizard_mark_import_done', array($this, 'ajax_mark_import_done'));
     }
 
     /**
@@ -68,7 +69,8 @@ class Queryra_Setup_Wizard {
 
         wp_localize_script('queryra-wizard', 'queryraWizard', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('queryra_wizard')
+            'nonce' => wp_create_nonce('queryra_wizard'),
+            'syncNonce' => wp_create_nonce('queryra_sync')
         ));
     }
 
@@ -798,6 +800,21 @@ class Queryra_Setup_Wizard {
         } else {
             wp_send_json_error(array('message' => $result['message']));
         }
+    }
+
+    /**
+     * AJAX: Mark wizard import as done (called by batched import)
+     */
+    public function ajax_mark_import_done() {
+        check_ajax_referer('queryra_sync', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        update_option('queryra_wizard_import_done', '1');
+        wp_send_json_success();
     }
 
     /**

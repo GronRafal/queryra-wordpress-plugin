@@ -1,80 +1,163 @@
 jQuery(document).ready(function($) {
 
-    // Send All Posts
+    // Import All to Queryra (batched)
     $('#queryra-sync-all').on('click', function() {
         var $button = $(this);
         var $status = $('#queryra-sync-status');
 
-        if (!confirm('⚠️ WARNING: Import will reset synchronization!\n\nAll imported records will become unsynced and AI search will stop working until you run Sync again from Queryra Dashboard.\n\nContinue with import?')) {
+        if (!confirm('This will import all published content to Queryra. Continue?')) {
             return;
         }
 
-        // Disable button
         $button.prop('disabled', true);
 
-        // Show loading
-        $status.html('<span class="queryra-spinner"></span> Sending posts...')
+        // Phase 1: Check plan limits
+        $status.html('<span class="queryra-spinner"></span> Checking plan limits...')
                .removeClass('queryra-status-success queryra-status-error')
                .addClass('queryra-status-loading')
                .show();
 
-        // Make AJAX request
         $.ajax({
             url: queryraData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'queryra_sync_all',
+                action: 'queryra_get_sync_info',
                 nonce: queryraData.nonce
             },
             success: function(response) {
-                if (response.success) {
-                    var successHtml = '<div style="background: #e7f5e7; border-left: 4px solid #46b450; padding: 15px; margin-top: 15px; border-radius: 3px;">';
-                    successHtml += '<p style="margin: 0 0 10px 0; color: #46b450; font-size: 16px;">';
-                    successHtml += '<span class="dashicons dashicons-yes-alt" style="font-size: 20px; width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"></span>';
-                    successHtml += '<strong>' + response.data.message + '</strong>';
-                    successHtml += '</p>';
-                    successHtml += '<p style="margin: 0 0 10px 0; color: #2c3338; font-size: 14px;">';
-                    successHtml += 'View and manage records in Queryra Dashboard';
-                    successHtml += '</p>';
-                    successHtml += '<a href="https://queryra.com/dashboard/records" target="_blank" class="button button-secondary" style="margin-top: 5px;">';
-                    successHtml += 'Open Dashboard';
-                    successHtml += '<span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px; vertical-align: middle;"></span>';
-                    successHtml += '</a>';
-                    successHtml += '</div>';
-
-                    $status.html(successHtml);
-
-                    // Reload page after 9 seconds to refresh stats
-                    setTimeout(function() {
-                        location.reload();
-                    }, 9000);
-                } else {
-                    // Parse error message (could be string or array of validation errors)
-                    var errorMsg = response.data.message;
-                    if (Array.isArray(errorMsg)) {
-                        // FastAPI validation errors
-                        errorMsg = errorMsg.map(function(err) {
-                            return err.loc ? err.loc.join('.') + ': ' + err.msg : JSON.stringify(err);
-                        }).join('<br>');
-                    } else if (typeof errorMsg === 'object') {
-                        errorMsg = JSON.stringify(errorMsg, null, 2);
-                    }
-
-                    $status.html('✗ ' + errorMsg)
-                           .removeClass('queryra-status-loading queryra-status-success')
-                           .addClass('queryra-status-error');
+                if (!response.success) {
+                    showSyncError($status, $button, response.data.message);
+                    return;
                 }
+
+                var info = response.data;
+
+                // Plan is full
+                if (info.record_limit > 0 && info.current_records >= info.record_limit) {
+                    showSyncError($status, $button,
+                        'Plan limit reached (' + info.current_records + '/' + info.record_limit +
+                        ' records). <a href="https://queryra.com/pricing" target="_blank">Upgrade your plan</a> to import more content.');
+                    return;
+                }
+
+                // No posts to sync
+                if (info.will_sync === 0) {
+                    showSyncError($status, $button, 'No published content found to import.');
+                    return;
+                }
+
+                // Phase 2: Start batched import
+                startBatchedSync($button, $status, info);
             },
             error: function(xhr, status, error) {
-                $status.html('✗ Send failed: ' + error)
-                       .removeClass('queryra-status-loading queryra-status-success')
-                       .addClass('queryra-status-error');
-            },
-            complete: function() {
-                $button.prop('disabled', false);
+                showSyncError($status, $button, 'Failed to check plan limits: ' + error);
             }
         });
     });
+
+    function startBatchedSync($button, $status, info) {
+        var offset = 0;
+        var totalSynced = 0;
+        var willSync = info.will_sync;
+        var batchSize = info.batch_size;
+
+        // Show progress UI
+        var limitNote = '';
+        if (info.record_limit > 0 && info.total_wp_posts > info.record_limit) {
+            limitNote = '<p style="margin: 8px 0 0 0; font-size: 12px; color: #dba617;">' +
+                'Plan limit: ' + info.record_limit + ' records. ' +
+                info.total_wp_posts + ' available in WordPress. Importing most recent ' + willSync + '.' +
+                '</p>';
+        }
+
+        var progressHtml =
+            '<div style="margin-top: 15px;">' +
+                '<p id="queryra-batch-status" style="margin: 0 0 10px 0; font-size: 14px; color: #1d2327;">' +
+                    '<span class="queryra-spinner"></span> Importing content... Please keep this tab open.' +
+                '</p>' +
+                '<div style="background: #dcdcde; height: 20px; border-radius: 10px; overflow: hidden;">' +
+                    '<div id="queryra-batch-bar" style="background: linear-gradient(90deg, #2271b1 0%, #135e96 100%); height: 100%; width: 0%; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; min-width: 30px;">0%</div>' +
+                '</div>' +
+                '<p id="queryra-batch-info" style="margin: 8px 0 0 0; font-size: 13px; color: #646970;">0 / ' + willSync + ' records</p>' +
+                limitNote +
+            '</div>';
+        $status.html(progressHtml).show();
+
+        function sendNextBatch() {
+            if (totalSynced >= willSync) {
+                onSyncComplete();
+                return;
+            }
+
+            var remaining = willSync - totalSynced;
+            var currentBatch = Math.min(batchSize, remaining);
+
+            $.ajax({
+                url: queryraData.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'queryra_sync_batch',
+                    nonce: queryraData.nonce,
+                    offset: offset,
+                    batch_size: currentBatch
+                },
+                success: function(response) {
+                    if (!response.success) {
+                        onSyncError(response.data.message);
+                        return;
+                    }
+
+                    var synced = response.data.synced;
+
+                    if (synced === 0) {
+                        onSyncComplete();
+                        return;
+                    }
+
+                    totalSynced += synced;
+                    offset += synced;
+
+                    var percent = Math.min(Math.round((totalSynced / willSync) * 100), 100);
+                    $('#queryra-batch-bar').css('width', percent + '%').text(percent + '%');
+                    $('#queryra-batch-info').text(totalSynced + ' / ' + willSync + ' records');
+
+                    sendNextBatch();
+                },
+                error: function(xhr, status, error) {
+                    onSyncError('Batch failed: ' + error);
+                }
+            });
+        }
+
+        function onSyncComplete() {
+            $('#queryra-batch-bar').css('width', '100%').text('100%');
+            $('#queryra-batch-info').text(totalSynced + ' / ' + willSync + ' records');
+            $('#queryra-batch-status').html(
+                '<span class="dashicons dashicons-yes-alt" style="font-size: 20px; width: 20px; height: 20px; vertical-align: middle; color: #46b450; margin-right: 5px;"></span>' +
+                '<strong style="color: #46b450;">Successfully imported ' + totalSynced + ' records to Queryra</strong>'
+            );
+            $button.prop('disabled', false);
+
+            setTimeout(function() { location.reload(); }, 5000);
+        }
+
+        function onSyncError(msg) {
+            $('#queryra-batch-status').html(
+                '<span style="color: #dc3232;">Error: ' + msg + '</span><br>' +
+                '<small style="color: #646970;">Already imported records are safe. You can re-run import anytime.</small>'
+            );
+            $button.prop('disabled', false);
+        }
+
+        sendNextBatch();
+    }
+
+    function showSyncError($status, $button, msg) {
+        $status.html('<span style="color: #dc3232;">' + msg + '</span>')
+               .removeClass('queryra-status-loading')
+               .addClass('queryra-status-error');
+        $button.prop('disabled', false);
+    }
 
     // Clear Cache
     $('#queryra-clear-cache').on('click', function() {

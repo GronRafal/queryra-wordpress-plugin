@@ -611,6 +611,10 @@ class Queryra_Admin {
                                 <span class="dashicons dashicons-upload" style="font-size: 16px; width: 16px; height: 16px; margin-top: 4px;"></span>
                                 Import All to Queryra
                             </button>
+                            <p class="description" style="margin-top: 8px;">
+                                <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                Content is imported in batches. Keep this tab open during import. If interrupted, you can safely re-run.
+                            </p>
                             <div id="queryra-sync-status" style="margin-top: 10px;"></div>
                         </div>
 

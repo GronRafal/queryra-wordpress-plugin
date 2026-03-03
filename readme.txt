@@ -3,7 +3,7 @@ Contributors: queryra
 Tags: WooCommerce, product search, AI search, semantic search, ecommerce
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -208,6 +208,12 @@ Queryra works with your existing theme — it doesn't override your templates or
 
 == Changelog ==
 
+= 1.1.5 (2026-03-03) =
+* Added: Batched bulk import with progress bar for large sites (50K+ records)
+* Added: Plan limit check before import starts
+* Improved: Import reliability with automatic retry support
+* Improved: Setup Wizard import now uses batched sync
+
 = 1.1.4 (2026-02-25) =
 * Added: Configurable cache duration (1 minute to forever)
 * Added: Record type (post/page/product) and platform metadata
@@ -253,6 +259,9 @@ Queryra works with your existing theme — it doesn't override your templates or
 * Free tier with 100 products
 
 == Upgrade Notice ==
+
+= 1.1.5 =
+Batched bulk import with progress bar. Now supports large sites with 50K+ records. Plan limit check before import.
 
 = 1.1.4 =
 Configurable cache duration and content type filtering. Re-import and sync recommended for type filtering.

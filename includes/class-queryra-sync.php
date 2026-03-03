@@ -35,6 +35,10 @@ class Queryra_Sync {
         // AJAX handlers for manual sync
         add_action('wp_ajax_queryra_sync_all', array($this, 'ajax_sync_all'));
         add_action('wp_ajax_queryra_test_connection', array($this, 'ajax_test_connection'));
+
+        // Batched sync AJAX handlers
+        add_action('wp_ajax_queryra_get_sync_info', array($this, 'ajax_get_sync_info'));
+        add_action('wp_ajax_queryra_sync_batch', array($this, 'ajax_sync_batch'));
     }
 
     /**
@@ -178,74 +182,54 @@ class Queryra_Sync {
         $content = wp_strip_all_tags($post->post_content);
         $excerpt = has_excerpt($post->ID) ? get_the_excerpt($post->ID) : wp_trim_words($content, 30);
 
-        // Get categories and tags
-        $categories = wp_get_post_categories($post->ID, array('fields' => 'names'));
-        $tags = wp_get_post_tags($post->ID, array('fields' => 'names'));
+        // Get categories and tags as arrays
+        $categories_arr = wp_get_post_categories($post->ID, array('fields' => 'names'));
+        $tags_arr = wp_get_post_tags($post->ID, array('fields' => 'names'));
 
-        // Build rich description with all content for better AI search
-        // Include: excerpt, full content, categories, and tags
+        // Description: excerpt + full content + attributes (for semantic search)
+        // Categories, tags, SKU, brand go as separate fields for parser filtering
         $description_parts = array();
 
-        // Add excerpt if different from content start
         if (!empty($excerpt)) {
             $description_parts[] = $excerpt;
         }
 
-        // Add full content
         if (!empty($content)) {
             $description_parts[] = $content;
-        }
-
-        // Add categories
-        if (!empty($categories)) {
-            $description_parts[] = "Categories: " . implode(', ', $categories);
-        }
-
-        // Add tags
-        if (!empty($tags)) {
-            $description_parts[] = "Tags: " . implode(', ', $tags);
         }
 
         // WooCommerce Product Enhancement
         $price = 0.0;
         $stock = 0;
+        $sku = '';
+        $brand = '';
         if ($post->post_type === 'product' && class_exists('WooCommerce')) {
             $product = wc_get_product($post->ID);
 
             if ($product) {
-                // 1. Real Price
                 $price = (float) $product->get_price();
-
-                // 2. Stock Quantity
                 $stock = (int) $product->get_stock_quantity();
+                $sku = $product->get_sku() ?: '';
 
-                // 3. Short Description (WooCommerce excerpt)
+                // Short Description
                 $short_desc = $product->get_short_description();
                 if (!empty($short_desc)) {
-                    $description_parts[] = "Product Info: " . wp_strip_all_tags($short_desc);
+                    $description_parts[] = wp_strip_all_tags($short_desc);
                 }
 
-                // 4. SKU
-                $sku = $product->get_sku();
-                if (!empty($sku)) {
-                    $description_parts[] = "SKU: " . $sku;
-                }
-
-                // 5. Product Categories (taxonomy: product_cat)
+                // Product Categories (taxonomy: product_cat) - override post categories
                 $product_cats = get_the_terms($post->ID, 'product_cat');
                 if ($product_cats && !is_wp_error($product_cats)) {
-                    $cat_names = wp_list_pluck($product_cats, 'name');
-                    $description_parts[] = "Product Categories: " . implode(', ', $cat_names);
+                    $categories_arr = wp_list_pluck($product_cats, 'name');
                 }
 
-                // 6. Product Tags (taxonomy: product_tag)
+                // Product Tags (taxonomy: product_tag) - override post tags
                 $product_tags = get_the_terms($post->ID, 'product_tag');
                 if ($product_tags && !is_wp_error($product_tags)) {
-                    $tag_names = wp_list_pluck($product_tags, 'name');
-                    $description_parts[] = "Product Tags: " . implode(', ', $tag_names);
+                    $tags_arr = wp_list_pluck($product_tags, 'name');
                 }
 
-                // 7. Product Attributes (Color, Size, Material, etc.)
+                // Product Attributes (Color, Size, Material, etc.) - keep in description
                 $attributes = $product->get_attributes();
                 if (!empty($attributes)) {
                     foreach ($attributes as $attribute) {
@@ -258,47 +242,179 @@ class Queryra_Sync {
                         }
                     }
                 }
+
+                // Brand: check common brand taxonomies, then product attribute
+                $brand = $this->get_product_brand($post->ID, $product);
             }
         }
 
-        // Combine all parts with double line breaks
         $full_description = implode("\n\n", $description_parts);
 
         // Get featured image
         $image_url = get_the_post_thumbnail_url($post->ID, 'medium');
 
         // Calculate margin based on post importance
-        // Sticky posts (featured) = 100%, normal posts = 50%
-        // WooCommerce: Featured products = 100%
         $margin = 0.5;
         if (is_sticky($post->ID)) {
             $margin = 1.0;
         } elseif ($post->post_type === 'product' && class_exists('WooCommerce')) {
-            $product = wc_get_product($post->ID);
+            $product = isset($product) ? $product : wc_get_product($post->ID);
             if ($product && $product->is_featured()) {
                 $margin = 1.0;
             }
         }
 
-        // Build record - only fields that backend expects
+        // Build record with all API fields
         $record = array(
-            'id' => 'wp-' . $post->ID,
-            'name' => $post->post_title,
-            'description' => $full_description,
-            'type' => $post->post_type,
-            'platform' => 'wordpress',
-            'price' => $price,
-            'url' => get_permalink($post->ID),
-            'image_url' => $image_url ?: '',
-            'stock' => $stock,
-            'margin' => $margin
+            'id'         => 'wp-' . $post->ID,
+            'name'       => $post->post_title,
+            'description'=> $full_description,
+            'type'       => $post->post_type,
+            'platform'   => 'wordpress',
+            'price'      => $price,
+            'url'        => get_permalink($post->ID),
+            'image_url'  => $image_url ?: '',
+            'stock'      => $stock,
+            'margin'     => $margin,
+            'sku'        => $sku,
+            'categories' => !empty($categories_arr) ? implode(', ', $categories_arr) : '',
+            'tags'       => !empty($tags_arr) ? implode(', ', $tags_arr) : '',
+            'brand'      => $brand,
         );
 
         return $record;
     }
 
     /**
-     * AJAX: Sync all posts
+     * Get product brand from taxonomy or attribute
+     */
+    private function get_product_brand($post_id, $product) {
+        // Check common brand taxonomies (WooCommerce Brands, YITH, Perfect Brands)
+        $brand_taxonomies = array('product_brand', 'yith_product_brand', 'pwb-brand');
+        foreach ($brand_taxonomies as $taxonomy) {
+            if (taxonomy_exists($taxonomy)) {
+                $terms = get_the_terms($post_id, $taxonomy);
+                if ($terms && !is_wp_error($terms)) {
+                    return $terms[0]->name;
+                }
+            }
+        }
+
+        // Check product attribute named "brand" or "marka"
+        $brand_value = $product->get_attribute('brand');
+        if (!empty($brand_value)) {
+            return $brand_value;
+        }
+        $brand_value = $product->get_attribute('marka');
+        if (!empty($brand_value)) {
+            return $brand_value;
+        }
+
+        return '';
+    }
+
+    /**
+     * AJAX: Get sync info for batched import
+     *
+     * Returns plan limits, total post count, and batch size
+     * so the frontend can plan the batched import.
+     */
+    public function ajax_get_sync_info() {
+        check_ajax_referer('queryra_sync', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+
+        // Get plan limits from API
+        $stats = $this->api->get_stats();
+        if (is_wp_error($stats)) {
+            wp_send_json_error(array('message' => $stats->get_error_message()));
+        }
+
+        $record_limit = isset($stats['record_limit']) ? (int) $stats['record_limit'] : 100;
+        $total_records = isset($stats['total_records']) ? (int) $stats['total_records'] : 0;
+        $plan = isset($stats['plan']) ? $stats['plan'] : 'free';
+
+        // Count published WordPress posts
+        $post_types = get_option('queryra_post_types', array('post', 'page'));
+        $wp_query = new WP_Query(array(
+            'post_type'      => $post_types,
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+        ));
+        $total_wp_posts = (int) $wp_query->found_posts;
+
+        // How many we'll actually send (respect plan limit)
+        $will_sync = ($record_limit > 0) ? min($total_wp_posts, $record_limit) : $total_wp_posts;
+
+        // Cache stats for search integration
+        update_option('queryra_cached_stats', $stats);
+
+        wp_send_json_success(array(
+            'total_wp_posts'  => $total_wp_posts,
+            'record_limit'    => $record_limit,
+            'current_records' => $total_records,
+            'will_sync'       => $will_sync,
+            'batch_size'      => 50,
+            'plan'            => $plan,
+        ));
+    }
+
+    /**
+     * AJAX: Sync a single batch of posts
+     *
+     * Fetches a page of post IDs and syncs them to Queryra.
+     * Called repeatedly by the frontend for batched import.
+     */
+    public function ajax_sync_batch() {
+        check_ajax_referer('queryra_sync', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+
+        $offset     = isset($_POST['offset']) ? absint($_POST['offset']) : 0;
+        $batch_size = isset($_POST['batch_size']) ? absint($_POST['batch_size']) : 50;
+        $batch_size = min($batch_size, 100);
+
+        $post_types = get_option('queryra_post_types', array('post', 'page'));
+
+        $post_ids = get_posts(array(
+            'post_type'      => $post_types,
+            'post_status'    => 'publish',
+            'posts_per_page' => $batch_size,
+            'offset'         => $offset,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'fields'         => 'ids',
+        ));
+
+        if (empty($post_ids)) {
+            wp_send_json_success(array(
+                'synced'  => 0,
+                'message' => 'No more posts to sync',
+            ));
+            return;
+        }
+
+        $result = $this->sync_posts($post_ids);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'synced'  => count($post_ids),
+                'message' => $result['message'],
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => $result['message'],
+            ));
+        }
+    }
+
+    /**
+     * AJAX: Sync all posts (legacy - kept for backward compatibility)
      */
     public function ajax_sync_all() {
         check_ajax_referer('queryra_sync', 'nonce');

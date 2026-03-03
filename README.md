@@ -281,8 +281,15 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.1.5 (2026-03-03)
+**Batched bulk import for large sites**
+- New: Batched import with real-time progress bar (supports 50K+ records)
+- New: Plan limit check before import starts
+- Improved: Import reliability with automatic retry support
+- Improved: Setup Wizard import now uses batched sync
+
 ### 1.1.4 (2026-02-25)
-⚙️ **Configurable cache & content type filtering**
+**Configurable cache & content type filtering**
 - New: Configurable cache duration (1 minute to forever)
 - New: Record type (post/page/product) and platform metadata
 - New: Search filtering by content type

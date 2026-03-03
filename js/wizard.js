@@ -61,57 +61,148 @@ jQuery(document).ready(function($) {
         });
     }
 
-    // Step 2: Start Import
+    // Step 2: Start Import (batched)
     $('#queryra-start-import').on('click', function() {
         var $button = $(this);
 
-        // Disable button
-        $button.prop('disabled', true).text('Importing...');
+        $button.prop('disabled', true).text('Checking plan...');
 
         // Show progress bar
         $('#queryra-import-progress').show();
         $('#queryra-import-success').hide();
 
-        // Start import
+        // Phase 1: Get sync info (plan limits, batch size)
         $.ajax({
             url: queryraWizard.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'queryra_wizard_import',
-                nonce: queryraWizard.nonce
+                action: 'queryra_get_sync_info',
+                nonce: queryraWizard.syncNonce
             },
             success: function(response) {
-                if (response.success) {
-                    // Show 100% progress
-                    $('#queryra-import-progress-bar').css('width', '100%').text('100%');
-                    $('#queryra-import-info').text(response.data.imported + ' / ' + response.data.imported + ' records');
-
-                    // Hide progress, show success
-                    setTimeout(function() {
-                        $('#queryra-import-progress').hide();
-                        $('#queryra-import-success').show();
-                        $('#queryra-success-message').text(response.data.message);
-
-                        // Enable Continue button
-                        $('#queryra-continue-step3').prop('disabled', false);
-
-                        // Hide Start Import button
-                        $button.hide();
-                    }, 500);
-                } else {
-                    // Show error
-                    alert('Import failed: ' + response.data.message);
-                    $button.prop('disabled', false).html('<span class="dashicons dashicons-upload"></span> Start Import Now');
-                    $('#queryra-import-progress').hide();
+                if (!response.success) {
+                    alert('Error: ' + response.data.message);
+                    resetImportButton($button);
+                    return;
                 }
+
+                var info = response.data;
+
+                // Plan is full
+                if (info.record_limit > 0 && info.current_records >= info.record_limit) {
+                    alert('Plan limit reached (' + info.current_records + '/' + info.record_limit + ' records). Please upgrade your plan or delete existing records.');
+                    resetImportButton($button);
+                    return;
+                }
+
+                // No posts
+                if (info.will_sync === 0) {
+                    alert('No published content found to import.');
+                    resetImportButton($button);
+                    return;
+                }
+
+                // Phase 2: Batched import
+                startWizardBatchSync($button, info);
             },
             error: function() {
-                alert('Import failed. Please try again.');
-                $button.prop('disabled', false).html('<span class="dashicons dashicons-upload"></span> Start Import Now');
-                $('#queryra-import-progress').hide();
+                alert('Failed to check plan limits. Please try again.');
+                resetImportButton($button);
             }
         });
     });
+
+    function startWizardBatchSync($button, info) {
+        var offset = 0;
+        var totalSynced = 0;
+        var willSync = info.will_sync;
+        var batchSize = info.batch_size;
+
+        $button.text('Importing...');
+        $('#queryra-import-status').text('Importing content... Please keep this tab open.');
+        $('#queryra-import-info').text('0 / ' + willSync + ' records');
+        $('#queryra-import-progress-bar').css('width', '0%').text('');
+
+        function sendBatch() {
+            if (totalSynced >= willSync) {
+                onImportDone();
+                return;
+            }
+
+            var currentBatch = Math.min(batchSize, willSync - totalSynced);
+
+            $.ajax({
+                url: queryraWizard.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'queryra_sync_batch',
+                    nonce: queryraWizard.syncNonce,
+                    offset: offset,
+                    batch_size: currentBatch
+                },
+                success: function(resp) {
+                    if (!resp.success) {
+                        onImportError('Batch error: ' + resp.data.message);
+                        return;
+                    }
+
+                    var synced = resp.data.synced;
+
+                    if (synced === 0) {
+                        onImportDone();
+                        return;
+                    }
+
+                    totalSynced += synced;
+                    offset += synced;
+
+                    var percent = Math.min(Math.round((totalSynced / willSync) * 100), 100);
+                    $('#queryra-import-progress-bar').css('width', percent + '%').text(percent + '%');
+                    $('#queryra-import-info').text(totalSynced + ' / ' + willSync + ' records');
+
+                    sendBatch();
+                },
+                error: function() {
+                    onImportError('Import batch failed. Please try again.');
+                }
+            });
+        }
+
+        function onImportDone() {
+            $('#queryra-import-progress-bar').css('width', '100%').text('100%');
+            $('#queryra-import-info').text(totalSynced + ' / ' + totalSynced + ' records');
+
+            // Mark import as done
+            $.ajax({
+                url: queryraWizard.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'queryra_wizard_mark_import_done',
+                    nonce: queryraWizard.syncNonce
+                }
+            });
+
+            setTimeout(function() {
+                $('#queryra-import-progress').hide();
+                $('#queryra-import-success').show();
+                $('#queryra-success-message').text('Successfully imported ' + totalSynced + ' records to Queryra');
+                $('#queryra-continue-step3').prop('disabled', false);
+                $button.hide();
+            }, 500);
+        }
+
+        function onImportError(msg) {
+            alert(msg + '\n\nAlready imported records are safe. You can retry.');
+            $button.prop('disabled', false).html('<span class="dashicons dashicons-upload"></span> Retry Import');
+        }
+
+        sendBatch();
+    }
+
+    function resetImportButton($button) {
+        $button.prop('disabled', false).html('<span class="dashicons dashicons-upload"></span> Start Import Now');
+        $('#queryra-import-progress').hide();
+    }
 
     // Step 2: Continue to Step 3
     $('#queryra-continue-step3').on('click', function() {
