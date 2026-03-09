@@ -1,6 +1,6 @@
 === AI Product Search for WooCommerce – Semantic Search & Smart Results by Queryra ===
 Contributors: queryra
-Tags: WooCommerce, product search, AI search, semantic search, ecommerce
+Tags: WooCommerce, product search, AI search, semantic search, intent-aware search
 Requires at least: 5.8
 Tested up to: 6.9
 Stable tag: 1.1.5
@@ -8,7 +8,7 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Stop losing sales to "no results found". AI search that understands what customers MEAN, not just what they type. Free forever.
+Stop losing sales to "no results found". Intent-aware AI search that understands price filters, brand exclusions, and customer intent — not just keywords. Free forever.
 
 == Description ==
 
@@ -95,6 +95,8 @@ Queryra fixes that link.
 
 **WordPress-Native** — Built for WooCommerce. Auto-syncs, supports variations, works with any theme.
 
+**Intent-Aware Search** — Most AI search plugins only match meaning. Queryra goes further: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints.
+
 = Founders Club — Limited Time =
 
 Early supporters get:
@@ -151,7 +153,7 @@ Yes. Instant results as customers type, with product thumbnails and smart sugges
 
 = How is this different from ChatGPT search plugins? =
 
-Other plugins require you to create an OpenAI account, manage API keys, and pay per request. Queryra includes everything — one API key, no extra accounts, predictable pricing.
+Other plugins require you to create an OpenAI account, manage API keys, and pay per request. Queryra includes everything — one API key, no extra accounts, predictable pricing. Plus, unlike vector-only plugins, Queryra understands price filters, brand exclusions, and sorting preferences in natural language — not just semantic meaning.
 
 = What if I have more than 100 products? =
 
@@ -196,6 +198,10 @@ Queryra works best with English content. The AI model understands semantic meani
 = Can I customize how search results look? =
 
 Queryra works with your existing theme — it doesn't override your templates or styling. Search results appear exactly as your theme displays them, so there's nothing to configure. If your theme has a search results template, Queryra respects it.
+
+= Can it handle price filters and brand exclusions in natural language? =
+
+Yes. A customer who searches "wireless headphones under $80, not Beats" gets exactly that — price cap applied, Beats excluded. Queryra extracts constraints from natural language automatically. No filter UI needed.
 
 == Screenshots ==
 

@@ -11,7 +11,7 @@ You sell gift boxes, perfumes, skincare sets — exactly what she'd love. But Wo
 
 Your customer leaves. Sale lost. This happens every day.
 
-**Queryra is different.** It thinks like AI but only knows YOUR store. When someone searches "present for my girlfriend", Queryra finds YOUR gift boxes, perfume sets, and skincare bundles.
+**Queryra is different.** It understands the full intent behind queries — not just meaning, but price filters, brand exclusions, and sorting preferences. And it only knows YOUR store. When someone searches "present for my girlfriend", Queryra finds YOUR gift boxes, perfume sets, and skincare bundles.
 
 👉 **[Live WooCommerce AI Search Demo](https://woo.queryra.com)** — over 200 products across 10 brands. Search naturally and see the difference.
 
@@ -41,6 +41,9 @@ Other plugins require you to create an OpenAI account and manage API keys. Query
 
 **WordPress-Native**
 Built specifically for WordPress and WooCommerce. Auto-syncs on publish, supports product variations, works with any theme.
+
+**Intent-Aware Search**
+Most AI plugins only match meaning. Queryra adds a second layer: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints.
 
 ## Built for WooCommerce
 
@@ -75,6 +78,7 @@ Queryra also works with regular WordPress content — posts, pages, and custom p
 
 ### Core Features
 - 🤖 **Semantic AI Search** - Understands meaning, not just keywords
+- 🎯 **Intent-Aware Search** - Understands price filters ("under $50"), brand exclusions ("not Beats"), and sorting ("best rated") in natural language
 - 🛒 **WooCommerce Integration** - Indexes products with prices, stock, and featured status
 - 🔄 **Auto-Sync** - Posts sync automatically when published or updated
 - 📝 **Custom Post Types** - Works with posts, pages, and any custom type
@@ -159,7 +163,7 @@ Your search is now powered by AI trained on your content.
 | HTTPS | Recommended |
 
 **Tested with:**
-- WordPress 6.9, 6.8, 6.7
+- WordPress 6.7.2, 6.6, 6.5
 - PHP 8.2, 8.1, 8.0, 7.4
 - Popular themes: Twenty Twenty-Four, Astra, Kadence, GeneratePress
 
@@ -201,7 +205,7 @@ Yes, [get free AI search API key](https://queryra.com/signup). No credit card re
 WordPress uses basic SQL keyword matching. Queryra uses AI trained on YOUR content to understand meaning and context.
 
 ### How is this different from generic ChatGPT plugins?
-Generic plugins use the same ChatGPT model for every site. Queryra trains a custom model specifically on YOUR content, making results more relevant. No OpenAI account needed.
+Generic plugins use the same ChatGPT model for every site. Queryra trains a custom model specifically on YOUR content, making results more relevant. No OpenAI account needed. Plus, unlike vector-only plugins, Queryra understands price filters, brand exclusions, and sorting preferences in natural language — not just semantic meaning.
 
 ### Does it work with my theme?
 Yes! Works with any WordPress theme. Hooks into standard WordPress search functionality.
@@ -387,6 +391,7 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 - [Documentation](https://queryra.com/docs)
 - [WordPress Integration Guide](https://queryra.com/docs/wordpress-integration)
 - [FAQ](https://queryra.com/faq)
+- [Why Vector Search Alone Isn't Enough for Ecommerce](https://queryra.com/blog/beyond-vector-search-ecommerce)
 - [Blog](https://queryra.com/blog) — Tips on WooCommerce search optimization and AI product discovery
 
 ---
