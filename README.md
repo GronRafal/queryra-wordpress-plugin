@@ -1,7 +1,7 @@
-# Queryra - AI Search for WordPress
+# Queryra - AI Search for WordPress & WooCommerce
 
-[![WordPress Plugin](https://img.shields.io/badge/WordPress-5.8%2B-blue.svg)](https://wordpress.org)
-[![Rating](https://img.shields.io/badge/Rating-★★★★★%205%2F5-yellow.svg)](https://wordpress.org/plugins/queryra-ai-search/)
+[![WordPress Plugin](https://img.shields.io/badge/WordPress-5.8%2B-blue.svg)](https://wordpress.org/plugins/queryra-ai-search/)
+[![Rating](https://img.shields.io/badge/Rating-★★★★★%205%2F5-yellow.svg)](https://wordpress.org/plugins/queryra-ai-search/#reviews)
 [![Active Installs](https://img.shields.io/badge/WordPress.org-Live-brightgreen.svg)](https://wordpress.org/plugins/queryra-ai-search/)
 [![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](LICENSE)
 
@@ -15,7 +15,7 @@ Your customer leaves. Sale lost. This happens every day.
 
 👉 **[Live WooCommerce AI Search Demo](https://woo.queryra.com)** — over 200 products across 10 brands. Search naturally and see the difference.
 
-[Get Free AI Search for WooCommerce](https://queryra.com/signup) • [AI Search Documentation](https://queryra.com/docs) • [Queryra FAQ](https://queryra.com/faq)
+[Start Free Trial](https://queryra.com/signup) · [Documentation](https://queryra.com/docs) · [FAQ](https://queryra.com/faq) · [Pricing](https://queryra.com/pricing) · [Blog](https://queryra.com/blog)
 
 ## The Problem With WordPress Search
 
@@ -29,7 +29,7 @@ Real searches that return 0 results in most stores:
 * "before wedding skincare" → Bridal kits, radiance creams, ritual sets
 * "postpartum hair loss" → Hair rescue sets, growth serums
 
-**Queryra understands these searches and finds the right products.**
+**Queryra understands these searches and finds the right products.** [Try it live →](https://woo.queryra.com)
 
 ## Why Queryra vs Other Search Plugins?
 
@@ -40,24 +40,24 @@ Generic AI plugins use the same model for everyone. Queryra builds a custom AI m
 Other plugins require you to create an OpenAI account and manage API keys. Queryra includes everything – one API key, no extra accounts.
 
 **WordPress-Native**
-Built specifically for WordPress and WooCommerce. Auto-syncs on publish, supports product variations, works with any theme.
+Built specifically for WordPress and WooCommerce. Auto-syncs on publish, supports product variations, works with any theme. [Setup guide →](https://queryra.com/docs/wordpress-integration)
 
 **Intent-Aware Search**
-Most AI plugins only match meaning. Queryra adds a second layer: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints.
+Most AI plugins only match meaning. Queryra adds a second layer: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 ## Built for WooCommerce
 
 * **Product Search** – Search by title, description, SKU, categories, tags, and attributes
 * **Smart Product Ranking** – AI understands which products best match the query
-* **Boost Control** – Promote high-margin products or slow-moving inventory like an experienced salesperson who knows when to recommend alternatives
+* **Boost Control** – Promote high-margin products or slow-moving inventory
 * **Live Search Results** – Instant AJAX-powered search suggestions
 * **Auto-Sync** – New products indexed automatically when published
-* **Smart Context Detection** – Automatically searches only products in WooCommerce shop pages, posts elsewhere. No configuration needed
+* **Smart Context Detection** – Automatically searches only products in WooCommerce shop pages, posts elsewhere
 * **Search Analytics** – See what customers search for, including zero-result queries. Find gaps in your inventory before customers leave
 
 ## Perfect For Any WooCommerce Store
 
-* **Beauty & Skincare** – "my skin looks tired" finds night creams and recovery oils
+* **Beauty & Skincare** – "my skin looks tired" finds night creams and recovery oils — [see it live →](https://woo.queryra.com)
 * **Fashion** – Find items by style, occasion, or color family
 * **Electronics** – Search by features, not just model numbers
 * **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
@@ -66,13 +66,9 @@ Most AI plugins only match meaning. Queryra adds a second layer: a query like "w
 
 ## Beyond WooCommerce
 
-Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for:
+Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for knowledge bases, blogs, and FAQ sections.
 
-* **Knowledge Bases** – Help customers find answers across hundreds of articles
-* **Blogs** – Readers search by topic, not exact titles
-* **FAQ Sections** – Natural questions find the right answers
-
-👉 **[Try it on 3,000+ Wikipedia articles →](https://queryra.com/playground/wiki)** — search "how do black holes form" or "history of jazz music" to see semantic search on non-product content.
+👉 **[Try it live on a WooCommerce store →](https://woo.queryra.com)** — search "present for my girlfriend" or "my skin looks tired" and see the difference.
 
 ## Features
 
@@ -109,7 +105,7 @@ graph LR
 3. **Sync** - Auto-sync posts or bulk send existing content
 4. **Search** - AI-powered results appear instantly
 
-[How to Install AI Search on WooCommerce](https://queryra.com/docs/wordpress-integration)
+[How to Install AI Search on WooCommerce →](https://queryra.com/docs/wordpress-integration)
 
 ## Quick Start
 
@@ -129,7 +125,7 @@ cd /wp-content/plugins/
 
 ### 2. Get API Key
 
-[Get free WooCommerce AI search](https://queryra.com/signup) → Copy API key from dashboard
+[Start your free trial →](https://queryra.com/signup) → Copy API key from dashboard
 
 ### 3. Configure Plugin
 
@@ -145,13 +141,11 @@ cd /wp-content/plugins/
 - Click **"Send All Posts to Queryra"** to sync existing content
 
 **Option B: Automatic**
-- New posts sync automatically when published ✨
+- New posts sync automatically when published
 
-### 5. Done! 🎉
+### 5. Done!
 
-Your search is now powered by AI trained on your content.
-
-[WooCommerce AI Search Setup Guide](https://queryra.com/docs/wordpress-integration)
+Your search is now powered by AI trained on your content. [Full setup guide →](https://queryra.com/docs/wordpress-integration)
 
 ## Requirements
 
@@ -163,69 +157,69 @@ Your search is now powered by AI trained on your content.
 | HTTPS | Recommended |
 
 **Tested with:**
-- WordPress 6.7.2, 6.6, 6.5
+- WordPress 6.9, 6.7.2, 6.6, 6.5
 - PHP 8.2, 8.1, 8.0, 7.4
 - Popular themes: Twenty Twenty-Four, Astra, Kadence, GeneratePress
-
-**Need an account?** [Free AI Search Plugin for WooCommerce](https://queryra.com/signup)
 
 ## Pricing
 
 | Plan | Products | Searches/mo | Price |
 |------|----------|-------------|-------|
-| Free | 100 | 500 | $0 forever |
+| Free Trial | 100 | 500 | $0 for 14 days |
+| Genesis Club | 200 | 500 | $0 for 30 days |
 | Pro | 500+ | 5,000+ | From $9.99/mo |
 
-No ChatGPT API key costs. No hidden fees. [WooCommerce AI Search Pricing](https://queryra.com/pricing)
+No ChatGPT API key costs. No hidden fees. [See full pricing →](https://queryra.com/pricing)
+
+### Genesis Club — First 100 Users
+
+Join the Genesis Club and lock in exclusive benefits (automatic after email verification):
+
+* **Extended trial** — 30 days instead of 14
+* **Double records** — 200 products on trial
+* **$9.99/mo locked forever** — price never increases
+* **Direct founder access** — talk to the dev team
+* **Lifetime Genesis badge** + priority support
+
+[Join Genesis Club →](https://queryra.com/signup)
+
+### Partner Program
+
+Love Queryra? Help us grow and get rewarded. Write a review, share a link, or create content about Queryra — and get your Pro account ($9.99/mo) for free.
+
+[Learn about the Partner Program →](https://queryra.com/blog/partner-program-pro-for-free)
 
 ## FAQ
 
-### Can I see it working before I install?
-Yes! We run a live WooCommerce demo store: **[woo.queryra.com](https://woo.queryra.com)** — over 200 beauty products across 10 brands. Try searching "present for my girlfriend" or "my skin looks tired" and see the difference.
+### Can I see a live demo before installing?
+Yes! Try our **[WooCommerce demo](https://woo.queryra.com)** with 200+ products across 10 brands. Our [blog](https://queryra.com/blog) and [FAQ page](https://queryra.com/faq) are also powered by Queryra.
 
-### What demos are available?
-We have 4 live demos you can try right now:
-- **WooCommerce store** (200+ products): [woo.queryra.com](https://woo.queryra.com)
-- **Wikipedia search** (3,000+ articles): [queryra.com/playground/wiki](https://queryra.com/playground/wiki)
-- **Blog search**: [queryra.com/blog](https://queryra.com/blog)
-- **FAQ search**: [queryra.com/faq](https://queryra.com/faq) — this page is powered by Queryra
+### How much does it cost?
+14-day free trial with 100 products and 500 searches/month. No credit card required. After the trial, Pro plans start at $9.99/month. Genesis Club members get 30 days free and 200 products. [See pricing →](https://queryra.com/pricing)
 
-Try searching "jury decides if young man is guilty" in the Wikipedia demo — it finds "12 Angry Men".
+### How is this different from ChatGPT search plugins?
+Queryra trains a custom model on YOUR content. No OpenAI account needed. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 ### How is Queryra different from Algolia?
-Algolia costs $50-500/month and requires developer setup. Queryra trains a custom AI model on YOUR store's products, starts free, and takes 5 minutes to install.
-
-### How does Queryra handle large catalogs?
-Our Wikipedia demo searches 3,000+ articles in under 500ms. Plans support up to 20,000 products.
-
-### Do I need a Queryra account?
-Yes, [get free AI search API key](https://queryra.com/signup). No credit card required.
-
-### How is this different from WordPress default search?
-WordPress uses basic SQL keyword matching. Queryra uses AI trained on YOUR content to understand meaning and context.
-
-### How is this different from generic ChatGPT plugins?
-Generic plugins use the same ChatGPT model for every site. Queryra trains a custom model specifically on YOUR content, making results more relevant. No OpenAI account needed. Plus, unlike vector-only plugins, Queryra understands price filters, brand exclusions, and sorting preferences in natural language — not just semantic meaning.
+Algolia costs $50-500/month and requires developer setup. Queryra starts with a free trial and takes 5 minutes to install. [Compare →](https://queryra.com/pricing)
 
 ### Does it work with my theme?
 Yes! Works with any WordPress theme. Hooks into standard WordPress search functionality.
 
-### Is it really free?
-Yes. 100 products (enough for most small stores) and 500 searches/month — free forever. No credit card, no trial expiration. Founders Club members get 200 products free.
-
 ### Will it slow down my site?
 No. Search queries are processed by Queryra's servers in milliseconds. No impact on your WordPress hosting.
 
-### What happens to my data if I deactivate the plugin?
-Search returns to WordPress default. Your data stays in Queryra until you delete it from the dashboard.
+### What happens after the free trial?
+You can upgrade to Pro ($9.99/mo), or join our [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) to earn a free Pro account by writing reviews or sharing Queryra.
 
-[WooCommerce Semantic Search FAQ](https://queryra.com/faq)
+### What happens to my data if I deactivate the plugin?
+Search returns to WordPress default. Your data stays in Queryra until you delete it from the [dashboard](https://queryra.com/dashboard).
+
+For more questions, visit our [FAQ page →](https://queryra.com/faq)
 
 ## Roadmap
 
-🚀 **In Development**
-
-The roadmap is actively being shaped by user feedback. We're building features that matter most to the WordPress community:
+The roadmap is actively being shaped by user feedback:
 
 - Custom hooks and filters for developers
 - Multilingual support (WPML/Polylang)
@@ -233,44 +227,32 @@ The roadmap is actively being shaped by user feedback. We're building features t
 - Search widget for Gutenberg
 - REST API expansion
 
-💡 **Your input matters!** Contact us at support@queryra.com to share your ideas and influence the direction of Queryra.
+Your input matters! [Contact us](mailto:support@queryra.com) or [open a discussion](https://github.com/GronRafal/queryra-wordpress-plugin/issues) to share your ideas.
 
 ## Support
 
-### Documentation
-- [Setup Guide](https://queryra.com/docs/wordpress-integration) - Step-by-step WordPress setup
-- [Complete Docs](https://queryra.com/docs) - All documentation
-- [FAQ](https://queryra.com/faq) - Common questions answered
-
-### Direct Support
-- **Email:** support@queryra.com
-- **Issues:** [GitHub Issues](https://github.com/GronRafal/queryra-wordpress-plugin/issues) for bug reports
-
-### Community
-- [GitHub Discussions](https://github.com/GronRafal/queryra-wordpress-plugin/discussions) - Ask questions, share tips
+* [Setup Guide](https://queryra.com/docs/wordpress-integration) — Step-by-step WordPress setup
+* [Documentation](https://queryra.com/docs) — All documentation
+* [FAQ](https://queryra.com/faq) — Common questions answered
+* **Email:** support@queryra.com
+* [GitHub Issues](https://github.com/GronRafal/queryra-wordpress-plugin/issues) — Bug reports
+* [GitHub Discussions](https://github.com/GronRafal/queryra-wordpress-plugin/issues) — Ask questions, share tips
 
 ## Contributing
 
-We welcome contributions! Here's how you can help:
+We welcome contributions!
 
-### Report Bugs
-Found a bug? [Open an issue](https://github.com/GronRafal/queryra-wordpress-plugin/issues) with:
-- WordPress version
-- PHP version
-- Steps to reproduce
-- Expected vs actual behavior
+**Report Bugs** — [Open an issue](https://github.com/GronRafal/queryra-wordpress-plugin/issues) with WordPress version, PHP version, steps to reproduce, and expected vs actual behavior.
 
-### Suggest Features
-Have an idea? Email us at support@queryra.com or open a discussion on GitHub.
+**Suggest Features** — [Email us](mailto:support@queryra.com) or [open a discussion](https://github.com/GronRafal/queryra-wordpress-plugin/issues).
 
-### Submit Code
+**Submit Code:**
 1. Fork the repo
 2. Create feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
 
-### Development
 ```bash
 # Clone repo
 git clone https://github.com/GronRafal/queryra-wordpress-plugin.git
@@ -301,79 +283,36 @@ phpcs --standard=WordPress
 - Improved: Cache settings UI in admin panel
 
 ### 1.1.3 (2026-02-12)
-🏪 **WooCommerce demo store & updated documentation**
+**WooCommerce demo store & updated documentation**
 - New: Live WooCommerce demo store at woo.queryra.com
 - Improved: Plugin description with tested search examples from demo store
-- Improved: FAQ with demo store links
 - Improved: Simplified search integration for better theme compatibility
-- Updated: Screenshots descriptions
 
 ### 1.1.2 (2026-02-02)
-📊 **Anonymous usage analytics**
+**Anonymous usage analytics**
 - New: Anonymous event tracking to understand user flow
 - New: Opt-out via `define('QUERYRA_DISABLE_ANALYTICS', true);` in wp-config.php
-- Privacy: No personal data collected (UUID only, no IP, no site URL)
-- See: [Privacy Policy section 1.6](https://queryra.com/privacy)
+- Privacy: No personal data collected — see [Privacy Policy](https://queryra.com/privacy)
 
 ### 1.1.1 (2026-02-01)
-🛒 **Full WooCommerce product search support**
+**Full WooCommerce product search support**
 - New: Product SKU, price, and attribute indexing
 - New: Smart product boost controls
 - Improved: Setup Wizard with one-click product import
 - Improved: Search relevance algorithm
-- Fixed: WordPress Plugin Checker compliance
 
 ### 1.1.0 (2026-01-28)
-✨ **Enhanced user experience and onboarding**
-- New: Setup Wizard - 4-step guided onboarding for new users
-- New: Tabbed admin interface - organized settings for better UX
-- New: Exit survey - collect feedback on plugin deactivation
+**Enhanced user experience and onboarding**
+- New: Setup Wizard — 4-step guided onboarding for new users
+- New: Tabbed admin interface — organized settings for better UX
+- New: Exit survey — collect feedback on plugin deactivation
 - Enhanced: WooCommerce product indexing improvements
-- Improved: Admin panel UI/UX with better organization
-- Fixed: Various bug fixes and stability improvements
 
 ### 1.0.0 (2026-01-23)
-🚀 **Initial public release**
+**Initial public release**
 - Production-ready AI search trained on your content
-- Stable API with 99.9% uptime
 - WordPress.org directory submission
 - Full security audit passed
-
-### 0.9.0 (2026-01-15) - Beta 2
-- Improved relevance scoring with cosine similarity
-- Added adaptive threshold filtering for better results
-- Enhanced embedding generation with title weighting
-- Fixed sync issues with large content libraries
-- Performance optimizations for faster searches
-
-### 0.8.0 (2026-01-08) - Beta 1
-- Public beta release
-- AI model training improvements
-- Custom post type support
-- Sticky post priority in search results
-- Real-time sync on publish/update
-- Settings dashboard with sync status
-- Testing with 50+ beta users
-
-### 0.7.0 (2025-12-20) - Alpha 3
-- ChromaDB integration for vector storage
-- Sentence transformer embeddings (all-MiniLM-L6-v2)
-- Semantic search algorithm refinements
-- Auto-sync functionality
-- API key authentication system
-
-### 0.6.0 (2025-12-10) - Alpha 2
-- Initial AI model training on WordPress content
-- Embedding generation pipeline
-- Search relevance testing and tuning
-- Categories and tags support
-
-### 0.5.0 (2025-12-01) - Alpha 1
-- First working prototype
-- Basic semantic search functionality
-- Manual sync of posts and pages
-- WordPress search hook integration
-- Internal testing phase
 
 ## License
 
@@ -385,14 +324,15 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 
 - [WordPress.org Plugin Page](https://wordpress.org/plugins/queryra-ai-search/)
 - [WooCommerce Live Demo](https://woo.queryra.com) — Demo beauty store with over 200 products
-- [Knowledge Base Demo](https://queryra.com/playground/wiki) — Semantic search on Wikipedia articles
 - [Queryra Homepage](https://queryra.com)
-- [Free AI Search for WooCommerce](https://queryra.com/signup)
+- [Start Free Trial](https://queryra.com/signup)
+- [Pricing](https://queryra.com/pricing)
 - [Documentation](https://queryra.com/docs)
-- [WordPress Integration Guide](https://queryra.com/docs/wordpress-integration)
+- [Setup Guide](https://queryra.com/docs/wordpress-integration)
 - [FAQ](https://queryra.com/faq)
-- [Why Vector Search Alone Isn't Enough for Ecommerce](https://queryra.com/blog/beyond-vector-search-ecommerce)
+- [Partner Program](https://queryra.com/blog/partner-program-pro-for-free)
 - [Blog](https://queryra.com/blog) — Tips on WooCommerce search optimization and AI product discovery
+- [Why Vector Search Alone Isn't Enough for Ecommerce](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 ---
 

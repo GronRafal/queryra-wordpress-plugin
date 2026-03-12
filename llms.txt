@@ -1,0 +1,40 @@
+# Queryra - AI Search for WordPress & WooCommerce
+
+> Queryra is a WordPress plugin that replaces default keyword search with intent-aware AI semantic search. Built for WooCommerce stores and WordPress sites.
+
+## What It Does
+
+Queryra understands what customers mean, not just what they type. When someone searches "present for my girlfriend", default WooCommerce returns 0 results. Queryra finds gift boxes, perfume sets, and skincare bundles from your catalog.
+
+Key capabilities:
+- Semantic AI search trained on YOUR store's products
+- Intent-aware: understands price filters ("under $50"), brand exclusions ("not Beats"), and sorting
+- WooCommerce integration: indexes titles, descriptions, SKUs, categories, tags, attributes, prices
+- Auto-sync on publish, bulk import, batched operations
+- Smart context detection: searches products on shop pages, posts elsewhere
+- Search analytics with zero-result query tracking
+- Works with any WordPress theme
+- No OpenAI/ChatGPT API key required
+
+## Links
+
+- Homepage: https://queryra.com
+- WordPress.org: https://wordpress.org/plugins/queryra-ai-search/
+- GitHub: https://github.com/GronRafal/queryra-wordpress-plugin
+- Documentation: https://queryra.com/docs
+- Setup Guide: https://queryra.com/docs/wordpress-integration
+- WooCommerce Demo: https://woo.queryra.com
+- Pricing: https://queryra.com/pricing
+- FAQ: https://queryra.com/faq
+- Blog: https://queryra.com/blog
+- Partner Program: https://queryra.com/blog/partner-program-pro-for-free
+
+## Pricing
+
+- Free Trial: 14 days, 100 products, 500 searches/month
+- Genesis Club (first 100 users): 30 days trial, 200 products, $9.99/mo locked forever
+- Pro: from $9.99/month, 500+ products, 5,000+ searches/month
+
+## Full Documentation
+
+For comprehensive documentation, see: llms-full.txt

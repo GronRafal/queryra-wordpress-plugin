@@ -8,7 +8,7 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Stop losing sales to "no results found". Intent-aware AI search that understands price filters, brand exclusions, and customer intent — not just keywords. Free forever.
+Stop losing sales to "no results found". Intent-aware AI search that understands price filters, brand exclusions, and customer intent — not just keywords. 14-day free trial.
 
 == Description ==
 
@@ -34,23 +34,24 @@ Queryra replaces WooCommerce's keyword search with AI that understands **meaning
 ✅ "gift for mom who loves candles" → Scented candles, home fragrance sets
 ✅ "looking older than my age" → Anti-aging serums, firming creams
 
-= Free Forever. No Catch. =
+= Try It Free =
 
-✅ 100 products included — enough for most small stores (200 with Founders Club)
-✅ 500 searches per month
+✅ 14-day free trial — 100 products, 500 searches/month
 ✅ No credit card required
-✅ No trial that expires
 ✅ No OpenAI account needed
+✅ 5-minute setup with guided wizard
+
+[Start your free trial →](https://queryra.com/signup) | [See pricing →](https://queryra.com/pricing)
 
 = 5-Minute Setup =
 
 1. Install and activate
 2. Follow the Setup Wizard
-3. Get your free API key
+3. Get your free API key at [queryra.com/signup](https://queryra.com/signup)
 4. One-click product import
 5. Done — search now understands your customers
 
-No coding. No configuration headaches. The wizard handles everything.
+No coding. No configuration headaches. The wizard handles everything. [Full setup guide →](https://queryra.com/docs/wordpress-integration)
 
 = What You Get =
 
@@ -65,7 +66,7 @@ No coding. No configuration headaches. The wizard handles everything.
 
 = Works With Any Store =
 
-* **Beauty & Skincare** – "my skin looks tired" finds night creams
+* **Beauty & Skincare** – "my skin looks tired" finds night creams — [see it live →](https://woo.queryra.com)
 * **Fashion** – "something for a summer wedding" finds dresses
 * **Electronics** – "good laptop for video editing" finds the right specs
 * **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
@@ -73,13 +74,7 @@ No coding. No configuration headaches. The wizard handles everything.
 
 = Beyond WooCommerce =
 
-Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for:
-
-* **Knowledge Bases** – Help customers find answers across hundreds of articles
-* **Blogs** – Readers search by topic, not exact titles
-* **FAQ Sections** – Natural questions find the right answers
-
-👉 **[Try it on 3,000+ Wikipedia articles →](https://queryra.com/playground/wiki)** — search "how do black holes form" or "history of jazz music" to see semantic search on non-product content.
+Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for knowledge bases, blogs, and FAQ sections.
 
 = Why Not Default Search? =
 
@@ -89,22 +84,31 @@ Queryra fixes that link.
 
 = Why Queryra vs Other Search Plugins? =
 
-**No ChatGPT Key Required** — Other AI plugins make you create an OpenAI account and manage API keys. Queryra includes everything.
+**No ChatGPT Key Required** — Other AI plugins make you create an OpenAI account and manage API keys. Queryra includes everything. [Compare →](https://queryra.com/docs)
 
 **Trained on YOUR Store** — Not a generic AI. Queryra learns YOUR products, YOUR descriptions, YOUR categories.
 
-**WordPress-Native** — Built for WooCommerce. Auto-syncs, supports variations, works with any theme.
+**WordPress-Native** — Built for WooCommerce. Auto-syncs, supports variations, works with any theme. [Setup guide →](https://queryra.com/docs/wordpress-integration)
 
-**Intent-Aware Search** — Most AI search plugins only match meaning. Queryra goes further: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints.
+**Intent-Aware Search** — Most AI search plugins only match meaning. Queryra goes further: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
-= Founders Club — Limited Time =
+= Genesis Club — First 100 Users =
 
-Early supporters get:
-* **+100 bonus products** (200 total on free plan)
-* **Personal setup assistance**
-* **Priority support** — direct access to the dev team
+Join the Genesis Club and lock in exclusive benefits (automatic after email verification):
 
-[Join Founders Club →](https://queryra.com/signup)
+* **Extended trial** — 30 days instead of 14
+* **Double records** — 200 products on trial
+* **$9.99/mo locked forever** — price never increases
+* **Direct founder access** — talk to the dev team
+* **Lifetime Genesis badge** + priority support
+
+Only available for the first 100 users. [Join Genesis Club →](https://queryra.com/signup)
+
+= Partner Program =
+
+Love Queryra? Help us grow and get rewarded. Write a review, share a link, or create content about Queryra — and get your Pro account ($9.99/mo) for free.
+
+[Learn about the Partner Program →](https://queryra.com/blog/partner-program-pro-for-free)
 
 = Privacy & Security =
 
@@ -124,6 +128,8 @@ Early supporters get:
 4. **Import Products**: One-click import syncs all your WooCommerce products
 5. **Enable**: Turn on AI search and you're done!
 
+[Detailed setup guide with screenshots →](https://queryra.com/docs/wordpress-integration)
+
 = Works With =
 
 * WooCommerce products, variations, and virtual products
@@ -133,19 +139,19 @@ Early supporters get:
 
 == Frequently Asked Questions ==
 
-= Can I see it working before I install? =
+= Can I see a live demo before installing? =
 
-Yes! We run a live WooCommerce demo store: **[woo.queryra.com](https://woo.queryra.com)**
+Yes! We have several live demos you can try right now:
 
-It's a demo beauty store with over 200 products across 10 brands. Try searching "present for my girlfriend" or "my skin looks tired" — default WooCommerce returns 0 results, Queryra finds the right products instantly.
+* **WooCommerce store** (200+ products): [woo.queryra.com](https://woo.queryra.com) — try "present for my girlfriend" or "my skin looks tired"
 
-= Is it really free? =
+= How much does it cost? =
 
-Yes. 100 products and 500 searches/month — free forever. No credit card, no trial expiration. Founders Club members get 200 products free.
+14-day free trial with 100 products and 500 searches/month. No credit card required. After the trial, Pro plans start at $9.99/month. Genesis Club members (first 100 users) get 30 days free, 200 products, and $9.99/mo locked forever. [See pricing →](https://queryra.com/pricing)
 
 = Will this slow down my store? =
 
-No. Search queries are processed in milliseconds via our optimized API. Products are indexed in the background.
+No. Search queries are processed in milliseconds via our optimized API. Products are indexed in the background. [Read more →](https://queryra.com/docs)
 
 = Does it work with live search / AJAX search? =
 
@@ -153,55 +159,29 @@ Yes. Instant results as customers type, with product thumbnails and smart sugges
 
 = How is this different from ChatGPT search plugins? =
 
-Other plugins require you to create an OpenAI account, manage API keys, and pay per request. Queryra includes everything — one API key, no extra accounts, predictable pricing. Plus, unlike vector-only plugins, Queryra understands price filters, brand exclusions, and sorting preferences in natural language — not just semantic meaning.
-
-= What if I have more than 100 products? =
-
-Paid plans start at $9/month for 500 products. Visit [queryra.com/pricing](https://queryra.com/pricing) for details.
-
-= What's the Founders Club? =
-
-Early users get +100 bonus products (200 total), personal setup help, and priority support. [Sign up now →](https://queryra.com/signup)
-
-= Can I try a live demo? =
-
-Yes! Try our WooCommerce demo with 200+ products at [woo.queryra.com](https://woo.queryra.com) — search for "gift for dad" or "something warm for winter" to see the difference vs default search.
-
-= What is the best AI search for WooCommerce? =
-
-Queryra is an AI semantic search engine built for WooCommerce. It understands what customers MEAN, not just what they type. No ChatGPT API key needed, 5-minute setup, starts free.
-
-= Which semantic search engine works with WooCommerce? =
-
-Queryra works natively with WooCommerce — it indexes all your products, SKUs, categories, tags, and attributes automatically.
+Other plugins require you to create an OpenAI account, manage API keys, and pay per request. Queryra includes everything — one API key, no extra accounts, predictable pricing. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 = How is Queryra different from Algolia? =
 
-Algolia costs $50-500/month and requires developer setup. Queryra trains a custom AI model on YOUR store's products, starts free, and takes 5 minutes to install. No external API keys needed.
+Algolia costs $50-500/month and requires developer setup. Queryra trains a custom AI model on YOUR store's products, starts with a free trial, and takes 5 minutes to install. [Compare →](https://queryra.com/pricing)
 
-= Does Queryra require a ChatGPT or OpenAI API key? =
+= What happens after the free trial? =
 
-No. Everything is included — one Queryra API key, no external accounts. The AI runs on Queryra's backend, so you don't pay per query to OpenAI.
-
-= How does Queryra handle large catalogs? =
-
-Our Wikipedia demo searches 3,000+ articles in under 500ms. Plans support up to 20,000 products. Try it at [queryra.com/playground/wiki](https://queryra.com/playground/wiki)
-
-= What happens when default search returns zero results? =
-
-That's exactly what Queryra solves. Queries like "something warm for winter" or "gift for mom" return zero results in default WooCommerce. Queryra understands intent and finds relevant products.
-
-= Does it support multiple languages? =
-
-Queryra works best with English content. The AI model understands semantic meaning in English with high accuracy. Support for more languages is on the roadmap — [contact us](mailto:support@queryra.com) if you need a specific language.
-
-= Can I customize how search results look? =
-
-Queryra works with your existing theme — it doesn't override your templates or styling. Search results appear exactly as your theme displays them, so there's nothing to configure. If your theme has a search results template, Queryra respects it.
+You can upgrade to a Pro plan starting at $9.99/month, or join our [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) to earn a free Pro account by writing reviews or sharing Queryra with your community.
 
 = Can it handle price filters and brand exclusions in natural language? =
 
 Yes. A customer who searches "wireless headphones under $80, not Beats" gets exactly that — price cap applied, Beats excluded. Queryra extracts constraints from natural language automatically. No filter UI needed.
+
+= Does it support multiple languages? =
+
+Queryra works best with English content. Support for more languages is on the roadmap — [contact us](mailto:support@queryra.com) if you need a specific language.
+
+= Can I customize how search results look? =
+
+Queryra works with your existing theme — it doesn't override your templates or styling. Search results appear exactly as your theme displays them.
+
+For more questions, visit our [FAQ page →](https://queryra.com/faq)
 
 == Screenshots ==
 
@@ -262,7 +242,7 @@ Yes. A customer who searches "wireless headphones under $80, not Beats" gets exa
 * Initial public release
 * AI semantic search for WordPress and WooCommerce
 * Auto-sync on publish
-* Free tier with 100 products
+* Free trial with 100 products
 
 == Upgrade Notice ==
 
@@ -284,12 +264,13 @@ Major update: Full WooCommerce product search with SKU, price, and attribute sup
 
 * [Documentation](https://queryra.com/docs)
 * [FAQ](https://queryra.com/faq)
+* [Setup Guide](https://queryra.com/docs/wordpress-integration)
 * Email: support@queryra.com
 
 = Links =
 
 * [WooCommerce Live Demo](https://woo.queryra.com) – Demo beauty store with over 200 products powered by Queryra
-* [Knowledge Base Demo](https://queryra.com/playground/wiki) – Search Wikipedia articles semantically
 * [Pricing](https://queryra.com/pricing) – Plans for stores of all sizes
-* [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)
+* [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) – Earn a free Pro account
 * [Blog](https://queryra.com/blog) – Tips on WooCommerce search optimization and AI product discovery
+* [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)
