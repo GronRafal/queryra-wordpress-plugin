@@ -1,5 +1,11 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-03-15 - version 1.1.6
+* Removed - API URL field from settings (hardcoded to default)
+* Added - Instance ID display in Support tab for troubleshooting
+* Improved - Status endpoint sends instance_id and plugin_type
+* Improved - Partner referral tracking via site_url for partner API keys
+
 2026-03-03 - version 1.1.5
 * Added - Batched bulk import with progress bar for large sites (50K+ records)
 * Added - Plan limit check before import starts

@@ -3,7 +3,7 @@
  * Plugin Name: AI Product Search for WooCommerce – Semantic Search & Smart Results by Queryra
  * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.1.5');
+define('QUERYRA_VERSION', '1.1.6');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -81,6 +81,9 @@ class Queryra_Search {
             add_action('wp_ajax_queryra_dismiss_114_notice', array($this, 'dismiss_114_notice'));
         }
 
+        // Run upgrade routine if version changed
+        $this->maybe_upgrade();
+
         // Initialize sync
         new Queryra_Sync();
 
@@ -130,6 +133,25 @@ class Queryra_Search {
     public function dismiss_114_notice() {
         update_option('queryra_114_notice_dismissed', true);
         wp_die();
+    }
+
+    /**
+     * Run one-time upgrade tasks when plugin version changes.
+     */
+    private function maybe_upgrade() {
+        $stored_version = get_option('queryra_plugin_version', '0');
+
+        if (version_compare($stored_version, QUERYRA_VERSION, '>=')) {
+            return;
+        }
+
+        // 1.1.6: ping status to register instance_id and plugin_type
+        if (version_compare($stored_version, '1.1.6', '<') && get_option('queryra_api_key')) {
+            $api = new Queryra_API();
+            $api->get_status();
+        }
+
+        update_option('queryra_plugin_version', QUERYRA_VERSION);
     }
 
     /**

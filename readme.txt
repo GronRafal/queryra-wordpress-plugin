@@ -3,7 +3,7 @@ Contributors: queryra
 Tags: WooCommerce, product search, AI search, semantic search, intent-aware search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -194,6 +194,12 @@ For more questions, visit our [FAQ page →](https://queryra.com/faq)
 
 == Changelog ==
 
+= 1.1.6 (2026-03-15) =
+* Removed: API URL field from settings (hardcoded to default)
+* Added: Instance ID display in Support tab for easier troubleshooting
+* Improved: Status endpoint now sends instance_id and plugin_type for better tracking
+* Improved: Partner referral tracking via site_url for partner API keys
+
 = 1.1.5 (2026-03-03) =
 * Added: Batched bulk import with progress bar for large sites (50K+ records)
 * Added: Plan limit check before import starts
@@ -245,6 +251,9 @@ For more questions, visit our [FAQ page →](https://queryra.com/faq)
 * Free trial with 100 products
 
 == Upgrade Notice ==
+
+= 1.1.6 =
+Simplified settings, improved instance tracking, and partner referral support.
 
 = 1.1.5 =
 Batched bulk import with progress bar. Now supports large sites with 50K+ records. Plan limit check before import.

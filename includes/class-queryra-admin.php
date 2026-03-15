@@ -325,19 +325,7 @@ class Queryra_Admin {
                                         <p class="description">Your Queryra API key</p>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th scope="row">
-                                        <label for="queryra_api_url">API URL</label>
-                                    </th>
-                                    <td>
-                                        <input type="url"
-                                               id="queryra_api_url"
-                                               name="queryra_api_url"
-                                               value="<?php echo esc_attr($api_url); ?>"
-                                               class="regular-text">
-                                        <p class="description">Default: https://queryra.com</p>
-                                    </td>
-                                </tr>
+                                <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
                                 <tr>
                                     <th scope="row">
                                         Plugin Enabled
@@ -1106,6 +1094,16 @@ class Queryra_Admin {
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
                                     <p class="description">Independent community support on WordPress.org</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <span class="dashicons dashicons-admin-generic" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    Instance ID
+                                </th>
+                                <td>
+                                    <code style="padding: 4px 8px; background: #f0f0f0; user-select: all;"><?php echo esc_html(get_option('queryra_instance_id', 'N/A')); ?></code>
+                                    <p class="description">Share this with support if requested</p>
                                 </td>
                             </tr>
                         </table>

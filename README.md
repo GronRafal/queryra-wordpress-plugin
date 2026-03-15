@@ -267,6 +267,13 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.1.6 (2026-03-15)
+**Simplified settings & instance tracking**
+- Removed: API URL field from settings (hardcoded to default)
+- New: Instance ID visible in Support tab for easier troubleshooting
+- Improved: Status endpoint sends instance_id and plugin_type for better tracking
+- Improved: Partner referral tracking via site_url for partner API keys
+
 ### 1.1.5 (2026-03-03)
 **Batched bulk import for large sites**
 - New: Batched import with real-time progress bar (supports 50K+ records)

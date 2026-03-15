@@ -42,9 +42,7 @@ class Queryra_API {
             );
         }
 
-        $response = $this->request('GET', '/api/v1/status', array(
-            'key' => $this->api_key
-        ));
+        $response = $this->request('GET', '/api/v1/status', $this->build_status_params());
 
         if (is_wp_error($response)) {
             return array(
@@ -196,11 +194,32 @@ class Queryra_API {
             return new WP_Error('no_api_key', 'API key is required');
         }
 
-        $response = $this->request('GET', '/api/v1/status', array(
-            'key' => $this->api_key
-        ));
+        $response = $this->request('GET', '/api/v1/status', $this->build_status_params());
 
         return $response;
+    }
+
+    /**
+     * Build query parameters for /api/v1/status endpoint.
+     *
+     * Always sends: key, instance_id, plugin_type.
+     * Additionally sends site_url for partner referrals (key contains :ref=CODE).
+     *
+     * @return array Query parameters
+     */
+    private function build_status_params() {
+        $params = array(
+            'key'         => $this->api_key,
+            'instance_id' => get_option('queryra_instance_id', ''),
+            'plugin_type' => 'wp',
+        );
+
+        // Send site_url only for partner referrals (key format: ABC123:ref=CODE)
+        if (strpos($this->api_key, ':ref=') !== false) {
+            $params['site_url'] = get_site_url();
+        }
+
+        return $params;
     }
 
     /**
