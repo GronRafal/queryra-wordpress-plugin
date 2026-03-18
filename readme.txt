@@ -8,7 +8,7 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Stop losing sales to "no results found". Intent-aware AI search that understands price filters, brand exclusions, and customer intent — not just keywords. 14-day free trial.
+Stop losing sales to "no results found". Intent-aware AI search that understands price filters, brand exclusions, and customer intent — not just keywords. Free trial available.
 
 == Description ==
 
@@ -36,8 +36,7 @@ Queryra replaces WooCommerce's keyword search with AI that understands **meaning
 
 = Try It Free =
 
-✅ 14-day free trial — 100 products, 500 searches/month
-✅ No credit card required
+✅ Free trial — no credit card required
 ✅ No OpenAI account needed
 ✅ 5-minute setup with guided wizard
 
@@ -92,23 +91,9 @@ Queryra fixes that link.
 
 **Intent-Aware Search** — Most AI search plugins only match meaning. Queryra goes further: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
-= Genesis Club — First 100 Users =
+= Genesis Club & Partner Program =
 
-Join the Genesis Club and lock in exclusive benefits (automatic after email verification):
-
-* **Extended trial** — 30 days instead of 14
-* **Double records** — 200 products on trial
-* **$9.99/mo locked forever** — price never increases
-* **Direct founder access** — talk to the dev team
-* **Lifetime Genesis badge** + priority support
-
-Only available for the first 100 users. [Join Genesis Club →](https://queryra.com/signup)
-
-= Partner Program =
-
-Love Queryra? Help us grow and get rewarded. Write a review, share a link, or create content about Queryra — and get your Pro account ($9.99/mo) for free.
-
-[Learn about the Partner Program →](https://queryra.com/blog/partner-program-pro-for-free)
+Early supporters get exclusive benefits. [Join Genesis Club →](https://queryra.com/signup) | [Partner Program →](https://queryra.com/blog/partner-program-pro-for-free)
 
 = Privacy & Security =
 
@@ -147,7 +132,7 @@ Yes! We have several live demos you can try right now:
 
 = How much does it cost? =
 
-14-day free trial with 100 products and 500 searches/month. No credit card required. After the trial, Pro plans start at $9.99/month. Genesis Club members (first 100 users) get 30 days free, 200 products, and $9.99/mo locked forever. [See pricing →](https://queryra.com/pricing)
+Free trial available — no credit card required. [See current pricing and plans →](https://queryra.com/pricing)
 
 = Will this slow down my store? =
 
@@ -167,7 +152,7 @@ Algolia costs $50-500/month and requires developer setup. Queryra trains a custo
 
 = What happens after the free trial? =
 
-You can upgrade to a Pro plan starting at $9.99/month, or join our [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) to earn a free Pro account by writing reviews or sharing Queryra with your community.
+You can upgrade to a paid plan, or join our [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) to earn a free Pro account by writing reviews or sharing Queryra. [See pricing →](https://queryra.com/pricing)
 
 = Can it handle price filters and brand exclusions in natural language? =
 
@@ -248,7 +233,7 @@ For more questions, visit our [FAQ page →](https://queryra.com/faq)
 * Initial public release
 * AI semantic search for WordPress and WooCommerce
 * Auto-sync on publish
-* Free trial with 100 products
+* Free trial included
 
 == Upgrade Notice ==
 

@@ -163,31 +163,9 @@ Your search is now powered by AI trained on your content. [Full setup guide →]
 
 ## Pricing
 
-| Plan | Products | Searches/mo | Price |
-|------|----------|-------------|-------|
-| Free Trial | 100 | 500 | $0 for 14 days |
-| Genesis Club | 200 | 500 | $0 for 30 days |
-| Pro | 500+ | 5,000+ | From $9.99/mo |
+Free trial available. No credit card required. No ChatGPT API key costs. No hidden fees.
 
-No ChatGPT API key costs. No hidden fees. [See full pricing →](https://queryra.com/pricing)
-
-### Genesis Club — First 100 Users
-
-Join the Genesis Club and lock in exclusive benefits (automatic after email verification):
-
-* **Extended trial** — 30 days instead of 14
-* **Double records** — 200 products on trial
-* **$9.99/mo locked forever** — price never increases
-* **Direct founder access** — talk to the dev team
-* **Lifetime Genesis badge** + priority support
-
-[Join Genesis Club →](https://queryra.com/signup)
-
-### Partner Program
-
-Love Queryra? Help us grow and get rewarded. Write a review, share a link, or create content about Queryra — and get your Pro account ($9.99/mo) for free.
-
-[Learn about the Partner Program →](https://queryra.com/blog/partner-program-pro-for-free)
+[See pricing & plans →](https://queryra.com/pricing) · [Join Genesis Club →](https://queryra.com/signup) · [Partner Program →](https://queryra.com/blog/partner-program-pro-for-free)
 
 ## FAQ
 
@@ -195,7 +173,7 @@ Love Queryra? Help us grow and get rewarded. Write a review, share a link, or cr
 Yes! Try our **[WooCommerce demo](https://woo.queryra.com)** with 200+ products across 10 brands. Our [blog](https://queryra.com/blog) and [FAQ page](https://queryra.com/faq) are also powered by Queryra.
 
 ### How much does it cost?
-14-day free trial with 100 products and 500 searches/month. No credit card required. After the trial, Pro plans start at $9.99/month. Genesis Club members get 30 days free and 200 products. [See pricing →](https://queryra.com/pricing)
+Free trial available — no credit card required. [See current pricing and plans →](https://queryra.com/pricing)
 
 ### How is this different from ChatGPT search plugins?
 Queryra trains a custom model on YOUR content. No OpenAI account needed. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
@@ -210,7 +188,7 @@ Yes! Works with any WordPress theme. Hooks into standard WordPress search functi
 No. Search queries are processed by Queryra's servers in milliseconds. No impact on your WordPress hosting.
 
 ### What happens after the free trial?
-You can upgrade to Pro ($9.99/mo), or join our [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) to earn a free Pro account by writing reviews or sharing Queryra.
+You can upgrade to a paid plan, or join our [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) to earn a free Pro account by writing reviews or sharing Queryra. [See pricing →](https://queryra.com/pricing)
 
 ### What happens to my data if I deactivate the plugin?
 Search returns to WordPress default. Your data stays in Queryra until you delete it from the [dashboard](https://queryra.com/dashboard).

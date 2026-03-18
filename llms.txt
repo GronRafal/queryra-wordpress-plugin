@@ -31,9 +31,7 @@ Key capabilities:
 
 ## Pricing
 
-- Free Trial: 14 days, 100 products, 500 searches/month
-- Genesis Club (first 100 users): 30 days trial, 200 products, $9.99/mo locked forever
-- Pro: from $9.99/month, 500+ products, 5,000+ searches/month
+Free trial available. No credit card required. See current plans: https://queryra.com/pricing
 
 ## Full Documentation
 

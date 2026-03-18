@@ -78,24 +78,9 @@ Tested with WordPress 6.9, 6.7.2, 6.6, 6.5 and PHP 8.2, 8.1, 8.0, 7.4.
 
 ## Pricing
 
-| Plan | Products | Searches/mo | Price |
-|------|----------|-------------|-------|
-| Free Trial | 100 | 500 | $0 for 14 days |
-| Genesis Club (first 100 users) | 200 | 500 | $0 for 30 days, then $9.99/mo locked forever |
-| Pro | 500+ | 5,000+ | From $9.99/mo |
+Free trial available. No credit card required. No ChatGPT API key costs. No hidden fees.
 
-No ChatGPT API key costs. No hidden fees.
-
-### Genesis Club — First 100 Users
-Exclusive benefits (automatic after email verification):
-- Extended trial: 30 days instead of 14
-- Double records: 200 products on trial
-- $9.99/mo locked forever (price never increases)
-- Direct founder access
-- Lifetime Genesis badge + priority support
-
-### Partner Program
-Write a review, share a link, or create content about Queryra — earn a free Pro account ($9.99/mo value).
+For current plans, Genesis Club benefits, and Partner Program details, see: https://queryra.com/pricing
 
 ## Installation
 
