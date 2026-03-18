@@ -38,5 +38,10 @@ WORK_PLAN.md
 # Documentation (dev only)
 docs/
 
-# SVN checkout folder
+# SVN checkout folders
 queryra-ai-search/
+assets-svn/
+trunk-svn/
+
+# Claude Code
+.claude/
