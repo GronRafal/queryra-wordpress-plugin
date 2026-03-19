@@ -245,6 +245,12 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.1.7 (2026-03-19)
+**Updated branding & centralized pricing**
+- Updated: Plugin title and short description for better WordPress.org discoverability
+- New: "Beyond semantic search" example — intent-aware price filter and brand exclusion demo
+- Improved: Removed hardcoded pricing from all docs — single source of truth at queryra.com/pricing
+
 ### 1.1.6 (2026-03-15)
 **Simplified settings & instance tracking**
 - Removed: API URL field from settings (hardcoded to default)

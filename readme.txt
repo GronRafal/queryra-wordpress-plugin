@@ -1,16 +1,18 @@
-=== AI Product Search for WooCommerce – Semantic Search & Smart Results by Queryra ===
+=== AI Search for WooCommerce & WordPress – Semantic & Intelligent Product Search by Queryra ===
 Contributors: queryra
-Tags: WooCommerce, product search, AI search, semantic search, intent-aware search
+Tags: WooCommerce, product search, AI search, semantic search, ecommerce
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Stop losing sales to "no results found". Intent-aware AI search that understands price filters, brand exclusions, and customer intent — not just keywords. Free trial available.
+AI search for WooCommerce and WordPress that understands customer intent — stop losing sales to "no results found"
 
 == Description ==
+
+Queryra is an AI search plugin for WooCommerce and WordPress that understands what customers mean — not just what they type.
 
 **Your customer types "present for my girlfriend". Your store returns: 0 results.**
 
@@ -33,6 +35,11 @@ Queryra replaces WooCommerce's keyword search with AI that understands **meaning
 ✅ "my skin looks tired" → Night creams, recovery oils, eye patches
 ✅ "gift for mom who loves candles" → Scented candles, home fragrance sets
 ✅ "looking older than my age" → Anti-aging serums, firming creams
+
+**Beyond semantic search:**
+✅ "wireless headphones under $80, not Beats" → price filter + brand exclusion applied automatically
+
+No other WooCommerce AI search plugin does this.
 
 = Try It Free =
 
@@ -179,6 +186,11 @@ For more questions, visit our [FAQ page →](https://queryra.com/faq)
 
 == Changelog ==
 
+= 1.1.7 (2026-03-19) =
+* Updated: Plugin title and short description for better WordPress.org discoverability
+* Added: "Beyond semantic search" example — intent-aware price filter and brand exclusion demo
+* Improved: Removed hardcoded pricing from all documentation — single source of truth at queryra.com/pricing
+
 = 1.1.6 (2026-03-15) =
 * Removed: API URL field from settings (hardcoded to default)
 * Added: Instance ID display in Support tab for easier troubleshooting
@@ -236,6 +248,9 @@ For more questions, visit our [FAQ page →](https://queryra.com/faq)
 * Free trial included
 
 == Upgrade Notice ==
+
+= 1.1.7 =
+Updated plugin branding, added intent-aware search example, centralized pricing to queryra.com/pricing.
 
 = 1.1.6 =
 Simplified settings, improved instance tracking, and partner referral support.
