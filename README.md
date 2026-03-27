@@ -15,7 +15,7 @@ Your customer leaves. Sale lost. This happens every day.
 
 👉 **[Live WooCommerce AI Search Demo](https://woo.queryra.com)** — over 200 products across 10 brands. Search naturally and see the difference.
 
-[Start Free Trial](https://queryra.com/signup) · [Documentation](https://queryra.com/docs) · [FAQ](https://queryra.com/faq) · [Pricing](https://queryra.com/pricing) · [Blog](https://queryra.com/blog)
+[Start Free Trial](https://queryra.com/signup) · [AI Search Documentation](https://queryra.com/docs) · [FAQ](https://queryra.com/faq) · [Pricing](https://queryra.com/pricing) · [Blog](https://queryra.com/blog)
 
 ## The Problem With WordPress Search
 
@@ -40,10 +40,10 @@ Generic AI plugins use the same model for everyone. Queryra builds a custom AI m
 Other plugins require you to create an OpenAI account and manage API keys. Queryra includes everything – one API key, no extra accounts.
 
 **WordPress-Native**
-Built specifically for WordPress and WooCommerce. Auto-syncs on publish, supports product variations, works with any theme. [Setup guide →](https://queryra.com/docs/wordpress-integration)
+Built specifically for WordPress and WooCommerce. Auto-syncs on publish, supports product variations, works with any theme. [WordPress Product Search Setup Guide →](https://queryra.com/docs/wordpress-integration)
 
 **Intent-Aware Search**
-Most AI plugins only match meaning. Queryra adds a second layer: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
+Most AI plugins only match meaning. Queryra adds a second layer: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints. [Why vector search alone isn't enough for WooCommerce product search →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 ## Built for WooCommerce
 
@@ -145,7 +145,7 @@ cd /wp-content/plugins/
 
 ### 5. Done!
 
-Your search is now powered by AI trained on your content. [Full setup guide →](https://queryra.com/docs/wordpress-integration)
+Your search is now powered by AI trained on your content. [WooCommerce Search Plugin Setup Guide →](https://queryra.com/docs/wordpress-integration)
 
 ## Requirements
 
@@ -176,7 +176,7 @@ Yes! Try our **[WooCommerce demo](https://woo.queryra.com)** with 200+ products 
 Free trial available — no credit card required. [See current pricing and plans →](https://queryra.com/pricing)
 
 ### How is this different from ChatGPT search plugins?
-Queryra trains a custom model on YOUR content. No OpenAI account needed. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
+Queryra trains a custom model on YOUR content. No OpenAI account needed. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Why vector search alone isn't enough for WooCommerce product search →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 ### How is Queryra different from Algolia?
 Algolia costs $50-500/month and requires developer setup. Queryra starts with a free trial and takes 5 minutes to install. [Compare →](https://queryra.com/pricing)
@@ -209,8 +209,8 @@ Your input matters! [Contact us](mailto:support@queryra.com) or [open a discussi
 
 ## Support
 
-* [Setup Guide](https://queryra.com/docs/wordpress-integration) — Step-by-step WordPress setup
-* [Documentation](https://queryra.com/docs) — All documentation
+* [WooCommerce Product Search Setup](https://queryra.com/docs/wordpress-integration) — Step-by-step WordPress setup
+* [AI Search Documentation](https://queryra.com/docs) — All documentation
 * [FAQ](https://queryra.com/faq) — Common questions answered
 * **Email:** support@queryra.com
 * [GitHub Issues](https://github.com/GronRafal/queryra-wordpress-plugin/issues) — Bug reports
@@ -314,15 +314,15 @@ GPL v2 or later - see [LICENSE](LICENSE) file for details
 ## Links
 
 - [WordPress.org Plugin Page](https://wordpress.org/plugins/queryra-ai-search/)
-- [WooCommerce Live Demo](https://woo.queryra.com) — Demo beauty store with over 200 products
-- [Queryra Homepage](https://queryra.com)
+- [WooCommerce AI Search Live Demo](https://woo.queryra.com)
+- [AI Product Search Plugin](https://queryra.com)
 - [Start Free Trial](https://queryra.com/signup)
 - [Pricing](https://queryra.com/pricing)
-- [Documentation](https://queryra.com/docs)
-- [Setup Guide](https://queryra.com/docs/wordpress-integration)
+- [AI Search Documentation](https://queryra.com/docs)
+- [WooCommerce Product Search Setup](https://queryra.com/docs/wordpress-integration)
 - [FAQ](https://queryra.com/faq)
 - [Partner Program](https://queryra.com/blog/partner-program-pro-for-free)
-- [Blog](https://queryra.com/blog) — Tips on WooCommerce search optimization and AI product discovery
+- [WooCommerce Search & AI Product Discovery Blog](https://queryra.com/blog)
 - [Why Vector Search Alone Isn't Enough for Ecommerce](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 ---

@@ -57,7 +57,7 @@ No other WooCommerce AI search plugin does this.
 4. One-click product import
 5. Done — search now understands your customers
 
-No coding. No configuration headaches. The wizard handles everything. [Full setup guide →](https://queryra.com/docs/wordpress-integration)
+No coding. No configuration headaches. The wizard handles everything. [WooCommerce Product Search Setup Guide →](https://queryra.com/docs/wordpress-integration)
 
 = What You Get =
 
@@ -90,13 +90,13 @@ Queryra fixes that link.
 
 = Why Queryra vs Other Search Plugins? =
 
-**No ChatGPT Key Required** — Other AI plugins make you create an OpenAI account and manage API keys. Queryra includes everything. [Compare →](https://queryra.com/docs)
+**No ChatGPT Key Required** — Other AI plugins make you create an OpenAI account and manage API keys. Queryra includes everything. [Compare AI Search Plugins →](https://queryra.com/docs)
 
 **Trained on YOUR Store** — Not a generic AI. Queryra learns YOUR products, YOUR descriptions, YOUR categories.
 
-**WordPress-Native** — Built for WooCommerce. Auto-syncs, supports variations, works with any theme. [Setup guide →](https://queryra.com/docs/wordpress-integration)
+**WordPress-Native** — Built for WooCommerce. Auto-syncs, supports variations, works with any theme. [WooCommerce Product Search Setup →](https://queryra.com/docs/wordpress-integration)
 
-**Intent-Aware Search** — Most AI search plugins only match meaning. Queryra goes further: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
+**Intent-Aware Search** — Most AI search plugins only match meaning. Queryra goes further: a query like "wireless headphones under $80, not Beats" applies the price filter AND excludes the brand. Vector-only plugins ignore both constraints. [Why vector search isn't enough for WooCommerce →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 = Genesis Club & Partner Program =
 
@@ -120,7 +120,7 @@ Early supporters get exclusive benefits. [Join Genesis Club →](https://queryra
 4. **Import Products**: One-click import syncs all your WooCommerce products
 5. **Enable**: Turn on AI search and you're done!
 
-[Detailed setup guide with screenshots →](https://queryra.com/docs/wordpress-integration)
+[WooCommerce Product Search Setup Guide →](https://queryra.com/docs/wordpress-integration)
 
 = Works With =
 
@@ -143,7 +143,7 @@ Free trial available — no credit card required. [See current pricing and plans
 
 = Will this slow down my store? =
 
-No. Search queries are processed in milliseconds via our optimized API. Products are indexed in the background. [Read more →](https://queryra.com/docs)
+No. Search queries are processed in milliseconds via our optimized API. Products are indexed in the background. [AI Search Performance Details →](https://queryra.com/docs)
 
 = Does it work with live search / AJAX search? =
 
@@ -151,7 +151,7 @@ Yes. Instant results as customers type, with product thumbnails and smart sugges
 
 = How is this different from ChatGPT search plugins? =
 
-Other plugins require you to create an OpenAI account, manage API keys, and pay per request. Queryra includes everything — one API key, no extra accounts, predictable pricing. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
+Other plugins require you to create an OpenAI account, manage API keys, and pay per request. Queryra includes everything — one API key, no extra accounts, predictable pricing. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Why vector search isn't enough for WooCommerce →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
 = How is Queryra different from Algolia? =
 
@@ -271,15 +271,15 @@ Major update: Full WooCommerce product search with SKU, price, and attribute sup
 
 = Support =
 
-* [Documentation](https://queryra.com/docs)
+* [AI Search Documentation](https://queryra.com/docs)
 * [FAQ](https://queryra.com/faq)
-* [Setup Guide](https://queryra.com/docs/wordpress-integration)
+* [WooCommerce Product Search Setup](https://queryra.com/docs/wordpress-integration)
 * Email: support@queryra.com
 
 = Links =
 
-* [WooCommerce Live Demo](https://woo.queryra.com) – Demo beauty store with over 200 products powered by Queryra
-* [Pricing](https://queryra.com/pricing) – Plans for stores of all sizes
-* [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) – Earn a free Pro account
-* [Blog](https://queryra.com/blog) – Tips on WooCommerce search optimization and AI product discovery
+* [WooCommerce AI Search Live Demo](https://woo.queryra.com)
+* [Pricing](https://queryra.com/pricing)
+* [Partner Program](https://queryra.com/blog/partner-program-pro-for-free)
+* [WooCommerce Search & AI Product Discovery Blog](https://queryra.com/blog)
 * [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)
