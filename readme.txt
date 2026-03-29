@@ -1,6 +1,6 @@
-=== AI Search for WooCommerce & WordPress – Semantic & Intelligent Product Search by Queryra ===
+=== AI Product Search for WooCommerce – Semantic Search Plugin ===
 Contributors: queryra
-Tags: WooCommerce, product search, AI search, semantic search, ecommerce
+Tags: WooCommerce search, product search, ai search, search plugin, instant search
 Requires at least: 5.8
 Tested up to: 6.9
 Stable tag: 1.1.7
@@ -8,11 +8,11 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-AI search for WooCommerce and WordPress that understands customer intent — stop losing sales to "no results found"
+AI product search plugin for WooCommerce that understands customer intent — boost sales with semantic search that eliminates "no results found"
 
 == Description ==
 
-Queryra is an AI search plugin for WooCommerce and WordPress that understands what customers mean — not just what they type.
+Queryra is an AI product search plugin for WooCommerce and WordPress — a semantic search engine that understands what customers mean — not just what they type.
 
 **Your customer types "present for my girlfriend". Your store returns: 0 results.**
 
@@ -24,7 +24,7 @@ Your customer leaves. Sale lost. This happens every day.
 
 = What Queryra Does =
 
-Queryra replaces WooCommerce's keyword search with AI that understands **meaning**. Your products stay the same. Your store stays the same. Search just works.
+Queryra replaces WooCommerce's default product search with AI search that understands **meaning**. Your products stay the same. Your store stays the same. Search just works.
 
 **Default WooCommerce → 0 results:**
 ❌ "my skin looks tired"
@@ -45,7 +45,7 @@ No other WooCommerce AI search plugin does this.
 
 ✅ Free trial — no credit card required
 ✅ No OpenAI account needed
-✅ 5-minute setup with guided wizard
+✅ AI product search ready in 5 minutes
 
 [Start your free trial →](https://queryra.com/signup) | [See pricing →](https://queryra.com/pricing)
 
@@ -70,7 +70,7 @@ No coding. No configuration headaches. The wizard handles everything. [WooCommer
 * **Smart Context Detection** – Automatically searches only products in WooCommerce shop pages, posts elsewhere. No configuration needed
 * **Search Analytics** – See what customers search for, including zero-result queries. Find gaps in your inventory before customers leave
 
-= Works With Any Store =
+= AI Product Search Works With Any Store =
 
 * **Beauty & Skincare** – "my skin looks tired" finds night creams — [see it live →](https://woo.queryra.com)
 * **Fashion** – "something for a summer wedding" finds dresses
@@ -80,11 +80,11 @@ No coding. No configuration headaches. The wizard handles everything. [WooCommer
 
 = Beyond WooCommerce =
 
-Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for knowledge bases, blogs, and FAQ sections.
+Queryra's semantic search also works with regular WordPress content — posts, pages, and custom post types. Perfect for knowledge bases, blogs, and FAQ sections.
 
 = Why Not Default Search? =
 
-WooCommerce search matches exact words. If your product is "Velora Overnight Recovery Oil" and someone types "my skin looks tired", they get nothing. They had the intent. You had the product. Search was the broken link.
+The default WooCommerce product search matches exact words. If your product is "Velora Overnight Recovery Oil" and someone types "my skin looks tired", they get nothing. They had the intent. You had the product. Search was the broken link.
 
 Queryra fixes that link.
 
@@ -147,7 +147,7 @@ No. Search queries are processed in milliseconds via our optimized API. Products
 
 = Does it work with live search / AJAX search? =
 
-Yes. Instant results as customers type, with product thumbnails and smart suggestions.
+Yes. Queryra's AI search delivers instant product search results as customers type, with product thumbnails and smart suggestions.
 
 = How is this different from ChatGPT search plugins? =
 
