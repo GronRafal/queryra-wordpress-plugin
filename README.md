@@ -245,6 +245,11 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.1.8 (2026-03-30)
+**Multilingual search**
+- Updated: Multilingual search now supports 50+ languages out of the box — no configuration needed
+- Updated: Documentation to reflect multilingual support launch
+
 ### 1.1.7 (2026-03-19)
 **Updated branding & centralized pricing**
 - Updated: Plugin title and short description for better WordPress.org discoverability

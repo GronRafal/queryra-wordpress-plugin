@@ -3,7 +3,7 @@ Contributors: queryra
 Tags: WooCommerce search, product search, ai search, search plugin, instant search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -167,7 +167,7 @@ Yes. A customer who searches "wireless headphones under $80, not Beats" gets exa
 
 = Does it support multiple languages? =
 
-Queryra works best with English content. Support for more languages is on the roadmap — [contact us](mailto:support@queryra.com) if you need a specific language.
+Yes! Queryra supports 50+ languages out of the box — Polish, German, French, Spanish, Dutch, Serbian, Japanese, Czech, and more. No configuration needed. Customers can search in their native language and find products automatically.
 
 = Can I customize how search results look? =
 
@@ -185,6 +185,10 @@ For more questions, visit our [FAQ page →](https://queryra.com/faq)
 6. Settings – simple configuration, one API key, no OpenAI account needed
 
 == Changelog ==
+
+= 1.1.8 (2026-03-30) =
+* Updated: Multilingual search now supports 50+ languages out of the box — no configuration needed
+* Updated: Documentation to reflect multilingual support launch
 
 = 1.1.7 (2026-03-19) =
 * Updated: Plugin title and short description for better WordPress.org discoverability
@@ -248,6 +252,9 @@ For more questions, visit our [FAQ page →](https://queryra.com/faq)
 * Free trial included
 
 == Upgrade Notice ==
+
+= 1.1.8 =
+Multilingual search now supports 50+ languages out of the box. No configuration needed.
 
 = 1.1.7 =
 Updated plugin branding, added intent-aware search example, centralized pricing to queryra.com/pricing.

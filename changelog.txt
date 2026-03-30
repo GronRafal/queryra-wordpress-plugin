@@ -1,5 +1,9 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-03-30 - version 1.1.8
+* Updated - Multilingual search now supports 50+ languages out of the box — no configuration needed
+* Updated - Documentation to reflect multilingual support launch
+
 2026-03-19 - version 1.1.7
 * Updated - Plugin title and short description for better WordPress.org discoverability
 * Added - "Beyond semantic search" example with intent-aware price filter and brand exclusion
