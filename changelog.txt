@@ -1,5 +1,11 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-04-09 - version 1.1.10
+* Fixed - Null safety check for WooCommerce product sync operations (PHP 8.0+ compatibility)
+* Fixed - Added nonce verification to admin notice dismissal for improved security
+* Improved - Semantic search index stability during product deletion edge cases
+* Improved - WooCommerce product search reliability for high-traffic stores
+
 2026-04-09 - version 1.1.9
 * Improved - AI search ranking optimized for WooCommerce product search relevance
 * Improved - Semantic search accuracy for natural language queries and intent detection

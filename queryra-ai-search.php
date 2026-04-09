@@ -3,7 +3,7 @@
  * Plugin Name: AI Search for WooCommerce – Semantic Search
  * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.1.9
+ * Version: 1.1.10
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.1.9');
+define('QUERYRA_VERSION', '1.1.10');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -120,7 +120,7 @@ class Queryra_Search {
         <script>
         jQuery(document).ready(function($) {
             $('.queryra-114-notice').on('click', '.notice-dismiss', function() {
-                $.post(ajaxurl, { action: 'queryra_dismiss_114_notice' });
+                $.post(ajaxurl, { action: 'queryra_dismiss_114_notice', _ajax_nonce: '<?php echo wp_create_nonce('queryra_dismiss_114'); ?>' });
             });
         });
         </script>
@@ -131,6 +131,7 @@ class Queryra_Search {
      * Dismiss 1.1.4 notice
      */
     public function dismiss_114_notice() {
+        check_ajax_referer('queryra_dismiss_114');
         update_option('queryra_114_notice_dismissed', true);
         wp_die();
     }

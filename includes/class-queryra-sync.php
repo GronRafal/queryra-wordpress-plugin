@@ -82,6 +82,9 @@ class Queryra_Sync {
      */
     public function sync_post_sticky_change($post_id) {
         $post = get_post($post_id);
+        if (!$post) {
+            return;
+        }
 
         // Check if post type should be synced
         $post_types = get_option('queryra_post_types', array('post', 'page'));
@@ -105,6 +108,9 @@ class Queryra_Sync {
      */
     public function delete_post_on_delete($post_id) {
         $post = get_post($post_id);
+        if (!$post) {
+            return;
+        }
 
         // Check if post type should be synced
         $post_types = get_option('queryra_post_types', array('post', 'page'));

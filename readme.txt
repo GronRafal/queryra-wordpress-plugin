@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, ai product search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.9
+Stable tag: 1.1.10
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -66,7 +66,7 @@ the brand automatically. No other WooCommerce AI search plugin does this.
 No coding. No configuration headaches.
 [WooCommerce AI Search Setup Guide →](https://queryra.com/docs/wordpress-integration)
 
-= WooCommerce AI Search Features =
+= WooCommerce Product Search Features =
 
 * **Natural Language Search** – Customers type like they think, AI search finds
 what they need
@@ -74,14 +74,14 @@ what they need
 tags, and attributes
 * **Semantic Search Ranking** – AI ranks results by meaning, not alphabetical order
 * **Boost Controls** – Promote products you want to sell more of
-* **Live AI Search** – Instant AJAX-powered suggestions as customers type
+* **Live Product Search** – Instant AJAX-powered suggestions as customers type
 * **Auto-Sync** – New WooCommerce products indexed automatically on publish
 * **Smart Context Detection** – AI search activates on WooCommerce shop pages
 automatically
 * **Search Analytics** – See what customers search for, including zero-result
 queries
 
-= WooCommerce AI Search Works With Any Store =
+= WooCommerce Product Search Works With Any Store =
 
 * **Beauty & Skincare** – "my skin looks tired" finds night creams
 * **Fashion** – "something for a summer wedding" finds dresses
@@ -89,7 +89,7 @@ queries
 * **Home & Garden** – "cozy living room" finds rugs, lamps, pillows
 * **Food & Beverage** – "healthy snacks for kids" finds the right products
 
-= AI Search for WordPress Content =
+= Semantic Search for WordPress Content =
 
 Queryra's semantic search also works with regular WordPress content — posts, pages,
 and custom post types. Perfect for knowledge bases, blogs, and FAQ sections.
@@ -101,7 +101,7 @@ Overnight Recovery Oil" and someone types "my skin looks tired", they get nothin
 AI search fixes that — customers find products even with vague or natural language
 queries.
 
-= Why Queryra AI Search vs Other Plugins? =
+= Why Queryra vs Other WooCommerce Product Search Plugins? =
 
 **No OpenAI Key Required** — Other AI search plugins make you create an OpenAI
 account and manage API keys. Queryra AI search includes everything.
@@ -166,13 +166,13 @@ Yes. AI Search supports 50+ languages out of the box including Polish, German, F
 = Will AI Search slow down my WooCommerce store? =
 No. AI Search processes queries via an optimized API. Products are indexed in the background. Search results are delivered in milliseconds — faster than most keyword search plugins.
 
-= How do I set up AI Search for WooCommerce? =
+= How do I set up WooCommerce product search? =
 Install and activate the plugin, follow the Setup Wizard, get a free API key at queryra.com/signup, and run a one-click product import. AI Search is ready in under 5 minutes. No coding required.
 
 = What happens when AI Search finds no results? =
 AI Search falls back automatically to WordPress default search so customers always see something. You can also use Search Analytics to identify zero-result queries and fix gaps in your product catalog.
 
-= Does AI Search support WooCommerce product variations? =
+= Does it support WooCommerce product variations? =
 Yes. Product variations are fully indexed including variation-specific SKUs, prices, and attributes. AI Search handles simple products, variable products, and virtual products.
 
 = Can I control which products appear first in search results? =
@@ -188,6 +188,12 @@ Yes. AI Search includes Boost Controls — you can promote specific products or 
 6. AI search settings — simple configuration, one API key, no OpenAI account needed
 
 == Changelog ==
+
+= 1.1.10 (2026-04-09) =
+* Fixed: Null safety check for WooCommerce product sync operations (PHP 8.0+ compatibility)
+* Fixed: Added nonce verification to admin notice dismissal for improved security
+* Improved: Semantic search index stability during product deletion edge cases
+* Improved: WooCommerce product search reliability for high-traffic stores
 
 = 1.1.9 (2026-04-09) =
 * Improved: AI search ranking optimized for WooCommerce product search relevance
