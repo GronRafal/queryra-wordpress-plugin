@@ -1,5 +1,5 @@
 === AI Search for WooCommerce – Semantic Search ===
-Contributors: queryra
+Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, ai product search
 Requires at least: 5.8
 Tested up to: 6.9
