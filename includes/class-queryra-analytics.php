@@ -50,11 +50,6 @@ class Queryra_Analytics {
             'timeout'  => 5,
             'blocking' => false,
         ));
-
-        // Debug logging
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Queryra Analytics: ' . $event);
-        }
     }
 
     /**
