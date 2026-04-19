@@ -3,7 +3,7 @@
  * Plugin Name: AI Search for WooCommerce – Semantic Search
  * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.1.10
+ * Version: 1.1.11
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.1.10');
+define('QUERYRA_VERSION', '1.1.11');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -89,6 +89,31 @@ class Queryra_Search {
 
         // Initialize search integration (AI-powered search)
         new Queryra_Search_Integration();
+
+        // Frontend fingerprint: enqueue stylesheet + generator meta tag
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
+        add_action('wp_head', array($this, 'output_generator_meta'), 1);
+    }
+
+    /**
+     * Enqueue a minimal frontend stylesheet so the plugin is discoverable
+     * by WordPress ecosystem crawlers (themesinfo, WPHive, Wappalyzer).
+     */
+    public function enqueue_frontend_assets() {
+        wp_enqueue_style(
+            'queryra-ai-search',
+            QUERYRA_PLUGIN_URL . 'css/queryra.css',
+            array(),
+            QUERYRA_VERSION
+        );
+    }
+
+    /**
+     * Output generator meta tag so detection tools (BuiltWith, Wappalyzer)
+     * can fingerprint the plugin and its version.
+     */
+    public function output_generator_meta() {
+        echo '<meta name="generator" content="Queryra AI Search ' . esc_attr(QUERYRA_VERSION) . '" />' . "\n";
     }
 
     /**
@@ -120,7 +145,7 @@ class Queryra_Search {
         <script>
         jQuery(document).ready(function($) {
             $('.queryra-114-notice').on('click', '.notice-dismiss', function() {
-                $.post(ajaxurl, { action: 'queryra_dismiss_114_notice', _ajax_nonce: '<?php echo wp_create_nonce('queryra_dismiss_114'); ?>' });
+                $.post(ajaxurl, { action: 'queryra_dismiss_114_notice', _ajax_nonce: '<?php echo esc_attr(wp_create_nonce('queryra_dismiss_114')); ?>' });
             });
         });
         </script>

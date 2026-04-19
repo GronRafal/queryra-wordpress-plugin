@@ -61,15 +61,88 @@ jQuery(document).ready(function($) {
         });
     }
 
+    // Step 2: Post-type checkboxes — dynamic summary + Start button gating
+    function updateImportSummary() {
+        var $container = $('#queryra-import-types');
+        if (!$container.length) return;
+
+        var limit = parseInt($container.data('limit'), 10) || 0;
+        var total = 0;
+        var selectedCount = 0;
+
+        $('.queryra-type-checkbox').each(function() {
+            if ($(this).is(':checked') && !$(this).is(':disabled')) {
+                total += parseInt($(this).data('count'), 10) || 0;
+                selectedCount++;
+            }
+        });
+
+        $('#queryra-summary-within-limit, #queryra-summary-over-limit, #queryra-summary-none').hide();
+
+        var $startBtn = $('#queryra-start-import');
+
+        if (selectedCount === 0) {
+            $('#queryra-summary-none').show();
+            $startBtn.prop('disabled', true);
+        } else if (limit > 0 && total > limit) {
+            $('#queryra-selected-total').text(total.toLocaleString());
+            $('#queryra-summary-over-limit').show();
+            $startBtn.prop('disabled', false);
+        } else {
+            $('#queryra-will-import-count').text(total.toLocaleString());
+            $('#queryra-summary-within-limit').show();
+            $startBtn.prop('disabled', false);
+        }
+    }
+
+    $('.queryra-type-checkbox').on('change', updateImportSummary);
+    updateImportSummary();
+
     // Step 2: Start Import (batched)
     $('#queryra-start-import').on('click', function() {
         var $button = $(this);
 
-        $button.prop('disabled', true).text('Checking plan...');
+        var selectedTypes = $('.queryra-type-checkbox:checked').map(function() {
+            return $(this).val();
+        }).get();
+
+        if (selectedTypes.length === 0) {
+            alert('Please select at least one content type to import.');
+            return;
+        }
+
+        $button.prop('disabled', true).text('Saving selection...');
 
         // Show progress bar
         $('#queryra-import-progress').show();
         $('#queryra-import-success').hide();
+
+        // Phase 0: Save selected post types so sync endpoints use them
+        $.ajax({
+            url: queryraWizard.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'queryra_wizard_save_post_types',
+                nonce: queryraWizard.nonce,
+                post_types: selectedTypes
+            },
+            success: function(saveResp) {
+                if (!saveResp.success) {
+                    alert('Error: ' + saveResp.data.message);
+                    resetImportButton($button);
+                    return;
+                }
+                fetchSyncInfoAndImport($button);
+            },
+            error: function() {
+                alert('Failed to save content type selection. Please try again.');
+                resetImportButton($button);
+            }
+        });
+    });
+
+    function fetchSyncInfoAndImport($button) {
+        $button.text('Checking plan...');
 
         // Phase 1: Get sync info (plan limits, batch size)
         $.ajax({
@@ -110,7 +183,7 @@ jQuery(document).ready(function($) {
                 resetImportButton($button);
             }
         });
-    });
+    }
 
     function startWizardBatchSync($button, info) {
         var offset = 0;

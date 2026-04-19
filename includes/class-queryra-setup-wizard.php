@@ -36,7 +36,7 @@ class Queryra_Setup_Wizard {
 
         // AJAX handlers
         add_action('wp_ajax_queryra_wizard_save_api_key', array($this, 'ajax_save_api_key'));
-        add_action('wp_ajax_queryra_wizard_import', array($this, 'ajax_import_content'));
+        add_action('wp_ajax_queryra_wizard_save_post_types', array($this, 'ajax_save_post_types'));
         add_action('wp_ajax_queryra_wizard_check_status', array($this, 'ajax_check_status'));
         add_action('wp_ajax_queryra_wizard_test_search', array($this, 'ajax_test_search'));
         add_action('wp_ajax_queryra_wizard_mark_import_done', array($this, 'ajax_mark_import_done'));
@@ -390,62 +390,68 @@ class Queryra_Setup_Wizard {
                 </p>
             </div>
 
-            <!-- What Will Be Imported -->
-            <div style="background: #fff; border: 2px solid #2271b1; padding: 25px; border-radius: 8px; margin: 25px 0;">
+            <!-- Select Content Types -->
+            <div id="queryra-import-types" style="background: #fff; border: 2px solid #2271b1; padding: 25px; border-radius: 8px; margin: 25px 0;" data-limit="<?php echo (int) $limit; ?>">
                 <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1d2327;">
                     <span class="dashicons dashicons-upload" style="color: #2271b1; font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
-                    What will be imported:
+                    Select what to import:
                 </h3>
 
-                <?php if (!$is_over_limit): ?>
-                    <!-- Everything fits within limit -->
-                    <div style="background: #e7f7ed; padding: 20px; border-radius: 4px; margin-bottom: 15px;">
-                        <p style="margin: 0 0 15px 0; font-size: 16px; color: #1d2327;">
-                            <span style="color: #00a32a; font-size: 24px; margin-right: 8px;">✅</span>
-                            <strong>All your content will be imported!</strong>
-                        </p>
-                        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-                            <?php if ($published_posts > 0): ?>
-                            <div style="text-align: center; min-width: 80px;">
-                                <div style="font-size: 32px; font-weight: 700; color: #00a32a; line-height: 1;"><?php echo number_format($published_posts); ?></div>
-                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #646970;">Posts</p>
-                            </div>
-                            <?php endif; ?>
-                            <?php if ($published_pages > 0): ?>
-                            <div style="text-align: center; min-width: 80px;">
-                                <div style="font-size: 32px; font-weight: 700; color: #00a32a; line-height: 1;"><?php echo number_format($published_pages); ?></div>
-                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #646970;">Pages</p>
-                            </div>
-                            <?php endif; ?>
-                            <?php if ($has_woocommerce && $published_products > 0): ?>
-                            <div style="text-align: center; min-width: 80px;">
-                                <div style="font-size: 32px; font-weight: 700; color: #00a32a; line-height: 1;"><?php echo number_format($published_products); ?></div>
-                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #646970;">Products</p>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <!-- Over limit - show what fits -->
-                    <div style="background: #fff3cd; padding: 20px; border-radius: 4px; margin-bottom: 15px;">
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
+                        <input type="checkbox" class="queryra-type-checkbox" value="post" data-count="<?php echo (int) $published_posts; ?>" checked <?php disabled($published_posts, 0); ?>>
+                        <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($published_posts); ?></strong>
+                        <span>Posts</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
+                        <input type="checkbox" class="queryra-type-checkbox" value="page" data-count="<?php echo (int) $published_pages; ?>" checked <?php disabled($published_pages, 0); ?>>
+                        <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($published_pages); ?></strong>
+                        <span>Pages</span>
+                    </label>
+                    <?php if ($has_woocommerce): ?>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
+                        <input type="checkbox" class="queryra-type-checkbox" value="product" data-count="<?php echo (int) $published_products; ?>" checked <?php disabled($published_products, 0); ?>>
+                        <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($published_products); ?></strong>
+                        <span>Products</span>
+                    </label>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Summary: within limit -->
+                <div id="queryra-summary-within-limit" style="display: none; background: #e7f7ed; padding: 15px 20px; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 15px; color: #1d2327;">
+                        <span style="color: #00a32a; font-size: 20px; margin-right: 8px;">✅</span>
+                        <strong><span id="queryra-will-import-count">0</span> records</strong> will be imported.
+                    </p>
+                </div>
+
+                <!-- Summary: over limit -->
+                <div id="queryra-summary-over-limit" style="display: none;">
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 4px; margin-bottom: 12px;">
                         <p style="margin: 0 0 10px 0; font-size: 16px; color: #856404;">
                             <span class="dashicons dashicons-info" style="font-size: 20px; width: 20px; height: 20px;"></span>
                             <strong>Plan Limit Reached</strong>
                         </p>
                         <p style="margin: 0; font-size: 14px; color: #646970;">
-                            You have <strong><?php echo number_format($total_content); ?> total records</strong>, but your plan allows <strong><?php echo number_format($limit); ?> records</strong>.
+                            You selected <strong><span id="queryra-selected-total">0</span> records</strong>, but your plan allows <strong><?php echo number_format($limit); ?> records</strong>.
                         </p>
                         <p style="margin: 10px 0 0 0; font-size: 14px; color: #646970;">
-                            We'll import the <strong><?php echo number_format($will_import); ?> most recent records</strong> (sorted by publish date).
+                            We'll import the <strong><?php echo number_format($limit); ?> most recent records</strong> (sorted by publish date, across the selected types).
                         </p>
                     </div>
                     <div style="background: #e7f3ff; padding: 15px; border-radius: 4px;">
                         <p style="margin: 0; font-size: 13px; color: #646970;">
-                            Want to import all <?php echo number_format($total_content); ?> records?
-                            <a href="https://queryra.com/pricing" target="_blank" style="color: #2271b1; text-decoration: underline;">Upgrade your plan</a>
+                            Need more records? <a href="https://queryra.com/dashboard" target="_blank" style="color: #2271b1; text-decoration: underline; font-weight: 600;">Request an increase from your Queryra dashboard →</a>
                         </p>
                     </div>
-                <?php endif; ?>
+                </div>
+
+                <!-- Summary: nothing selected -->
+                <div id="queryra-summary-none" style="display: none; background: #fef2f2; padding: 15px 20px; border-radius: 4px; border-left: 4px solid #dc3232;">
+                    <p style="margin: 0; font-size: 14px; color: #dc3232;">
+                        Please select at least one content type to import.
+                    </p>
+                </div>
             </div>
 
             <!-- Info Box -->
@@ -547,13 +553,7 @@ class Queryra_Setup_Wizard {
         // Auto-set plugin settings (hidden)
         update_option('queryra_enabled', '1');
         update_option('queryra_auto_sync', '1');
-
-        // Build post types - include products if WooCommerce active
-        $post_types = array('post', 'page');
-        if (class_exists('WooCommerce')) {
-            $post_types[] = 'product';
-        }
-        update_option('queryra_post_types', $post_types);
+        // Note: queryra_post_types is set by the user in step 2 (see ajax_save_post_types)
 
         ?>
         <div class="queryra-wizard-step">
@@ -744,9 +744,11 @@ class Queryra_Setup_Wizard {
     }
 
     /**
-     * AJAX: Import content
+     * AJAX: Save selected post types before starting wizard import.
+     * The sync endpoints (get_sync_info, sync_batch) then use the
+     * queryra_post_types option for the import.
      */
-    public function ajax_import_content() {
+    public function ajax_save_post_types() {
         check_ajax_referer('queryra_wizard', 'nonce');
 
         if (!current_user_can('manage_options')) {
@@ -754,52 +756,31 @@ class Queryra_Setup_Wizard {
             return;
         }
 
-        // Get stats to know the limit
-        $stats = get_option('queryra_cached_stats');
-        $limit = isset($stats['record_limit']) ? $stats['record_limit'] : 100;
-
-        // Build post types array
-        $post_types = array('post', 'page');
-
-        // Add products if WooCommerce is active
-        if (class_exists('WooCommerce')) {
-            $post_types[] = 'product';
+        $raw = array();
+        if (isset($_POST['post_types']) && is_array($_POST['post_types'])) {
+            $raw = array_map('sanitize_key', wp_unslash($_POST['post_types']));
         }
 
-        // Get all published content (posts, pages, products) up to limit
-        $all_content = get_posts(array(
-            'post_type' => $post_types,
-            'post_status' => 'publish',
-            'numberposts' => $limit,
-            'orderby' => 'date',
-            'order' => 'DESC'
-        ));
+        $allowed = array('post', 'page');
+        if (class_exists('WooCommerce')) {
+            $allowed[] = 'product';
+        }
 
-        if (empty($all_content)) {
-            wp_send_json_error(array('message' => 'No content found to import'));
+        $selected = array();
+        foreach ($raw as $type) {
+            if (in_array($type, $allowed, true)) {
+                $selected[] = $type;
+            }
+        }
+
+        if (empty($selected)) {
+            wp_send_json_error(array('message' => 'Select at least one content type.'));
             return;
         }
 
-        // Get post IDs
-        $post_ids = array_map(function($post) {
-            return $post->ID;
-        }, $all_content);
+        update_option('queryra_post_types', array_values(array_unique($selected)));
 
-        // Use existing sync functionality
-        $sync = new Queryra_Sync();
-        $result = $sync->sync_posts($post_ids);
-
-        if ($result['success']) {
-            // Save that wizard import was completed
-            update_option('queryra_wizard_import_done', '1');
-
-            wp_send_json_success(array(
-                'message' => sprintf('Successfully imported %d records', count($all_content)),
-                'imported' => count($all_content)
-            ));
-        } else {
-            wp_send_json_error(array('message' => $result['message']));
-        }
+        wp_send_json_success(array('post_types' => $selected));
     }
 
     /**

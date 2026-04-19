@@ -1,0 +1,7 @@
+/*!
+ * Queryra AI Search — https://queryra.com
+ * Semantic search for WordPress & WooCommerce
+ */
+.queryra-search-indicator{display:none}
+.queryra-search-active .queryra-search-indicator{display:inline-block;vertical-align:middle}
+.queryra-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}

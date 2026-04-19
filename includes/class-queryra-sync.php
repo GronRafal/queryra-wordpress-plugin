@@ -33,7 +33,6 @@ class Queryra_Sync {
         }
 
         // AJAX handlers for manual sync
-        add_action('wp_ajax_queryra_sync_all', array($this, 'ajax_sync_all'));
         add_action('wp_ajax_queryra_test_connection', array($this, 'ajax_test_connection'));
 
         // Batched sync AJAX handlers
@@ -416,47 +415,6 @@ class Queryra_Sync {
             wp_send_json_error(array(
                 'message' => $result['message'],
             ));
-        }
-    }
-
-    /**
-     * AJAX: Sync all posts (legacy - kept for backward compatibility)
-     */
-    public function ajax_sync_all() {
-        check_ajax_referer('queryra_sync', 'nonce');
-
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Unauthorized'));
-        }
-
-        // Get all published posts
-        $post_types = get_option('queryra_post_types', array('post', 'page'));
-
-        $args = array(
-            'post_type' => $post_types,
-            'post_status' => 'publish',
-            'posts_per_page' => -1,
-            'fields' => 'ids'
-        );
-
-        $post_ids = get_posts($args);
-
-        if (empty($post_ids)) {
-            wp_send_json_error(array('message' => 'No posts found'));
-        }
-
-        // Track sync start
-        Queryra_Analytics::track('sync_started');
-
-        // Sync posts
-        $result = $this->sync_posts($post_ids);
-
-        if ($result['success']) {
-            // Track sync completion
-            Queryra_Analytics::track('sync_completed');
-            wp_send_json_success($result);
-        } else {
-            wp_send_json_error($result);
         }
     }
 

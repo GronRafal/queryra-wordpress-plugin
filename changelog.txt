@@ -1,5 +1,11 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-04-20 - version 1.1.11
+* Added - AI search plugin fingerprint (meta generator tag + minimal stylesheet) for WordPress ecosystem discoverability (themesinfo, WPHive, Wappalyzer, BuiltWith)
+* Added - Wizard content type selection — pick which post types to send to AI search (posts, pages, WooCommerce products)
+* Improved - Removed legacy non-batched import paths — AI search content import is now always batched
+* Improved - Admin notice dismissal: nonce output now escaped with esc_attr() for defense-in-depth security
+
 2026-04-09 - version 1.1.10
 * Fixed - Null safety check for WooCommerce product sync operations (PHP 8.0+ compatibility)
 * Fixed - Added nonce verification to admin notice dismissal for improved security

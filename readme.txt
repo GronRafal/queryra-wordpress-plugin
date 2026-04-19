@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, ai product search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.10
+Stable tag: 1.1.11
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -189,6 +189,13 @@ Yes. AI Search includes Boost Controls — you can promote specific products or 
 
 == Changelog ==
 
+= 1.1.11 (2026-04-20) =
+* Added: AI search plugin fingerprint (meta generator tag + minimal stylesheet) for WordPress ecosystem discoverability — Queryra AI search is now properly indexed by WPScan, WPHive, PluginTests, Wappalyzer, and BuiltWith
+* Added: Privacy section documenting AI search data handling — what content is sent to the semantic search API, what is never sent, and how WooCommerce store owners stay in control
+* Added: Wizard now lets you select which content types to send to AI search (posts, pages, WooCommerce products) instead of importing everything by default
+* Improved: Removed legacy non-batched import code paths — AI search content import is now always batched for reliability on large WooCommerce catalogs
+* Improved: Admin notice dismissal nonce output now escaped with esc_attr() for defense-in-depth security
+
 = 1.1.10 (2026-04-09) =
 * Fixed: Null safety check for WooCommerce product sync operations (PHP 8.0+ compatibility)
 * Fixed: Added nonce verification to admin notice dismissal for improved security
@@ -269,6 +276,17 @@ Yes. AI Search includes Boost Controls — you can promote specific products or 
 
 == Upgrade Notice ==
 
+= 1.1.11 =
+Minor improvement release. Adds AI search plugin discoverability for
+WordPress ecosystem tools, wizard content type selection, Privacy section
+documenting AI search data handling, and hardens admin notice escaping.
+Safe to update.
+
+= 1.1.10 =
+Security and stability release. PHP 8.0+ null safety for WooCommerce
+product sync, nonce verification on admin notices, and improved semantic
+search index reliability during product deletions.
+
 = 1.1.9 =
 AI search ranking and semantic search accuracy improvements for WooCommerce
 product search.
@@ -292,6 +310,76 @@ AI search cache controls and content type filtering added.
 = 1.1.1 =
 Major update: full WooCommerce product search with AI semantic search. SKU,
 price, and attribute indexing added.
+
+== Privacy ==
+
+Queryra is built with privacy in mind. This section explains exactly what
+data leaves your WordPress site, what stays local, and how you stay in
+control as the store owner.
+
+= What Queryra sends to the API =
+
+**Content indexing (posts, pages, products):**
+For every published item of the post types you enable (default: posts and
+pages; optionally products), Queryra sends:
+
+* Title, content, excerpt (HTML stripped)
+* Post type, permalink, featured image URL
+* Categories and tags (names only)
+* For WooCommerce products: price, stock quantity, SKU, brand, short description, product attributes (e.g. Color, Size)
+* Featured/sticky flag (used to boost ranking of highlighted content)
+
+That's it. This is the same data your site already shows publicly on the
+frontend — Queryra does not read private posts, drafts, or protected content.
+
+**Search queries:**
+When a visitor types in your search box, only the query text is sent to the
+API. The API returns matching post IDs, which WordPress then renders
+normally from your own database.
+
+**Anonymous usage analytics:**
+On plugin activation and deactivation, Queryra sends: a randomly generated
+instance UUID (stored locally, no link to any user), WordPress version,
+PHP version, plugin version, WooCommerce active flag, and counts of posts,
+pages and products. This helps us prioritize compatibility fixes. You can
+disable this entirely by adding the following line to your wp-config.php:
+
+`define('QUERYRA_DISABLE_ANALYTICS', true);`
+
+= What Queryra NEVER sends =
+
+* No visitor IP addresses
+* No user agents or browser fingerprints
+* No cookies or session identifiers
+* No customer accounts, emails, or order data
+* No browsing history or behavior tracking
+* No personally identifiable information (PII) about searchers or customers
+* No private, draft, password-protected or unpublished content
+
+= Your control as a store owner =
+
+* Choose which post types are indexed (Settings → Queryra)
+* Disable AI search anytime — WordPress falls back to native search
+* Deactivate the plugin to stop all data transmission
+* Delete indexed records from the Queryra dashboard
+
+= Security =
+
+Queryra is publicly tracked by independent security and quality services:
+
+* [WPScan vulnerability database](https://wpscan.com/plugin/queryra-ai-search)
+* [PluginTests static analysis and smoke tests](https://plugintests.com/plugins/wporg/queryra-ai-search/latest)
+* [Source code on GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)
+
+**No third-party frontend scripts:** Queryra loads only its own minimal
+stylesheet on public pages. No external JavaScript, no tracking pixels,
+no third-party CDN requests on the frontend.
+
+**Responsible disclosure:** Found a security issue? Email
+contact@queryra.com. We will investigate on a best-effort basis and credit
+reporters in the changelog.
+
+**Full privacy policy:** [queryra.com/privacy](https://queryra.com/privacy)
 
 == Additional Information ==
 
