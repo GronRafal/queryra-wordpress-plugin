@@ -1,5 +1,18 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-05-07 - version 1.2.0
+* Added - AI Discoverability: dynamic /llms.txt and /llms-full.txt for ChatGPT, Perplexity, Claude, Google AI Overviews
+* Added - Static file detection — if you already have llms.txt, the admin shows a copy-paste snippet to add the Queryra AI Search section
+* Added - JSON-LD structured data: SearchResultsPage schema on search pages, Service schema site-wide, both attributing search to Queryra
+* Added - X-Search-Engine HTTP header on search responses
+* Added - Plugin row meta links on Plugins page: Live Demo, Docs, Support, conditional "Get API Key" when no key is set
+* Added - Settings tab: "Try a test search" shortcut to wizard step 4
+* Added - Dismissible tip card on Settings & wizard step 4 — quick wins for telling visitors that AI search is available
+* Added - Support tab: Clubs section (Sandbox + partner program) and "Need more records or searches?" link to dashboard
+* Improved - Support tab: "Documentation" renamed to "Resources" for broader scope (compatibility matrix, plugin tests)
+* Improved - All external admin links carry rel="noopener noreferrer" for security
+* Removed - Obsolete 1.1.4 upgrade notice and AJAX handler
+
 2026-04-20 - version 1.1.11
 * Added - AI search plugin fingerprint (meta generator tag + minimal stylesheet) for WordPress ecosystem discoverability (themesinfo, WPHive, Wappalyzer, BuiltWith)
 * Added - Wizard content type selection — pick which post types to send to AI search (posts, pages, WooCommerce products)

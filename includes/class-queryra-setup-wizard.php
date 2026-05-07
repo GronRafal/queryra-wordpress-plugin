@@ -694,6 +694,14 @@ class Queryra_Setup_Wizard {
                 <div id="queryra-search-error" style="display: none; margin-top: 20px;"></div>
             </div>
 
+            <?php
+            // "Tell your visitors about AI search" tip — same component as Settings tab,
+            // shared dismiss state so users don't see it twice after acknowledging.
+            if (class_exists('Queryra_Admin')) {
+                Queryra_Admin::render_ux_tip();
+            }
+            ?>
+
             <!-- Finish Button -->
             <div style="display: flex; gap: 15px; margin-top: 30px;">
                 <a href="?page=queryra-search" class="queryra-button queryra-button-primary queryra-button-large" style="flex: 1; justify-content: center; text-decoration: none;">

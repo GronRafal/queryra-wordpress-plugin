@@ -33,6 +33,42 @@ class Queryra_Admin {
 
         // AJAX handler for clearing cache
         add_action('wp_ajax_queryra_clear_cache', array($this, 'ajax_clear_cache'));
+
+        // AJAX handler for dismissing the UX tip (shared between Settings tab and wizard)
+        add_action('wp_ajax_queryra_dismiss_ux_tip', array($this, 'ajax_dismiss_ux_tip'));
+
+        // Plugins page row links
+        add_filter('plugin_action_links_' . QUERYRA_PLUGIN_BASENAME, array($this, 'add_action_links'));
+        add_filter('plugin_row_meta', array($this, 'add_row_meta'), 10, 2);
+    }
+
+    /**
+     * Add "Settings" link to plugin action links (left side on Plugins page).
+     */
+    public function add_action_links($links) {
+        $settings_link = '<a href="' . esc_url(admin_url('admin.php?page=queryra-search&tab=settings')) . '">' . esc_html__('Settings', 'queryra-ai-search') . '</a>';
+        array_unshift($links, $settings_link);
+
+        // Show "Get API Key" only if no key configured yet.
+        if (!get_option('queryra_api_key')) {
+            $get_key_link = '<a href="https://queryra.com/dashboard" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#2271b1;">' . esc_html__('Get API Key', 'queryra-ai-search') . '</a>';
+            array_unshift($links, $get_key_link);
+        }
+
+        return $links;
+    }
+
+    /**
+     * Add meta links (right side on Plugins page) below the description.
+     */
+    public function add_row_meta($links, $file) {
+        if ($file !== QUERYRA_PLUGIN_BASENAME) {
+            return $links;
+        }
+        $links[] = '<a href="https://woo.queryra.com" target="_blank" rel="noopener noreferrer">' . esc_html__('Live Demo', 'queryra-ai-search') . '</a>';
+        $links[] = '<a href="https://queryra.com/docs" target="_blank" rel="noopener noreferrer">' . esc_html__('Docs', 'queryra-ai-search') . '</a>';
+        $links[] = '<a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" rel="noopener noreferrer">' . esc_html__('Support', 'queryra-ai-search') . '</a>';
+        return $links;
     }
 
     /**
@@ -84,6 +120,23 @@ class Queryra_Admin {
             'sanitize_callback' => 'intval',
             'default' => 86400
         ));
+        // AI Discoverability — enabled by default so the plugin earns
+        // attribution from LLMs (ChatGPT, Perplexity, Claude) out of the box.
+        register_setting('queryra_settings', 'queryra_generate_llms_txt', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => true
+        ));
+        register_setting('queryra_settings', 'queryra_generate_llms_full_txt', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => true
+        ));
+        register_setting('queryra_settings', 'queryra_output_schema', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => true
+        ));
     }
 
     /**
@@ -115,6 +168,74 @@ class Queryra_Admin {
         }
 
         return $result;
+    }
+
+    /**
+     * Render the "tell your visitors about AI search" tip card.
+     * Shared between Settings tab and the setup wizard so both surfaces
+     * carry the same message and dismiss state.
+     *
+     * Returns nothing if the user already dismissed the tip.
+     */
+    public static function render_ux_tip() {
+        if (get_option('queryra_ux_tip_dismissed') === '1') {
+            return;
+        }
+        $nonce = wp_create_nonce('queryra_dismiss_ux_tip');
+        ?>
+        <div class="queryra-ux-tip" style="background: #fffaf0; border: 1px solid #ccd0d4; border-left: 4px solid #f0b849; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; margin: 20px 0;">
+            <h2 style="margin: 0 0 10px 0; padding-bottom: 10px; border-bottom: 1px solid #eee; font-size: 20px;">
+                <span class="dashicons dashicons-lightbulb" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px; color: #f0b849;"></span>
+                Tip: tell your visitors you have AI search
+            </h2>
+            <p style="margin: 0 0 12px 0;">
+                Most visitors search like on Google — one or two keywords. They won't unlock AI semantic search unless they know it's there. A few tiny tweaks change everything:
+            </p>
+
+            <div style="display: grid; grid-template-columns: 28px 1fr; gap: 8px 12px; margin: 12px 0; align-items: start;">
+                <div style="font-size: 18px;">🏷️</div>
+                <div>
+                    <strong>Relabel the search field</strong><br>
+                    <code>Search</code> → <code>AI Search</code> or <code>Smart Search</code>
+                </div>
+
+                <div style="font-size: 18px;">✏️</div>
+                <div>
+                    <strong>Update the placeholder text</strong><br>
+                    <code>Search products...</code> → <code>Describe what you need...</code> or <code>Ask in your own words...</code>
+                </div>
+
+                <div style="font-size: 18px;">💬</div>
+                <div>
+                    <strong>Add a hint below the search bar</strong><br>
+                    e.g. <em>"Try a full sentence or question"</em>, <em>"Powered by AI — search naturally"</em>
+                </div>
+            </div>
+
+            <p style="margin: 12px 0 0 0; font-size: 13px; color: #646970;">
+                Where to change this depends on your theme: block themes use the Site Editor, page builders (Elementor, Divi) have a search widget, classic themes use <code>searchform.php</code>.
+            </p>
+
+            <p style="margin-top: 16px;">
+                <button type="button" class="button button-primary queryra-ux-tip-dismiss" data-nonce="<?php echo esc_attr($nonce); ?>">
+                    Got it
+                </button>
+            </p>
+        </div>
+        <script>
+        (function($) {
+            $(document).on('click', '.queryra-ux-tip-dismiss', function() {
+                var $btn = $(this);
+                var $card = $btn.closest('.queryra-ux-tip');
+                $.post(ajaxurl, {
+                    action: 'queryra_dismiss_ux_tip',
+                    _ajax_nonce: $btn.data('nonce')
+                });
+                $card.slideUp(300, function() { $card.remove(); });
+            });
+        })(jQuery);
+        </script>
+        <?php
     }
 
     /**
@@ -180,6 +301,9 @@ class Queryra_Admin {
         $auto_sync = get_option('queryra_auto_sync', '1');
         $ai_search = get_option('queryra_ai_search', '0'); // Disabled by default
         $post_types = get_option('queryra_post_types', array('post', 'page'));
+        $generate_llms_txt      = get_option('queryra_generate_llms_txt', '1');
+        $generate_llms_full_txt = get_option('queryra_generate_llms_full_txt', '1');
+        $output_schema          = get_option('queryra_output_schema', '1');
 
         // Get available post types (exclude attachment/media and revisions)
         $all_post_types = get_post_types(array('public' => true), 'objects');
@@ -341,16 +465,186 @@ class Queryra_Admin {
                                         <p class="description" style="margin-top: 8px;">
                                             When enabled, WordPress native search will automatically use Queryra AI for intelligent, semantic search results.
                                         </p>
+                                        <?php if (!empty($api_key) && $ai_search === '1'): ?>
+                                            <p style="margin-top: 10px;">
+                                                <a href="<?php echo esc_url(admin_url('admin.php?page=queryra-setup-wizard&step=4')); ?>" class="button button-secondary">
+                                                    <span class="dashicons dashicons-search" style="font-size: 16px; width: 16px; height: 16px; vertical-align: text-bottom;"></span>
+                                                    Try a test search
+                                                </a>
+                                                <span class="description" style="margin-left: 6px;">Run a sample query in the wizard sandbox.</span>
+                                            </p>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             </table>
 
                             <p style="margin-top: 20px;">
-                                <a href="https://queryra.com/dashboard/api-keys" target="_blank" class="button button-secondary">
+                                <a href="https://queryra.com/dashboard/api-keys" target="_blank" rel="noopener noreferrer" class="button button-secondary">
                                     Open Dashboard
                                     <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                 </a>
                             </p>
+                        </div>
+
+                        <?php
+                        // Show "tell your visitors about AI search" tip only when AI is enabled
+                        // and the user hasn't dismissed it yet.
+                        if ($ai_search === '1') {
+                            self::render_ux_tip();
+                        }
+                        ?>
+
+                        <div class="queryra-card">
+                            <h2>
+                                <span class="dashicons dashicons-share-alt2" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                                AI Discoverability
+                            </h2>
+                            <p>
+                                Help LLMs (ChatGPT, Perplexity, Claude, Google AI Overviews) discover this site and its AI search capability.
+                                Improves how AI assistants describe your store to users.
+                            </p>
+                            <p style="background:#f0f6fc;border-left:4px solid #2271b1;padding:8px 12px;margin:12px 0;">
+                                <strong>Safe by design:</strong> nothing is written to your filesystem. All discoverability files are generated on-the-fly when an AI crawler asks for them. If a real <code>llms.txt</code> already exists on your server, it always takes priority.
+                            </p>
+
+                            <table class="form-table">
+                                <tr>
+                                    <th scope="row">Structured data</th>
+                                    <td>
+                                        <input type="hidden" name="queryra_output_schema" value="0">
+                                        <label>
+                                            <input type="checkbox"
+                                                   name="queryra_output_schema"
+                                                   value="1"
+                                                   <?php checked($output_schema, '1'); ?>>
+                                            <strong>Output JSON-LD schema &amp; X-Search-Engine header</strong>
+                                        </label>
+                                        <p class="description" style="margin-top: 8px;">
+                                            Adds <code>SearchResultsPage</code> schema on search pages and <code>Service</code> schema site-wide,
+                                            both attributing the search engine to Queryra. Disable only if your SEO plugin already handles this.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <?php
+                                $llms_state      = Queryra_LLMS::detect_static_file_state('llms.txt');
+                                $llms_full_state = Queryra_LLMS::detect_static_file_state('llms-full.txt');
+                                $llms_helper     = new Queryra_LLMS();
+                                ?>
+                                <tr>
+                                    <th scope="row">/llms.txt</th>
+                                    <td>
+                                        <?php // When checkbox is active: hidden=0 lets unchecking disable.
+                                              // When checkbox is disabled (static file): preserve current option value. ?>
+                                        <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo $llms_state === 'none' ? '0' : esc_attr($generate_llms_txt); ?>">
+                                        <label>
+                                            <input type="checkbox"
+                                                   name="queryra_generate_llms_txt"
+                                                   value="1"
+                                                   <?php disabled($llms_state !== 'none'); ?>
+                                                   <?php checked($generate_llms_txt, '1'); ?>>
+                                            <strong>Modify <code>/llms.txt</code> response</strong>
+                                        </label>
+                                        <p class="description" style="margin-top: 8px;">
+                                            When an AI crawler requests <code>/llms.txt</code>, the plugin responds with a brief site identity and AI Search section.
+                                            Proposed standard by <a href="https://llmstxt.org/" target="_blank" rel="noopener noreferrer">llmstxt.org</a>.
+                                            No file is written to disk.
+                                        </p>
+
+                                        <?php if ($llms_state === 'none'): ?>
+                                            <p style="margin-top: 8px;">
+                                                📄 <a href="<?php echo esc_url(home_url('/llms.txt')); ?>" target="_blank" rel="noopener noreferrer">View current /llms.txt →</a>
+                                            </p>
+                                        <?php elseif ($llms_state === 'has_section'): ?>
+                                            <div class="notice notice-success inline" style="margin: 10px 0; padding: 8px 12px;">
+                                                <p style="margin: 0;">
+                                                    ✓ Static <code>/llms.txt</code> detected with a Queryra AI Search section.
+                                                    Looking good — your file is served as-is by the web server.
+                                                </p>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="notice notice-warning inline" style="margin: 10px 0; padding: 8px 12px;">
+                                                <p style="margin: 0 0 8px 0;">
+                                                    ⚠ Static <code>/llms.txt</code> detected at your site root, but it does <strong>not</strong> contain the Queryra AI Search section.
+                                                    The web server serves your file directly, so the plugin can't add this automatically.
+                                                </p>
+                                                <p style="margin: 8px 0 4px 0;">
+                                                    <strong>To get AEO benefit, copy this snippet into your <code>/llms.txt</code>:</strong>
+                                                </p>
+                                                <textarea readonly rows="9" class="large-text code queryra-snippet" onclick="this.select()"><?php echo esc_textarea($llms_helper->get_snippet_short()); ?></textarea>
+                                                <button type="button" class="button button-secondary queryra-copy-snippet" data-target=".queryra-snippet:eq(0)" style="margin-top: 6px;">
+                                                    <span class="dashicons dashicons-clipboard" style="vertical-align: text-bottom;"></span> Copy snippet
+                                                </button>
+                                                <span class="queryra-copy-feedback" style="margin-left: 8px; color: #46b450; display: none;">✓ Copied!</span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">/llms-full.txt</th>
+                                    <td>
+                                        <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo $llms_full_state === 'none' ? '0' : esc_attr($generate_llms_full_txt); ?>">
+                                        <label>
+                                            <input type="checkbox"
+                                                   name="queryra_generate_llms_full_txt"
+                                                   value="1"
+                                                   <?php disabled($llms_full_state !== 'none'); ?>
+                                                   <?php checked($generate_llms_full_txt, '1'); ?>>
+                                            <strong>Modify <code>/llms-full.txt</code> response</strong>
+                                        </label>
+                                        <p class="description" style="margin-top: 8px;">
+                                            Expanded version with detailed AI search capabilities — for deeper AI ingestion.
+                                            Same standard as <code>/llms.txt</code>.
+                                        </p>
+
+                                        <?php if ($llms_full_state === 'none'): ?>
+                                            <p style="margin-top: 8px;">
+                                                📄 <a href="<?php echo esc_url(home_url('/llms-full.txt')); ?>" target="_blank" rel="noopener noreferrer">View current /llms-full.txt →</a>
+                                            </p>
+                                        <?php elseif ($llms_full_state === 'has_section'): ?>
+                                            <div class="notice notice-success inline" style="margin: 10px 0; padding: 8px 12px;">
+                                                <p style="margin: 0;">
+                                                    ✓ Static <code>/llms-full.txt</code> detected with a Queryra AI Search section.
+                                                    Looking good.
+                                                </p>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="notice notice-warning inline" style="margin: 10px 0; padding: 8px 12px;">
+                                                <p style="margin: 0 0 8px 0;">
+                                                    ⚠ Static <code>/llms-full.txt</code> detected, but missing the Queryra AI Search section.
+                                                </p>
+                                                <p style="margin: 8px 0 4px 0;">
+                                                    <strong>Copy this expanded snippet into your <code>/llms-full.txt</code>:</strong>
+                                                </p>
+                                                <textarea readonly rows="20" class="large-text code queryra-snippet" onclick="this.select()"><?php echo esc_textarea($llms_helper->get_snippet_full()); ?></textarea>
+                                                <button type="button" class="button button-secondary queryra-copy-snippet" data-target=".queryra-snippet:eq(1)" style="margin-top: 6px;">
+                                                    <span class="dashicons dashicons-clipboard" style="vertical-align: text-bottom;"></span> Copy snippet
+                                                </button>
+                                                <span class="queryra-copy-feedback" style="margin-left: 8px; color: #46b450; display: none;">✓ Copied!</span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <script>
+                            (function($) {
+                                $(document).on('click', '.queryra-copy-snippet', function() {
+                                    var $btn = $(this);
+                                    var $textarea = $btn.closest('.notice').find('textarea.queryra-snippet');
+                                    if (!$textarea.length) return;
+                                    $textarea[0].select();
+                                    try {
+                                        document.execCommand('copy');
+                                        $textarea[0].setSelectionRange(0, 0);
+                                        var $feedback = $btn.siblings('.queryra-copy-feedback');
+                                        $feedback.fadeIn(150);
+                                        setTimeout(function() { $feedback.fadeOut(300); }, 2000);
+                                    } catch (e) {
+                                        // Fallback: textarea is already selected, user can Ctrl/Cmd+C.
+                                    }
+                                });
+                            })(jQuery);
+                            </script>
                         </div>
 
                         <?php submit_button('Save Settings'); ?>
@@ -365,6 +659,9 @@ class Queryra_Admin {
                         <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
                         <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
                         <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
+                        <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
+                        <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
+                        <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
                         <!-- Preserve product post type if selected in WooCommerce tab -->
                         <?php if (in_array('product', $post_types)): ?>
                             <input type="hidden" name="queryra_post_types[]" value="product">
@@ -615,7 +912,7 @@ class Queryra_Admin {
                         </ul>
 
                         <p style="margin-top: 20px;">
-                            <a href="https://queryra.com/dashboard/records" target="_blank" class="button button-secondary">
+                            <a href="https://queryra.com/dashboard/records" target="_blank" rel="noopener noreferrer" class="button button-secondary">
                                 Open Dashboard
                                 <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                             </a>
@@ -734,7 +1031,7 @@ class Queryra_Admin {
                                 Sync happens in Queryra Dashboard where your records are processed and prepared for AI search.
                                 View sync history, logs, and trigger sync manually.
                             </p>
-                            <a href="https://queryra.com/dashboard/sync" target="_blank" class="button button-secondary" style="margin-top: 10px;">
+                            <a href="https://queryra.com/dashboard/sync" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="margin-top: 10px;">
                                 Open Dashboard
                                 <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                             </a>
@@ -846,7 +1143,7 @@ class Queryra_Admin {
                         <?php endif; ?>
 
                         <p style="margin-top: 20px;">
-                            <a href="https://queryra.com/dashboard/searches" target="_blank" class="button button-secondary">
+                            <a href="https://queryra.com/dashboard/searches" target="_blank" rel="noopener noreferrer" class="button button-secondary">
                                 View Full Analytics in Dashboard
                                 <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                             </a>
@@ -864,6 +1161,9 @@ class Queryra_Admin {
                             <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
                             <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
                             <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
+                        <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
+                        <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
+                        <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
                             <!-- Preserve non-product post types from Content tab -->
                             <?php foreach ($post_types as $pt): ?>
                                 <?php if ($pt !== 'product'): ?>
@@ -962,7 +1262,7 @@ class Queryra_Admin {
                                     <li>Enable customers to find products using natural language queries</li>
                                 </ul>
                                 <p style="margin-bottom: 0;">
-                                    <a href="https://wordpress.org/plugins/woocommerce/" target="_blank" class="button button-secondary">
+                                    <a href="https://wordpress.org/plugins/woocommerce/" target="_blank" rel="noopener noreferrer" class="button button-secondary">
                                         Learn More About WooCommerce
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -981,6 +1281,9 @@ class Queryra_Admin {
                         <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
                         <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
                         <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
+                        <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
+                        <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
+                        <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
                         <?php foreach ($post_types as $pt): ?>
                             <input type="hidden" name="queryra_post_types[]" value="<?php echo esc_attr($pt); ?>">
                         <?php endforeach; ?>
@@ -1002,7 +1305,7 @@ class Queryra_Admin {
                                 </ul>
                                 <p style="margin: 12px 0 0 0; font-size: 13px; color: #646970;">
                                     Cache is managed automatically by WordPress using Transients API.
-                                    <a href="https://developer.wordpress.org/apis/transients/" target="_blank" style="color: #2271b1;">Learn about WordPress Transients →</a>
+                                    <a href="https://developer.wordpress.org/apis/transients/" target="_blank" rel="noopener noreferrer" style="color: #2271b1;">Learn about WordPress Transients →</a>
                                 </p>
                             </div>
 
@@ -1063,7 +1366,7 @@ class Queryra_Admin {
                                     Dashboard
                                 </th>
                                 <td>
-                                    <a href="https://queryra.com/dashboard" target="_blank" class="button button-secondary">
+                                    <a href="https://queryra.com/dashboard" target="_blank" rel="noopener noreferrer" class="button button-secondary">
                                         Open Dashboard
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -1073,14 +1376,14 @@ class Queryra_Admin {
                             <tr>
                                 <th scope="row">
                                     <span class="dashicons dashicons-book" style="font-size: 20px; width: 20px; height: 20px;"></span>
-                                    Documentation
+                                    Resources
                                 </th>
                                 <td>
-                                    <a href="https://queryra.com/docs/wordpress-integration" target="_blank" class="button button-secondary">
-                                        View Docs
+                                    <a href="https://queryra.com/docs/wordpress-integration" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                        View Resources
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
-                                    <p class="description">Getting started guides, FAQs, and troubleshooting tips</p>
+                                    <p class="description">Getting started guides, plugin compatibility matrix (translation plugins, WooCommerce extensions), FAQs, and troubleshooting</p>
                                 </td>
                             </tr>
                             <tr>
@@ -1089,11 +1392,44 @@ class Queryra_Admin {
                                     Community Help
                                 </th>
                                 <td>
-                                    <a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" class="button button-secondary">
+                                    <a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" rel="noopener noreferrer" class="button button-secondary">
                                         Visit Forum
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
                                     <p class="description">Independent community support on WordPress.org</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <span class="dashicons dashicons-groups" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    Clubs
+                                </th>
+                                <td>
+                                    <a href="https://queryra.com/dashboard/club" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                        Join a Club
+                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                    </a>
+                                    <p class="description">
+                                        <strong>Sandbox:</strong> come in — try Queryra free during your testing period.
+                                        All we ask in return is a link to queryra.com from your site.
+                                        Backlinks matter a lot to us at this stage; it's a small exchange, and we genuinely appreciate it.
+                                        <br><br>
+                                        <strong>Partner clubs:</strong> prefer to earn instead? Join one of our partner clubs — refer users, earn commissions, and keep Queryra free for yourself.
+                                        New clubs are added regularly; pick the one that fits.
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <span class="dashicons dashicons-cloud-upload" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                                    Need more records or searches?
+                                </th>
+                                <td>
+                                    <a href="https://queryra.com/dashboard" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                        Open Dashboard
+                                        <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
+                                    </a>
+                                    <p class="description">If you need more space for testing — more products or posts than your current limit — feel free to send us a request from the dashboard.</p>
                                 </td>
                             </tr>
                             <tr>
@@ -1193,7 +1529,7 @@ class Queryra_Admin {
 
                                     <?php if (!$has_synced): ?>
                                         <p style="margin: 0 0 5px 0; font-size: 13px; color: #646970;">
-                                            • No synced records. <a href="https://queryra.com/dashboard/sync" target="_blank">Sync in Dashboard</a>
+                                            • No synced records. <a href="https://queryra.com/dashboard/sync" target="_blank" rel="noopener noreferrer">Sync in Dashboard</a>
                                         </p>
                                     <?php endif; ?>
 
@@ -1265,5 +1601,19 @@ class Queryra_Admin {
         } else {
             wp_send_json_error('Failed to clear cache');
         }
+    }
+
+    /**
+     * AJAX: Persist that the user has dismissed the "tell visitors about AI search" tip.
+     * Shared option between Settings tab and wizard step 4.
+     */
+    public function ajax_dismiss_ux_tip() {
+        check_ajax_referer('queryra_dismiss_ux_tip');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized', 403);
+            return;
+        }
+        update_option('queryra_ux_tip_dismissed', '1');
+        wp_send_json_success();
     }
 }

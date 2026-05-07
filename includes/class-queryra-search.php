@@ -32,6 +32,140 @@ class Queryra_Search_Integration {
 
         // Override WordPress search with Queryra
         add_action('pre_get_posts', array($this, 'override_search'));
+
+        // SEO/AEO: structured data on search results pages
+        add_action('wp_head', array($this, 'output_search_schema'), 20);
+
+        // SEO/AEO: site-wide Service schema (every frontend page) so LLMs
+        // know the site offers AI semantic search, not just on /?s= pages.
+        add_action('wp_head', array($this, 'output_site_schema'), 21);
+
+        // Fingerprint header on search responses (detection tools, AEO)
+        add_action('send_headers', array($this, 'output_search_header'));
+    }
+
+    /**
+     * Output JSON-LD Service schema describing the AI search capability of
+     * this site. Emitted on every frontend page (except search results — those
+     * already get a stronger SearchResultsPage schema).
+     *
+     * Purpose: when LLMs (ChatGPT, Perplexity, Google AI Overviews) crawl
+     * any page of the site, they learn that natural-language search is
+     * supported and how to use it.
+     */
+    public function output_site_schema() {
+        if (is_admin() || wp_doing_ajax() || is_search() || is_404()) {
+            return;
+        }
+        if (get_option('queryra_ai_search') !== '1' || !get_option('queryra_api_key')) {
+            return;
+        }
+        if (get_option('queryra_output_schema', '1') !== '1') {
+            return;
+        }
+
+        $home = home_url('/');
+
+        $schema = array(
+            '@context'    => 'https://schema.org',
+            '@type'       => 'Service',
+            'name'        => 'AI Semantic Search',
+            'serviceType' => 'Site Search',
+            'description' => 'AI-powered semantic search. Users can search using natural language — describe needs in full sentences, ask questions, use intent. The AI understands meaning, price filters, and brand exclusions.',
+            'provider'    => array(
+                '@type'  => 'Organization',
+                'name'   => 'Queryra',
+                'url'    => 'https://queryra.com',
+                'sameAs' => array(
+                    'https://wordpress.org/plugins/queryra-ai-search/',
+                ),
+            ),
+            'areaServed'  => array(
+                '@type' => 'WebSite',
+                'url'   => $home,
+                'name'  => get_bloginfo('name'),
+            ),
+            'potentialAction' => array(
+                '@type'       => 'SearchAction',
+                'target'      => array(
+                    '@type'       => 'EntryPoint',
+                    'urlTemplate' => $home . '?s={search_term_string}',
+                ),
+                'query-input' => 'required name=search_term_string',
+            ),
+        );
+
+        echo "\n<script type=\"application/ld+json\">"
+            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            . "</script>\n";
+    }
+
+    /**
+     * Output JSON-LD SearchResultsPage schema with Queryra as the search
+     * provider. Helps LLMs and crawlers attribute the search engine.
+     */
+    public function output_search_schema() {
+        if (!is_search()) {
+            return;
+        }
+        if (get_option('queryra_ai_search') !== '1' || !get_option('queryra_api_key')) {
+            return;
+        }
+        if (get_option('queryra_output_schema', '1') !== '1') {
+            return;
+        }
+
+        $search_term = get_search_query();
+        if (empty($search_term)) {
+            return;
+        }
+
+        $schema = array(
+            '@context'  => 'https://schema.org',
+            '@type'     => 'SearchResultsPage',
+            'name'      => sprintf(
+                /* translators: %s: search term */
+                __('Search results for "%s"', 'queryra-ai-search'),
+                $search_term
+            ),
+            'url'       => home_url(add_query_arg(null, null)),
+            'isPartOf'  => array(
+                '@type' => 'WebSite',
+                'url'   => home_url('/'),
+                'name'  => get_bloginfo('name'),
+            ),
+            'provider'  => array(
+                '@type'  => 'Organization',
+                'name'   => 'Queryra',
+                'url'    => 'https://queryra.com',
+                'sameAs' => array(
+                    'https://wordpress.org/plugins/queryra-ai-search/',
+                ),
+            ),
+        );
+
+        echo "\n<script type=\"application/ld+json\">"
+            . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            . "</script>\n";
+    }
+
+    /**
+     * Send X-Search-Engine header on search results pages.
+     */
+    public function output_search_header() {
+        if (!is_search()) {
+            return;
+        }
+        if (get_option('queryra_ai_search') !== '1' || !get_option('queryra_api_key')) {
+            return;
+        }
+        if (get_option('queryra_output_schema', '1') !== '1') {
+            return;
+        }
+        if (headers_sent()) {
+            return;
+        }
+        header('X-Search-Engine: Queryra-AI/' . QUERYRA_VERSION);
     }
 
     /**

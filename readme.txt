@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, ai product search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.11
+Stable tag: 1.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -54,8 +54,7 @@ the brand automatically. No other WooCommerce AI search plugin does this.
 ✅ No OpenAI account needed
 ✅ WooCommerce AI search ready in 5 minutes
 
-[Start your free trial →](https://queryra.com/signup) |
-[See pricing →](https://queryra.com/pricing)
+[Start your free trial →](https://queryra.com/signup)
 
 1. Install and activate
 2. Follow the Setup Wizard
@@ -188,6 +187,19 @@ Yes. AI Search includes Boost Controls — you can promote specific products or 
 6. AI search settings — simple configuration, one API key, no OpenAI account needed
 
 == Changelog ==
+
+= 1.2.0 (2026-05-07) =
+* Added - AI Discoverability: dynamic /llms.txt and /llms-full.txt for AI crawlers
+* Added - JSON-LD structured data (SearchResultsPage + Service schema)
+* Added - X-Search-Engine HTTP header on search responses
+* Added - Static llms.txt detection with copy-paste snippet
+* Added - Plugin row meta links: Live Demo, Docs, Support, Get API Key
+* Added - "Try a test search" shortcut in Settings tab
+* Added - Dismissible tip card — help visitors discover AI search
+* Added - Support tab: Clubs section, "Need more records?" link
+* Improved - Support tab: Documentation → Resources
+* Improved - Security: rel="noopener noreferrer" on external links
+* Removed - Obsolete 1.1.4 upgrade notice
 
 = 1.1.11 (2026-04-20) =
 * Added: AI search plugin fingerprint (meta generator tag + minimal stylesheet) for WordPress ecosystem discoverability — Queryra AI search is now properly indexed by WPScan, WPHive, PluginTests, Wappalyzer, and BuiltWith
@@ -393,7 +405,6 @@ reporters in the changelog.
 = Links =
 
 * [WooCommerce AI Search Live Demo](https://woo.queryra.com)
-* [Pricing](https://queryra.com/pricing)
 * [Partner Program](https://queryra.com/blog/partner-program-pro-for-free)
 * [WooCommerce Search & AI Product Discovery Blog](https://queryra.com/blog)
 * [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)

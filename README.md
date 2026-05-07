@@ -245,6 +245,24 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.2.0 (2026-05-07)
+**AI Discoverability — make your search engine visible to LLMs**
+- New: Dynamic `/llms.txt` and `/llms-full.txt` files for ChatGPT, Perplexity, Claude, Google AI Overviews
+- New: JSON-LD structured data — `SearchResultsPage` on search pages, `Service` schema site-wide, both attributing search to Queryra
+- New: `X-Search-Engine` HTTP header on search responses
+- New: Detects existing static `llms.txt` and offers a copy-paste snippet for manual integration
+
+**Admin UX**
+- New: Plugin row meta links on Plugins page (Live Demo, Docs, Support, conditional Get API Key)
+- New: "Try a test search" shortcut in Settings tab → opens wizard step 4
+- New: Dismissible tip card on Settings & wizard — relabel suggestions to help visitors discover AI search
+- New: Support tab — Clubs section (Sandbox + partner program) and "Need more records or searches?" link
+- Improved: Support tab "Documentation" → "Resources" (broader scope: compatibility matrix, plugin tests)
+
+**Cleanup & Security**
+- Improved: All external admin links use `rel="noopener noreferrer"`
+- Removed: Obsolete 1.1.4 upgrade notice
+
 ### 1.1.8 (2026-03-30)
 **Multilingual search**
 - Updated: Multilingual search now supports 50+ languages out of the box — no configuration needed
