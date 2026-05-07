@@ -48,6 +48,28 @@ AI Search goes further than vector search alone. A natural language query like
 "wireless headphones under $80, not Beats" applies the price filter AND excludes
 the brand automatically. No other WooCommerce AI search plugin does this.
 
+= AI Search Compatible Plugins =
+
+* [TranslatePress](https://queryra.com/docs/translatepress-integration) — multilingual AI search
+* [Weglot](https://queryra.com/docs/weglot-integration) — multilingual AI search
+
+More integrations → [queryra.com/docs](https://queryra.com/docs)
+
+= Make Your Store Discoverable by AI =
+
+AI Search doesn't just help your customers — it helps AI assistants find your store.
+Queryra automatically generates structured data and AI-readable files so ChatGPT,
+Perplexity, Google AI Overviews, and Claude can recommend your products.
+
+* Dynamic /llms.txt and /llms-full.txt for AI crawlers
+* JSON-LD structured data on search pages
+* X-Search-Engine header for AI attribution
+
+Want extra visibility?
+
+* **Free Pro access** — join the [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) and get unlimited AI search at no cost
+* **Store promotion** — your store gets featured on queryra.com and promoted across AI search platforms
+
 = AI Search Setup in 5 Minutes =
 
 ✅ Free trial — no credit card required

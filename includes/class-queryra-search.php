@@ -33,6 +33,12 @@ class Queryra_Search_Integration {
         // Override WordPress search with Queryra
         add_action('pre_get_posts', array($this, 'override_search'));
 
+        // When AI search has produced post__in IDs, nullify the SQL search
+        // WHERE clause so WordPress does not narrow results by literal LIKE
+        // matching. The 's' query var stays intact so themes can display
+        // "Search results for: foo" and the search input keeps the value.
+        add_filter('posts_search', array($this, 'remove_search_sql'), 10, 2);
+
         // SEO/AEO: structured data on search results pages
         add_action('wp_head', array($this, 'output_search_schema'), 20);
 
@@ -337,11 +343,27 @@ class Queryra_Search_Integration {
         $query->set('post__in', $cached_ids);
         $query->set('orderby', 'post__in');
 
-        // Don't filter by search term anymore (we have exact IDs)
-        // But keep 's' parameter for theme to display "Search results for: X"
-        $query->set('s', '');
+        // We deliberately do NOT clear 's' — it stays in query_vars so
+        // themes can display "Search results for: foo" via get_search_query()
+        // and the search input retains the user's query. The SQL LIKE clause
+        // that 's' would normally produce is nullified by remove_search_sql()
+        // (posts_search filter) below, since AI has already done the matching.
 
-        // Store original search term for themes that need it
+        // Backward-compat: keep this for any custom theme that already reads it.
         $query->set('queryra_search_term', $search_term);
+    }
+
+    /**
+     * Strip the WordPress native search WHERE clause when this query was
+     * resolved by Queryra AI. Without this, WP would add
+     *     AND (post_title LIKE '%foo%' OR post_content LIKE '%foo%' …)
+     * which would filter out semantic matches that don't contain the literal
+     * keyword (the whole point of AI search).
+     */
+    public function remove_search_sql($search, $query) {
+        if ($query->get('queryra_ai_used')) {
+            return '';
+        }
+        return $search;
     }
 }
