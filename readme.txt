@@ -1,9 +1,9 @@
 === AI Search for WooCommerce – Semantic Search ===
 Contributors: queryra, aisearch
-Tags: ai search, semantic search, woocommerce search, product search, ai product search
+Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2
+Stable tag: 1.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -55,6 +55,33 @@ the brand automatically. No other WooCommerce AI search plugin does this.
 
 More integrations → [queryra.com/docs](https://queryra.com/docs)
 
+= AI Search for Page Builders & Custom Fields =
+
+Page builder content used to be invisible to WordPress search. Queryra fixes this
+— AI search now reads everything your visitors see:
+
+* **Elementor AI search** — indexes content stored in `_elementor_data`, including
+text widgets, headings, and product descriptions built with Elementor
+* **Beaver Builder & Breakdance** — full content extraction from saved layouts
+* **Oxygen Builder** — both legacy shortcode mode and modern JSON v2 supported
+* **Gutenberg / WPBakery / Divi** — native support (content already in post_content)
+
+= AI Search for Custom Fields & Taxonomies =
+
+Most product data lives in custom fields, not the post content. Queryra reads it
+automatically:
+
+* **ACF (Free + Pro)** — text, textarea, WYSIWYG, repeaters, and groups indexed
+without configuration
+* **Meta Box** — text fields and group fields via the official registry
+* **Custom taxonomies** — `book_genre`, `material`, `property_type`, or any public
+custom taxonomy is sent to the AI search index, keyed by slug
+* **Pods, JetEngine, Bricks Builder** — supported via developer filter
+`queryra_indexable_meta_content`
+
+Smart filtering automatically excludes CSS values, hex colors, URLs, and dates
+from the semantic search index — keeping AI relevance high.
+
 = Make Your Store Discoverable by AI =
 
 AI Search doesn't just help your customers — it helps AI assistants find your store.
@@ -101,6 +128,8 @@ tags, and attributes
 automatically
 * **Search Analytics** – See what customers search for, including zero-result
 queries
+* **Page Builder Support** – Indexes content from Elementor, Beaver Builder, Breakdance, Oxygen automatically
+* **Custom Field Indexing** – Reads ACF and Meta Box custom fields out of the box
 
 = WooCommerce Product Search Works With Any Store =
 
@@ -153,6 +182,9 @@ filter AND excludes the brand. Vector-only plugins ignore both.
 * WooCommerce product SKUs, categories, tags, and custom attributes
 * Regular WordPress posts, pages, and custom post types
 * Any WordPress theme — AI search works without template changes
+* Page builders: Elementor, Breakdance, Beaver Builder, Oxygen, Gutenberg, WPBakery, Divi
+* Custom fields: ACF (Free + Pro), Meta Box
+* Custom taxonomies: any public taxonomy registered with `public => true`
 
 = Minimum Requirements =
 
@@ -199,6 +231,23 @@ Yes. Product variations are fully indexed including variation-specific SKUs, pri
 = Can I control which products appear first in search results? =
 Yes. AI Search includes Boost Controls — you can promote specific products or categories to appear higher in results. Useful for high-margin products or seasonal inventory.
 
+= Does AI Search work with Elementor / Beaver Builder / Oxygen page builders? =
+Yes. AI Search automatically extracts content from Elementor (`_elementor_data`),
+Breakdance, Beaver Builder, and Oxygen (both legacy shortcodes and JSON v2). No
+configuration needed — page builder content is indexed the same way as standard
+post content.
+
+= Does AI Search index ACF and Meta Box custom fields? =
+Yes. AI Search reads ACF (Free + Pro) text, textarea, WYSIWYG, repeater, and
+group fields automatically. Meta Box text and group fields are also supported.
+For Pods, JetEngine, and Bricks Builder, use the developer filter
+`queryra_indexable_meta_content` to specify which fields to index.
+
+= Can I search by custom taxonomies (not just categories and tags)? =
+Yes. Queryra sends all public custom taxonomies (e.g. `book_genre`, `material`,
+`property_type`) to the AI search index in a `taxonomies` field, keyed by slug.
+Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
+
 == Screenshots ==
 
 1. AI search live demo — type "present for my girlfriend" and find gift boxes, skincare sets, perfumes across 200+ WooCommerce products
@@ -209,6 +258,20 @@ Yes. AI Search includes Boost Controls — you can promote specific products or 
 6. AI search settings — simple configuration, one API key, no OpenAI account needed
 
 == Changelog ==
+
+= 1.3.0 (2026-05-14) =
+* Added: AI search now indexes content from Elementor, Breakdance, Beaver Builder, and Oxygen page builders — your product descriptions built with page builders are now fully searchable
+* Added: AI search reads custom fields from ACF (Free + Pro) and Meta Box — text, textarea, WYSIWYG, repeaters, and groups all indexed automatically
+* Added: Custom taxonomies (book_genre, material, property_type, etc.) now sent to AI search index — search by any taxonomy your store uses
+* Added: Smart text filter automatically excludes CSS values, hex colors, URLs, and other technical strings from AI search index
+* Fixed: Search query now properly displays in page title and stays in the search input on results pages
+* Fixed: Duplicate content removed from AI search index — manual excerpts and WooCommerce short descriptions deduplicated against main content for better semantic search accuracy
+* Improved: Bulk import performance dramatically faster on sites with many custom fields — postmeta now prefetched in single query per batch
+* Developer: New filter `queryra_indexable_meta_content` for Pods, JetEngine, and Bricks Builder integration
+* Developer: New filter `queryra_indexable_taxonomies` to control which custom taxonomies are sent to AI search
+* Improved: Semantic search relevance for WooCommerce stores using page builders — AI search now extracts product descriptions from Elementor, Beaver Builder, Breakdance, and Oxygen layouts
+* Improved: AI product search accuracy for WooCommerce stores using ACF and Meta Box custom fields
+* Improved: WordPress search results page now correctly displays the search query for better UX with AI search
 
 = 1.2.0 (2026-05-07) =
 * Added - AI Discoverability: dynamic /llms.txt and /llms-full.txt for AI crawlers
@@ -309,6 +372,15 @@ Yes. AI Search includes Boost Controls — you can promote specific products or 
 * Free trial included — no OpenAI account required
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Major update: AI search now indexes Elementor, Breakdance, Beaver Builder, Oxygen page builders,
+ACF and Meta Box custom fields, and all custom taxonomies. Recommended for all stores using page builders or custom
+fields — search results will be significantly more relevant.
+
+= 1.2.0 =
+AI Discoverability release — Queryra now generates llms.txt and JSON-LD schema so ChatGPT, Perplexity, Claude,
+and Google AI Overviews can find your store.
 
 = 1.1.11 =
 Minor improvement release. Adds AI search plugin discoverability for

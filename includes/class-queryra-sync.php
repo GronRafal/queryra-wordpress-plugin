@@ -136,6 +136,13 @@ class Queryra_Sync {
             );
         }
 
+        // Prefetch all postmeta for this batch in a single query. Without this,
+        // each call to get_post_meta() during build_record() (post content,
+        // builder data, product fields, brand taxonomy meta) would issue its
+        // own SQL query — at 50K records that means hundreds of thousands of
+        // queries and a brutal bulk-import slowdown.
+        update_meta_cache('post', $post_ids);
+
         $records = array();
 
         foreach ($post_ids as $post_id) {
@@ -185,22 +192,35 @@ class Queryra_Sync {
     private function build_record($post) {
         // Get post content (strip HTML tags)
         $content = wp_strip_all_tags($post->post_content);
-        $excerpt = has_excerpt($post->ID) ? get_the_excerpt($post->ID) : wp_trim_words($content, 30);
 
         // Get categories and tags as arrays
         $categories_arr = wp_get_post_categories($post->ID, array('fields' => 'names'));
         $tags_arr = wp_get_post_tags($post->ID, array('fields' => 'names'));
 
-        // Description: excerpt + full content + attributes (for semantic search)
-        // Categories, tags, SKU, brand go as separate fields for parser filtering
+        // Description: manual excerpt (if any) + full content + attributes (for semantic search).
+        // We deliberately do NOT use the auto-generated excerpt (wp_trim_words of $content),
+        // because that would duplicate the first 30 words of content — biasing the embedding
+        // and wasting payload bytes. A manual excerpt is included only if it is not already
+        // present inside $content (avoids double-counting when the author copy-pasted).
         $description_parts = array();
 
-        if (!empty($excerpt)) {
-            $description_parts[] = $excerpt;
+        if (has_excerpt($post->ID)) {
+            $excerpt = wp_strip_all_tags(get_the_excerpt($post->ID));
+            if (!empty($excerpt) && ($content === '' || stripos($content, $excerpt) === false)) {
+                $description_parts[] = $excerpt;
+            }
         }
 
         if (!empty($content)) {
             $description_parts[] = $content;
+        }
+
+        // Page builder content stored outside post_content (Elementor, Breakdance,
+        // Oxygen, Beaver Builder) plus any developer-supplied custom content via the
+        // queryra_indexable_meta_content filter.
+        $builder_content = Queryra_Postmeta::get_content_for($post->ID);
+        if (!empty($builder_content) && ($content === '' || stripos($content, $builder_content) === false)) {
+            $description_parts[] = $builder_content;
         }
 
         // WooCommerce Product Enhancement
@@ -216,10 +236,14 @@ class Queryra_Sync {
                 $stock = (int) $product->get_stock_quantity();
                 $sku = $product->get_sku() ?: '';
 
-                // Short Description
+                // Short Description — include only if not already substring of $content
+                // (overlap between long and short description is common in WooCommerce).
                 $short_desc = $product->get_short_description();
                 if (!empty($short_desc)) {
-                    $description_parts[] = wp_strip_all_tags($short_desc);
+                    $short_desc_clean = wp_strip_all_tags($short_desc);
+                    if (!empty($short_desc_clean) && ($content === '' || stripos($content, $short_desc_clean) === false)) {
+                        $description_parts[] = $short_desc_clean;
+                    }
                 }
 
                 // Product Categories (taxonomy: product_cat) - override post categories
@@ -255,6 +279,13 @@ class Queryra_Sync {
 
         $full_description = implode("\n\n", $description_parts);
 
+        // Custom taxonomies — every public taxonomy on this post type that
+        // is not already covered by a dedicated field (categories/tags/brand)
+        // or is a WordPress system taxonomy. Sent as a separate `taxonomies`
+        // field (slug => "term1, term2") so the API can index them with the
+        // signal weight it wants, rather than mixed into description text.
+        $custom_taxonomies = $this->collect_custom_taxonomies($post);
+
         // Get featured image
         $image_url = get_the_post_thumbnail_url($post->ID, 'medium');
 
@@ -285,9 +316,72 @@ class Queryra_Sync {
             'categories' => !empty($categories_arr) ? implode(', ', $categories_arr) : '',
             'tags'       => !empty($tags_arr) ? implode(', ', $tags_arr) : '',
             'brand'      => $brand,
+            'taxonomies' => $custom_taxonomies,
         );
 
         return $record;
+    }
+
+    /**
+     * Collect terms from every public custom taxonomy registered for this
+     * post type, excluding ones we already report under dedicated fields
+     * (categories/tags/brand) and WordPress system taxonomies.
+     *
+     * Returns map: slug => "term1, term2"
+     *
+     * Developers can override the list via the `queryra_indexable_taxonomies`
+     * filter (e.g., to remove a private internal taxonomy).
+     */
+    private function collect_custom_taxonomies($post) {
+        $skip = array(
+            // Already reported via dedicated fields
+            'category', 'post_tag',
+            'product_cat', 'product_tag',
+            'product_brand', 'yith_product_brand', 'pwb-brand',
+            // WordPress system / non-content
+            'post_format', 'nav_menu', 'link_category',
+        );
+
+        $all_taxonomies = get_object_taxonomies($post->post_type, 'objects');
+        if (empty($all_taxonomies)) {
+            return array();
+        }
+
+        $indexable = array();
+        foreach ($all_taxonomies as $tax_name => $tax_object) {
+            if (empty($tax_object->public)) {
+                continue;
+            }
+            if (in_array($tax_name, $skip, true)) {
+                continue;
+            }
+            $indexable[$tax_name] = $tax_object;
+        }
+
+        /**
+         * Filter: queryra_indexable_taxonomies
+         *
+         * Adjust which custom taxonomies are sent to Queryra.
+         *
+         * @param array  $indexable Map of slug => taxonomy object.
+         * @param WP_Post $post     Post being indexed.
+         */
+        $indexable = apply_filters('queryra_indexable_taxonomies', $indexable, $post);
+
+        $result = array();
+        foreach ($indexable as $tax_name => $tax_object) {
+            $terms = get_the_terms($post->ID, $tax_name);
+            if (!$terms || is_wp_error($terms)) {
+                continue;
+            }
+            $term_names = wp_list_pluck($terms, 'name');
+            if (empty($term_names)) {
+                continue;
+            }
+            $result[$tax_name] = implode(', ', $term_names);
+        }
+
+        return $result;
     }
 
     /**

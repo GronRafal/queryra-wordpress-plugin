@@ -245,6 +245,55 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.3.0 (2026-05-07)
+**Page builder & custom field support — AI search now sees what visitors see**
+- New: Automatic content extraction from Elementor (`_elementor_data` JSON), Breakdance, Beaver Builder, Oxygen (both legacy shortcodes and modern JSON v2)
+- New: Automatic content extraction from ACF (Free + Pro) — text, textarea, wysiwyg, repeaters, groups
+- New: Automatic content extraction from Meta Box — text fields and group fields via registry
+- New: Smart text filtering excludes CSS values, hex colors, URLs, dates, and other technical strings automatically
+
+**Custom taxonomies — beyond categories and tags**
+- New: All public custom taxonomies (`book_genre`, `material`, `property_type`, etc.) are sent in a new `taxonomies` API field, keyed by slug
+- Existing `categories`, `tags`, and `brand` fields unchanged for backward compatibility
+
+**Search results display**
+- Fixed: Search query now properly shows in the page title (`Search results for: "foo"`) and stays in the search input on results pages — previously both were empty after the AI resolved the query
+- Implemented via `posts_search` filter; the `s` query var is preserved so themes work without modification
+
+**Description quality**
+- Fixed: Description was sending the first 30 words of content twice — only manual excerpts are now included, and skipped if they're a substring of the content (removes embedding bias)
+- Fixed: WooCommerce `short_description` is now deduplicated against the long description
+
+**Performance**
+- Improved: Bulk sync prefetches all postmeta in one query per batch — dramatic speedup on sites with many custom fields (was N queries per post, now 1 query per batch)
+
+**For developers**
+- New filter: `queryra_indexable_meta_content` — add content from custom field plugins not auto-detected (Pods, JetEngine, custom postmeta)
+- New filter: `queryra_indexable_taxonomies` — control which custom taxonomies are sent
+
+#### Compatibility (v1.3.0)
+
+Auto-detected page builders (no setup required):
+- Gutenberg / Block Editor — native (content in `post_content`)
+- WPBakery / Visual Composer — native (shortcodes in `post_content`)
+- Divi — native (shortcodes in `post_content`)
+- Elementor — new
+- Breakdance — new
+- Beaver Builder — new
+- Oxygen — new
+
+Auto-detected custom field plugins:
+- ACF (Free + Pro) — new
+- Meta Box — new
+
+Not auto-detected (use developer filter):
+- Pods, JetEngine, Toolset, Bricks Builder (intentional)
+
+Backward compatibility:
+- All existing API record fields are unchanged
+- New `taxonomies` field is additive — older backends ignore it without issues
+- No database schema changes, no options removed, no behavior changes for sites without builders or custom fields
+
 ### 1.2.0 (2026-05-07)
 **AI Discoverability — make your search engine visible to LLMs**
 - New: Dynamic `/llms.txt` and `/llms-full.txt` files for ChatGPT, Perplexity, Claude, Google AI Overviews

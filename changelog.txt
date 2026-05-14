@@ -1,5 +1,18 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-05-07 - version 1.3.0
+* Added - Automatic content extraction from page builders: Elementor, Breakdance, Beaver Builder, Oxygen (legacy shortcodes + modern JSON v2)
+* Added - Automatic content extraction from ACF (Free + Pro) — text, textarea, wysiwyg, repeaters, groups
+* Added - Automatic content extraction from Meta Box — text fields and group fields via rwmb_meta_boxes registry
+* Added - Custom taxonomies — all public custom taxonomies (book_genre, material, location, etc.) now sent in new "taxonomies" API field, keyed by slug
+* Added - Developer filter queryra_indexable_meta_content — extend postmeta extraction with custom field plugins (Pods, JetEngine, custom)
+* Added - Developer filter queryra_indexable_taxonomies — control which custom taxonomies are indexed
+* Added - Smart text filter for postmeta extraction — automatically excludes CSS values, hex colors, URLs, dates, and other technical strings
+* Fixed - Search query now properly displayed in page title ("Search results for: ...") and stays in the search input on results pages — previously both were empty after AI resolved the query
+* Fixed - Description duplication — auto-generated excerpts were repeating the first 30 words of content; only manual excerpts are now included (and skipped if a substring of content)
+* Fixed - WooCommerce short_description duplication when it overlaps the long description
+* Improved - Bulk sync prefetches all postmeta in one query per batch — dramatically faster for large sites with many custom fields
+
 2026-05-07 - version 1.2.0
 * Added - AI Discoverability: dynamic /llms.txt and /llms-full.txt for ChatGPT, Perplexity, Claude, Google AI Overviews
 * Added - Static file detection — if you already have llms.txt, the admin shows a copy-paste snippet to add the Queryra AI Search section
