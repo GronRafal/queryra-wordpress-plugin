@@ -1,5 +1,8 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-05-18 - version 1.3.1
+* Fixed - Critical: bulk sync returned HTTP 422 on sites without custom taxonomies. The empty taxonomies field was serialized as a JSON array ([]) instead of an object ({}), failing API validation. Affected most sites (blogs and stores using only standard categories/tags). Initial import now works on all sites.
+
 2026-05-07 - version 1.3.0
 * Added - Automatic content extraction from page builders: Elementor, Breakdance, Beaver Builder, Oxygen (legacy shortcodes + modern JSON v2)
 * Added - Automatic content extraction from ACF (Free + Pro) — text, textarea, wysiwyg, repeaters, groups

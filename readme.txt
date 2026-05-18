@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.3
+Stable tag: 1.3.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -259,6 +259,9 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
+= 1.3.1 (2026-05-18) =
+* Fixed: Critical — initial import and bulk sync now work on all sites. Sites without custom taxonomies (most blogs and stores using only standard categories and tags) could not sync content to AI search due to a data formatting issue. All sites can now import successfully.
+
 = 1.3.0 (2026-05-14) =
 * Added: AI search now indexes content from Elementor, Breakdance, Beaver Builder, and Oxygen page builders — your product descriptions built with page builders are now fully searchable
 * Added: AI search reads custom fields from ACF (Free + Pro) and Meta Box — text, textarea, WYSIWYG, repeaters, and groups all indexed automatically
@@ -372,6 +375,9 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 * Free trial included — no OpenAI account required
 
 == Upgrade Notice ==
+
+= 1.3.1 =
+Critical fix: bulk sync and initial import failed on sites without custom taxonomies (most blogs and stores). Update immediately if you are on 1.3.0.
 
 = 1.3.0 =
 Major update: AI search now indexes Elementor, Breakdance, Beaver Builder, Oxygen page builders,

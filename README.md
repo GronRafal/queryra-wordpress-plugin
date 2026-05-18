@@ -245,6 +245,10 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.3.1 (2026-05-18)
+**Critical fix — bulk sync on sites without custom taxonomies**
+- Fixed: Bulk sync returned HTTP 422 on any site without custom taxonomies (the majority — blogs and stores using only standard categories/tags). The empty `taxonomies` field serialized as a JSON array `[]` instead of an object `{}`, failing API validation. Initial import and re-sync now work on all sites.
+
 ### 1.3.0 (2026-05-07)
 **Page builder & custom field support — AI search now sees what visitors see**
 - New: Automatic content extraction from Elementor (`_elementor_data` JSON), Breakdance, Beaver Builder, Oxygen (both legacy shortcodes and modern JSON v2)

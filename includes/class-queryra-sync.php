@@ -316,7 +316,11 @@ class Queryra_Sync {
             'categories' => !empty($categories_arr) ? implode(', ', $categories_arr) : '',
             'tags'       => !empty($tags_arr) ? implode(', ', $tags_arr) : '',
             'brand'      => $brand,
-            'taxonomies' => $custom_taxonomies,
+            // Cast to object so an empty map serializes as JSON {} (object),
+            // not [] (array). The API validates `taxonomies` as an object;
+            // an empty PHP array would JSON-encode as [] and trigger a 422
+            // on every record without custom taxonomies.
+            'taxonomies' => (object) $custom_taxonomies,
         );
 
         return $record;
