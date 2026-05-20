@@ -34,6 +34,7 @@ class Queryra_Postmeta {
     const ELEMENTOR_TEXT_KEYS  = array('title', 'text', 'editor', 'content', 'caption', 'description', 'heading', 'button_text', 'subtitle');
     const BREAKDANCE_TEXT_KEYS = array('text', 'title', 'content', 'heading', 'subtitle', 'caption', 'button_text', 'description');
     const OXYGEN_TEXT_KEYS     = array('text', 'content', 'heading', 'title', 'button_text');
+    const OXYGEN6_TEXT_KEYS    = array('text', 'content', 'label', 'title');
 
     /**
      * Main entry point. Returns a single string with all visible text
@@ -161,15 +162,18 @@ class Queryra_Postmeta {
     }
 
     /* ─────────────────────────────────────────────────────────────────
-     * Oxygen — two storage formats depending on version:
-     *   - Legacy: `_ct_builder_shortcodes` (shortcode string)
-     *   - Modern: `_ct_builder_json_v2` (JSON tree, similar to Elementor)
-     * We try both and combine.
+     * Oxygen — three storage formats depending on version:
+     *   - Classic legacy: `_ct_builder_shortcodes` (shortcode string)
+     *   - Classic modern: `_ct_builder_json_v2` (JSON tree)
+     *   - Oxygen 6.0+:    `_oxygen_data` (JSON envelope with tree_json_string
+     *                     containing a double-encoded JSON tree; element type
+     *                     OxygenElements\Text, text under properties.content.content.text)
+     * We try all and combine — migrated pages may keep multiple keys.
      * ───────────────────────────────────────────────────────────────── */
     private static function extract_oxygen($post_id) {
         $parts = array();
 
-        // Legacy: shortcode dump
+        // Classic legacy: shortcode dump
         $shortcodes = get_post_meta($post_id, '_ct_builder_shortcodes', true);
         if (!empty($shortcodes) && is_string($shortcodes)) {
             // Strip shortcode brackets/attrs, keep inner text
@@ -177,14 +181,32 @@ class Queryra_Postmeta {
             $parts[] = wp_strip_all_tags($stripped);
         }
 
-        // Modern: JSON tree
+        // Classic modern: JSON tree
         $json = get_post_meta($post_id, '_ct_builder_json_v2', true);
         if (!empty($json)) {
             $data = is_string($json) ? json_decode($json, true) : $json;
             if (is_array($data)) {
                 $texts = array();
                 self::walk_keyed_extract($data, self::OXYGEN_TEXT_KEYS, $texts);
-                $parts[] = implode("\n", array_filter($texts));
+                if (!empty($texts)) {
+                    $parts[] = implode("\n", $texts);
+                }
+            }
+        }
+
+        // Oxygen 6.0+ — double-encoded JSON in `_oxygen_data.tree_json_string`
+        $oxygen6 = get_post_meta($post_id, '_oxygen_data', true);
+        if (!empty($oxygen6)) {
+            $outer = is_string($oxygen6) ? json_decode($oxygen6, true) : $oxygen6;
+            if (is_array($outer) && !empty($outer['tree_json_string']) && is_string($outer['tree_json_string'])) {
+                $tree = json_decode($outer['tree_json_string'], true);
+                if (is_array($tree) && !empty($tree['root'])) {
+                    $texts = array();
+                    self::walk_keyed_extract($tree['root'], self::OXYGEN6_TEXT_KEYS, $texts);
+                    if (!empty($texts)) {
+                        $parts[] = implode("\n", $texts);
+                    }
+                }
             }
         }
 

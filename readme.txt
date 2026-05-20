@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -259,6 +259,13 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
+= 1.3.2 (2026-05-20) =
+* Added: AI search compatibility with Oxygen Builder 6.0 — content from pages built with the new Oxygen 6 is now indexed by AI search automatically
+* Added: AI search page builder support extended — Oxygen Builder 6.0 stable joins the list of page builders automatically indexed by AI search (Elementor, Breakdance, Beaver Builder, Classic Oxygen)
+* Improved: AI search coverage for WordPress sites using Oxygen Builder — both Classic Oxygen 4.x and the new Oxygen 6.0 are now auto-detected and indexed by AI search
+* Improved: AI search relevance for WooCommerce stores and WordPress sites built with Oxygen 6.0 page builder
+* Improved: AI search migration path — sites that upgraded from Classic Oxygen 4.x to Oxygen 6.0 stable are still fully indexed by AI search
+
 = 1.3.1 (2026-05-18) =
 * Fixed: Critical — initial import and bulk sync now work on all sites. Sites without custom taxonomies (most blogs and stores using only standard categories and tags) could not sync content to AI search due to a data formatting issue. All sites can now import successfully.
 
@@ -375,6 +382,9 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 * Free trial included — no OpenAI account required
 
 == Upgrade Notice ==
+
+= 1.3.2 =
+AI search now supports Oxygen Builder 6.0 — pages built with the latest Oxygen 6 stable are fully indexed by AI search alongside Classic Oxygen 4.x.
 
 = 1.3.1 =
 Critical fix: bulk sync and initial import failed on sites without custom taxonomies (most blogs and stores). Update immediately if you are on 1.3.0.

@@ -245,6 +245,13 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.3.2 (2026-05-20)
+**AI search compatibility — Oxygen Builder 6.0 support**
+- Added: AI search now indexes content from Oxygen Builder 6.0 stable — the new builder format (`_oxygen_data` with `tree_json_string` double-encoded JSON tree) is parsed automatically alongside Classic Oxygen 4.x
+- Added: Pages built with Oxygen 6.0 are fully searchable via AI search — `OxygenElements\Text` nodes, headings, and all visible widgets are extracted and indexed
+- Improved: AI search page builder coverage expanded — Oxygen Builder 6.0 joins Elementor, Breakdance, Beaver Builder, and Classic Oxygen for comprehensive AI search across the most popular WordPress page builders
+- Improved: AI search relevance for sites migrated from Classic Oxygen 4.x to Oxygen 6.0 — both legacy (`_ct_builder_*`) and new (`_oxygen_data`) postmeta keys are read so no content is lost in the upgrade path
+
 ### 1.3.1 (2026-05-18)
 **Critical fix — bulk sync on sites without custom taxonomies**
 - Fixed: Bulk sync returned HTTP 422 on any site without custom taxonomies (the majority — blogs and stores using only standard categories/tags). The empty `taxonomies` field serialized as a JSON array `[]` instead of an object `{}`, failing API validation. Initial import and re-sync now work on all sites.
