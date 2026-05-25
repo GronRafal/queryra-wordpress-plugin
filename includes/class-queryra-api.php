@@ -59,6 +59,52 @@ class Queryra_API {
     }
 
     /**
+     * Validate an arbitrary API key (without saving it).
+     *
+     * Reuses the existing test_connection() round-trip so the validation
+     * path is identical to what the plugin uses internally. Stateless:
+     * the current $this->api_key is preserved across the call.
+     *
+     * @param string $key Candidate API key to verify.
+     * @return true|WP_Error true on success, WP_Error with details on failure.
+     */
+    public function validate_key($key) {
+        if (class_exists('Queryra_Search')) {
+            Queryra_Search::log('validate_key() ENTER — key_len=' . strlen((string)$key));
+        }
+
+        if (empty($key) || !is_string($key)) {
+            if (class_exists('Queryra_Search')) {
+                Queryra_Search::log('validate_key — empty/invalid key argument');
+            }
+            return new WP_Error('queryra_empty_key', __('API key is required.', 'queryra-ai-search'));
+        }
+
+        $previous_key  = $this->api_key;
+        $this->api_key = trim($key);
+
+        if (class_exists('Queryra_Search')) {
+            Queryra_Search::log('validate_key — calling test_connection() against ' . $this->api_url);
+        }
+        $result = $this->test_connection();
+        if (class_exists('Queryra_Search')) {
+            Queryra_Search::log('validate_key — test_connection returned: success=' . (!empty($result['success']) ? 'true' : 'false') . ' msg="' . (isset($result['message']) ? $result['message'] : '') . '"');
+        }
+
+        // Restore previous state — never mutate due to a validation call.
+        $this->api_key = $previous_key;
+
+        if (!empty($result['success'])) {
+            return true;
+        }
+
+        return new WP_Error(
+            'queryra_invalid_key',
+            isset($result['message']) ? $result['message'] : __('API key validation failed.', 'queryra-ai-search')
+        );
+    }
+
+    /**
      * Sync records (bulk)
      *
      * @param array $records Array of records to sync

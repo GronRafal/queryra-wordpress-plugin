@@ -245,6 +245,14 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.4.0 (2026-05-25)
+**WordPress integration improvements & developer hooks**
+- New: Search ability registered for site automation tools and AI assistants — Queryra semantic search is now discoverable and callable programmatically by other plugins and agents.
+- New: Developer filter `queryra_validate_api_key` for external API key validation. Returns `true` on success, `WP_Error` on failure. Reuses the existing `Queryra_API::test_connection()` round-trip so validation behavior is identical everywhere.
+- New: Defensive guard against destructive overwrites of saved configuration by external code.
+- Improved: API key field uses partial masking with click-to-edit (last 4 characters visible) on both Settings tab and Setup Wizard.
+- Improved: Tested up to the latest WordPress version. Backward compatible — all features work on WordPress 5.8 onwards.
+
 ### 1.3.2 (2026-05-20)
 **AI search compatibility — Oxygen Builder 6.0 support**
 - Added: AI search now indexes content from Oxygen Builder 6.0 stable — the new builder format (`_oxygen_data` with `tree_json_string` double-encoded JSON tree) is parsed automatically alongside Classic Oxygen 4.x

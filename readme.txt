@@ -1,19 +1,26 @@
-=== AI Search for WooCommerce – Semantic Search ===
+=== AI Search for WooCommerce – Semantic Search Connector ===
 Contributors: queryra, aisearch
-Tags: ai search, semantic search, woocommerce search, product search, search
+Tags: ai search, semantic search, woocommerce search, product search, connector
 Requires at least: 5.8
-Tested up to: 6.9
-Stable tag: 1.3.2
+Tested up to: 7.0
+Stable tag: 1.4.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Replaces WooCommerce search with AI semantic search. Understands customer intent — finds products even with natural language queries.
+AI search connector for WP and WooCommerce. Replaces keyword search with semantic AI — finds products and posts using natural language queries.
 
 == Description ==
 
-Queryra is an AI search plugin for WooCommerce and WordPress — a semantic search
-engine that understands what customers mean, not just what they type.
+**The first AI search connector for WordPress 7.0.** While other WordPress 7.0
+connectors generate text (OpenAI, Anthropic, Google), Queryra is the search
+engine for your site. After activation, Queryra appears in Settings → Connectors
+alongside the LLM providers — but instead of writing content, Queryra finds
+posts, pages, and products by meaning, intent, and natural language.
+
+Queryra is an AI search plugin for WordPress and WooCommerce — a semantic search
+engine that understands what customers mean, not just what they type. Works with
+posts, pages, custom post types, and WooCommerce products.
 
 **Your customer types "present for my girlfriend". Your WooCommerce store returns:
 0 results.**
@@ -96,6 +103,23 @@ Want extra visibility?
 
 * **Free Pro access** — join the [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) and get unlimited AI search at no cost
 * **Store promotion** — your store gets featured on queryra.com and promoted across AI search platforms
+
+= WordPress 7.0 Connectors API & Abilities API =
+
+Queryra is a native WordPress 7.0 AI search connector. After activation, Queryra
+appears in **Settings → Connectors** alongside OpenAI, Anthropic, and Google —
+giving site owners a unified place to manage AI search configuration.
+
+* **Connectors API** — Queryra registers as an AI search connector. Manage your
+  Queryra API key from the standard WordPress 7.0 Connectors screen.
+* **Abilities API** — Queryra exposes `queryra/semantic-search` as a discoverable
+  ability. AI agents, chatbots, and assistants running on WordPress 7.0 can call
+  Queryra natively for semantic product search.
+* **Backward compatible** — Queryra works on WordPress 5.8+. Connector and ability
+  features activate automatically on WordPress 7.0 and newer.
+
+This makes Queryra the first AI semantic search plugin built natively for the
+WordPress 7.0 connector ecosystem.
 
 = AI Search Setup in 5 Minutes =
 
@@ -195,6 +219,21 @@ filter AND excludes the brand. Vector-only plugins ignore both.
 
 == Frequently Asked Questions ==
 
+= Does Queryra work as a WordPress 7.0 connector? =
+Yes. Queryra registers as a native WordPress 7.0 AI search connector. After activation on WordPress 7.0 or newer, Queryra appears in Settings → Connectors alongside the default AI providers (OpenAI, Anthropic, Google). You can manage your Queryra API key from the standard Connectors screen instead of (or in addition to) the Queryra settings page.
+
+= Does Queryra support the WordPress 7.0 Abilities API? =
+Yes. Queryra registers the `queryra/semantic-search` ability via the Abilities API. AI agents, chatbots, and other plugins running on WordPress 7.0 can discover and invoke Queryra's semantic search programmatically — natural-language search results are returned as a discoverable WordPress ability with input and output schemas.
+
+= Does Queryra work on older WordPress versions? =
+Yes. Queryra fully supports WordPress 5.8 through 7.0+. The Connectors API and Abilities API integration activates automatically on WordPress 7.0 sites; on older versions, Queryra continues to work through its own settings page (Queryra → Settings) with no feature loss for end users.
+
+= How is Queryra different from OpenAI, Anthropic, and Google connectors? =
+OpenAI, Anthropic, and Google are LLM providers — they generate text and images from prompts. Queryra is a search engine connector. Where LLM connectors create new content, Queryra finds existing content in your site by semantic meaning. They complement each other: an LLM connector can write a product description, then Queryra makes it findable. You can use Queryra alongside LLM connectors in WordPress 7.0 Settings → Connectors.
+
+= Does Queryra work with regular WordPress posts and pages, not just WooCommerce products? =
+Yes. Queryra indexes posts, pages, custom post types, and WooCommerce products. The plugin name mentions WooCommerce because that is the most common use case, but Queryra is a full WordPress AI search connector — perfect for blogs, knowledge bases, documentation sites, news sites, and any WordPress content type.
+
 = What is AI Search for WooCommerce? =
 AI Search is a semantic search plugin that replaces the default WooCommerce product search with AI-powered search. Instead of matching exact keywords, AI Search understands what customers mean — so "gift for mom who loves candles" finds candles, not zero results.
 
@@ -258,6 +297,13 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 6. AI search settings — simple configuration, one API key, no OpenAI account needed
 
 == Changelog ==
+
+= 1.4.0 (2026-05-25) =
+* Added: Search ability registered for site automation tools and AI assistants — other plugins and agents can now discover and invoke Queryra semantic search programmatically.
+* Added: Developer filter `queryra_validate_api_key` for external API key validation. Returns true on success, WP_Error on failure.
+* Added: Defensive guard prevents destructive overwrites of the saved API key by external code.
+* Improved: API key field uses partial masking with click-to-edit (last 4 characters visible) on Settings tab and Setup Wizard.
+* Improved: Tested up to the latest WordPress version — fully backward compatible with WordPress 5.8+.
 
 = 1.3.2 (2026-05-20) =
 * Added: AI search compatibility with Oxygen Builder 6.0 — content from pages built with the new Oxygen 6 is now indexed by AI search automatically
@@ -382,6 +428,9 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 * Free trial included — no OpenAI account required
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+New developer hooks, defensive guards, and API key UX improvements. Queryra semantic search is now programmatically callable by other plugins and AI assistants. Fully backward compatible.
 
 = 1.3.2 =
 AI search now supports Oxygen Builder 6.0 — pages built with the latest Oxygen 6 stable are fully indexed by AI search alongside Classic Oxygen 4.x.

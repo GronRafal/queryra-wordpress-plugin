@@ -219,13 +219,63 @@ class Queryra_Setup_Wizard {
                         <label for="queryra-api-key">API Key</label>
                         <input type="text"
                                id="queryra-api-key"
-                               class="queryra-input"
+                               class="queryra-input queryra-masked-key"
                                placeholder="sk_live_..."
+                               autocomplete="off"
+                               spellcheck="false"
                                value="<?php echo esc_attr($current_api_key); ?>">
                         <p class="queryra-field-note">
-                            Enter your Queryra API key. You can find it in your
-                            <a href="https://queryra.com/dashboard/api-keys" target="_blank">Dashboard Settings</a>.
+                            Enter your Queryra API key (click the field to edit). You can find it in your
+                            <a href="https://queryra.com/dashboard/api-keys" target="_blank" rel="noopener noreferrer">Dashboard Settings</a>.
                         </p>
+                        <script>
+                        (function($) {
+                            // Connectors-API-style masking: last 4 chars visible, bullets for the rest.
+                            function mask(s) {
+                                if (!s || s.length <= 4) return s || '';
+                                var bullets = new Array(Math.min(s.length - 4, 24) + 1).join('•');
+                                return bullets + s.slice(-4);
+                            }
+                            $('.queryra-masked-key').each(function() {
+                                var $input = $(this);
+                                if ($input.data('queryraMaskBound')) return;
+                                $input.data('queryraMaskBound', true);
+                                var real = $input.val();
+                                $input.data('realValue', real);
+                                if (real && real.length > 4) {
+                                    $input.val(mask(real));
+                                }
+                                $input.on('focus', function() {
+                                    var $t = $(this);
+                                    $t.val($t.data('realValue') || '');
+                                    setTimeout(function() { $t.select(); }, 0);
+                                });
+                                $input.on('input', function() {
+                                    $(this).data('realValue', $(this).val());
+                                });
+                                $input.on('blur', function() {
+                                    var $t = $(this);
+                                    var v = $t.data('realValue');
+                                    if (v && v.length > 4) {
+                                        $t.val(mask(v));
+                                    }
+                                });
+                            });
+                            // Wizard.js reads the value via .val() on click of the Continue button.
+                            // Intercept BEFORE that handler (mousedown fires earlier than click) to
+                            // restore the real value, so bullets never reach the AJAX request.
+                            $(document).on('mousedown', '#queryra-save-api-key, #queryra-save-api-key-new', function() {
+                                var $key = $('.queryra-masked-key');
+                                $key.each(function() {
+                                    var $t = $(this);
+                                    var v = $t.data('realValue');
+                                    if (typeof v !== 'undefined' && v !== null) {
+                                        $t.val(v);
+                                    }
+                                });
+                            });
+                        })(jQuery);
+                        </script>
                     </div>
 
                     <div id="queryra-connection-status"></div>

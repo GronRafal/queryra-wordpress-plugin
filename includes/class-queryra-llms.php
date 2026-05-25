@@ -37,13 +37,13 @@ class Queryra_LLMS {
 
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
         $request_uri  = wp_unslash($_SERVER['REQUEST_URI']);
-        $request_path = parse_url($request_uri, PHP_URL_PATH);
+        $request_path = wp_parse_url($request_uri, PHP_URL_PATH);
         if (!$request_path) {
             return;
         }
 
         // Strip site subdirectory (when WP is installed in /blog or similar).
-        $home_path = parse_url(home_url('/'), PHP_URL_PATH);
+        $home_path = wp_parse_url(home_url('/'), PHP_URL_PATH);
         if ($home_path && $home_path !== '/' && strpos($request_path, $home_path) === 0) {
             $request_path = substr($request_path, strlen($home_path) - 1);
         }

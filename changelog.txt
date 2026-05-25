@@ -1,5 +1,12 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-05-25 - version 1.4.0
+* Added - Search ability registered for site automation tools and AI assistants. Other plugins and agents can discover and invoke Queryra semantic search programmatically.
+* Added - Developer filter queryra_validate_api_key for external API key validation. Returns true on success, WP_Error on failure. Reuses the same test_connection() round-trip Queryra uses internally.
+* Added - Defensive guard against destructive overwrites of saved configuration by external code.
+* Improved - API key field uses partial masking with click-to-edit (last 4 characters visible).
+* Improved - Tested up to the latest WordPress version.
+
 2026-05-20 - version 1.3.2
 * Added - AI search compatibility with Oxygen Builder 6.0 — automatic content extraction from the new _oxygen_data postmeta format (double-encoded JSON tree, OxygenElements\Text nodes). AI search now indexes pages built with Oxygen 6.0 stable alongside Classic Oxygen 4.x
 * Improved - AI search page builder coverage — Oxygen Builder 6.0 joins Elementor, Breakdance, Beaver Builder, and Classic Oxygen for full AI search indexing across the most popular WordPress page builders

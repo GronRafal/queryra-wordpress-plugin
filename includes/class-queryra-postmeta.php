@@ -257,6 +257,7 @@ class Queryra_Postmeta {
             return '';
         }
 
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party hook owned by the Meta Box plugin; we are the consumer, not the publisher.
         $meta_boxes = apply_filters('rwmb_meta_boxes', array());
         if (empty($meta_boxes) || !is_array($meta_boxes)) {
             return '';

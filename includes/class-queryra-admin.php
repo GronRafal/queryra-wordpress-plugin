@@ -444,9 +444,52 @@ class Queryra_Admin {
                                                id="queryra_api_key"
                                                name="queryra_api_key"
                                                value="<?php echo esc_attr($api_key); ?>"
-                                               class="regular-text"
+                                               class="regular-text queryra-masked-key"
+                                               autocomplete="off"
+                                               spellcheck="false"
                                                placeholder="sk_live_xxxxxxxxxxxxx">
-                                        <p class="description">Your Queryra API key</p>
+                                        <p class="description">Your Queryra API key — click to edit</p>
+                                        <script>
+                                        (function($) {
+                                            // Mirror the Connectors API masking: keep last 4 chars visible,
+                                            // bullets for the rest; reveal the full key on focus.
+                                            function mask(s) {
+                                                if (!s || s.length <= 4) return s || '';
+                                                var bullets = new Array(Math.min(s.length - 4, 24) + 1).join('•');
+                                                return bullets + s.slice(-4);
+                                            }
+                                            $('.queryra-masked-key').each(function() {
+                                                var $input = $(this);
+                                                if ($input.data('queryraMaskBound')) return;
+                                                $input.data('queryraMaskBound', true);
+                                                var real = $input.val();
+                                                $input.data('realValue', real);
+                                                if (real && real.length > 4) {
+                                                    $input.val(mask(real));
+                                                }
+                                                $input.on('focus', function() {
+                                                    var $t = $(this);
+                                                    $t.val($t.data('realValue') || '');
+                                                    setTimeout(function() { $t.select(); }, 0);
+                                                });
+                                                $input.on('input', function() {
+                                                    $(this).data('realValue', $(this).val());
+                                                });
+                                                $input.on('blur', function() {
+                                                    var $t = $(this);
+                                                    var v = $t.data('realValue');
+                                                    if (v && v.length > 4) {
+                                                        $t.val(mask(v));
+                                                    }
+                                                });
+                                                // Restore real value right before the form submits so
+                                                // bullets are never sent to options.php.
+                                                $input.closest('form').on('submit', function() {
+                                                    $input.val($input.data('realValue') || '');
+                                                });
+                                            });
+                                        })(jQuery);
+                                        </script>
                                     </td>
                                 </tr>
                                 <input type="hidden" name="queryra_api_url" value="<?php echo esc_attr($api_url); ?>">
