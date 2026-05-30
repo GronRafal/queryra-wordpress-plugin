@@ -1,5 +1,24 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-05-25 - version 1.4.1
+* New: B2BKing (B2B for WooCommerce) integration — replaces the bulk
+  order form keyword search with Queryra semantic AI search. Loads only
+  when B2BKing is active; core untouched.
+* Security: visibility-intersect ensures products hidden by B2B group,
+  category, or per-product restriction never surface through semantic
+  search. Fail-closed default if the visibility set cannot be verified.
+* Performance: O(1) intersect lookups scale to 100k+ products.
+* UX: bulk order form rebrand when AI Search is enabled —
+  search placeholder "AI search — try anything…", sort option "AI Pick"
+  (replaces "Automatic"), loader text "AI is thinking — not just
+  searching…", and search icon swapped to Google Material Design
+  `auto_awesome` (same icon library B2BKing already uses).
+* Toggle: shares the master "Enable Queryra AI Search" option — single
+  instant kill-switch. When off, B2BKing native search runs as before.
+* Known limitations: pagination counts may show small discrepancies
+  vs Queryra ranking; sort dropdown options other than "AI Pick" are
+  overridden by AI relevance during search.
+
 2026-05-25 - version 1.4.0
 * Added - Search ability registered for site automation tools and AI assistants. Other plugins and agents can discover and invoke Queryra semantic search programmatically.
 * Added - Developer filter queryra_validate_api_key for external API key validation. Returns true on success, WP_Error on failure. Reuses the same test_connection() round-trip Queryra uses internally.

@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: AI Search for WooCommerce – Semantic Search Connector
+ * Plugin Name: AI Search for WooCommerce – Semantic Search
  * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.4.0
+ * Version: 1.4.1
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.4.0');
+define('QUERYRA_VERSION', '1.4.1');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -35,6 +35,7 @@ require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-deactivation-survey.ph
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-analytics.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-llms.php';
 require_once QUERYRA_PLUGIN_DIR . 'includes/class-queryra-postmeta.php';
+require_once QUERYRA_PLUGIN_DIR . 'includes/integrations/class-queryra-integration-loader.php';
 
 // WordPress 7.0+ optional integrations.
 // Feature detection (not version check) — works even if WP backports
@@ -397,6 +398,13 @@ class Queryra_Search {
         if (class_exists('Queryra_Connector')) {
             new Queryra_Connector();
         }
+
+        // Third-party plugin integrations (B2BKing, etc.). The loader only
+        // pulls in an integration when its target plugin is active, so sites
+        // without those plugins parse zero integration code. We run on
+        // plugins_loaded (this init) so all other plugins are already loaded.
+        $integration_loader = new Queryra_Integration_Loader();
+        $integration_loader->load();
 
         // Frontend fingerprint: enqueue stylesheet + generator meta tag
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
