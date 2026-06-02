@@ -226,7 +226,7 @@ class Queryra_Setup_Wizard {
                                value="<?php echo esc_attr($current_api_key); ?>">
                         <p class="queryra-field-note">
                             Enter your Queryra API key (click the field to edit). You can find it in your
-                            <a href="https://queryra.com/dashboard/api-keys" target="_blank" rel="noopener noreferrer">Dashboard Settings</a>.
+                            <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/api-keys')); ?>" target="_blank" rel="noopener">Dashboard Settings</a>.
                         </p>
                         <script>
                         (function($) {
@@ -309,7 +309,7 @@ class Queryra_Setup_Wizard {
                             <li>Come back here and paste it below</li>
                         </ol>
 
-                        <a href="https://queryra.com/signup"
+                        <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/signup')); ?>"
                            target="_blank"
                            class="queryra-button queryra-button-primary"
                            style="margin-top: 15px;">
@@ -491,7 +491,7 @@ class Queryra_Setup_Wizard {
                     </div>
                     <div style="background: #e7f3ff; padding: 15px; border-radius: 4px;">
                         <p style="margin: 0; font-size: 13px; color: #646970;">
-                            Need more records? <a href="https://queryra.com/dashboard" target="_blank" style="color: #2271b1; text-decoration: underline; font-weight: 600;">Request an increase from your Queryra dashboard →</a>
+                            Need more records? <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard')); ?>" target="_blank" style="color: #2271b1; text-decoration: underline; font-weight: 600;">Request an increase from your Queryra dashboard →</a>
                         </p>
                     </div>
                 </div>
@@ -510,7 +510,7 @@ class Queryra_Setup_Wizard {
                     💡 <strong>After import:</strong> You can manage your imported content anytime:
                 </p>
                 <ul style="margin: 0 0 0 20px; padding: 0; font-size: 13px; color: #646970;">
-                    <li>Delete unwanted records from <a href="https://queryra.com/dashboard/records" target="_blank">Queryra Dashboard</a></li>
+                    <li>Delete unwanted records from <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/records')); ?>" target="_blank">Queryra Dashboard</a></li>
                     <li>Import new content from <strong>Settings → Records</strong></li>
                     <li>Auto-sync keeps everything up to date</li>
                 </ul>
@@ -645,7 +645,7 @@ class Queryra_Setup_Wizard {
                     <li>Come back here and click <strong>"Check Status"</strong> to verify</li>
                 </ol>
 
-                <a href="https://queryra.com/dashboard/sync"
+                <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/sync')); ?>"
                    target="_blank"
                    class="queryra-button queryra-button-primary"
                    style="margin-top: 20px;">
@@ -954,7 +954,7 @@ class Queryra_Setup_Wizard {
                     '<strong>FREE Plan Search Window Closed</strong><br><br>' .
                     'Your FREE plan allows AI search for <strong>1 hour every 3 hours</strong>.<br><br>' .
                     '⏰ Next search window opens in: <strong>%s</strong> (at %s UTC)<br><br>' .
-                    '💡 Want unlimited 24/7 access? <a href="https://queryra.com/pricing" target="_blank" style="color: #2271b1; font-weight: 600;">Upgrade to STARTER plan</a>',
+                    '💡 Want full-time AI search without the daily window? <a href="' . esc_url(Queryra_Search::tracked_url('https://queryra.com/pricing')) . '" target="_blank" style="color: #2271b1; font-weight: 600;">Upgrade to STARTER plan</a>',
                     $time_text,
                     $next_time
                 );

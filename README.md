@@ -33,8 +33,8 @@ Real searches that return 0 results in most stores:
 
 ## Why Queryra vs Other Search Plugins?
 
-**Trained on YOUR Store**
-Generic AI plugins use the same model for everyone. Queryra builds a custom AI model from YOUR products, YOUR descriptions, YOUR categories.
+**Indexed on YOUR Store**
+Generic AI plugins use the same model for everyone. Queryra learns from YOUR products, YOUR descriptions, YOUR categories — your content, not generic global data.
 
 **No ChatGPT Key Required**
 Other plugins require you to create an OpenAI account and manage API keys. Queryra includes everything – one API key, no extra accounts.
@@ -55,7 +55,7 @@ Most AI plugins only match meaning. Queryra adds a second layer: a query like "w
 * **Smart Context Detection** – Automatically searches only products in WooCommerce shop pages, posts elsewhere
 * **Search Analytics** – See what customers search for, including zero-result queries. Find gaps in your inventory before customers leave
 
-## Perfect For Any WooCommerce Store
+## Well-Suited for Any WooCommerce Store
 
 * **Beauty & Skincare** – "my skin looks tired" finds night creams and recovery oils — [see it live →](https://woo.queryra.com)
 * **Fashion** – Find items by style, occasion, or color family
@@ -66,7 +66,7 @@ Most AI plugins only match meaning. Queryra adds a second layer: a query like "w
 
 ## Beyond WooCommerce
 
-Queryra also works with regular WordPress content — posts, pages, and custom post types. Perfect for knowledge bases, blogs, and FAQ sections.
+Queryra also works with regular WordPress content — posts, pages, and custom post types. Well-suited for knowledge bases, blogs, and FAQ sections.
 
 👉 **[Try it live on a WooCommerce store →](https://woo.queryra.com)** — search "present for my girlfriend" or "my skin looks tired" and see the difference.
 
@@ -96,7 +96,7 @@ Queryra also works with regular WordPress content — posts, pages, and custom p
 graph LR
     A[Publish Post] --> B[WordPress Plugin]
     B --> C[Queryra API]
-    C --> D[AI Training]
+    C --> D[AI Indexing]
     D --> E[Smart Search]
 ```
 
@@ -145,7 +145,7 @@ cd /wp-content/plugins/
 
 ### 5. Done!
 
-Your search is now powered by AI trained on your content. [WooCommerce Search Plugin Setup Guide →](https://queryra.com/docs/wordpress-integration)
+Your search is now powered by AI indexed on your content. [WooCommerce Search Plugin Setup Guide →](https://queryra.com/docs/wordpress-integration)
 
 ## Requirements
 
@@ -157,7 +157,7 @@ Your search is now powered by AI trained on your content. [WooCommerce Search Pl
 | HTTPS | Recommended |
 
 **Tested with:**
-- WordPress 6.9, 6.7.2, 6.6, 6.5
+- WordPress 7.0, 6.9, 6.7.2, 6.6, 6.5
 - PHP 8.2, 8.1, 8.0, 7.4
 - Popular themes: Twenty Twenty-Four, Astra, Kadence, GeneratePress
 
@@ -178,8 +178,8 @@ Free trial available — no credit card required. [See current pricing and plans
 ### How is this different from ChatGPT search plugins?
 Queryra trains a custom model on YOUR content. No OpenAI account needed. Plus, Queryra understands price filters, brand exclusions, and sorting in natural language — not just semantic meaning. [Why vector search alone isn't enough for WooCommerce product search →](https://queryra.com/blog/beyond-vector-search-woocommerce)
 
-### How is Queryra different from Algolia?
-Algolia costs $50-500/month and requires developer setup. Queryra starts with a free trial and takes 5 minutes to install. [Compare →](https://queryra.com/pricing)
+### How is Queryra different from enterprise search platforms?
+Enterprise search platforms are powerful but typically aimed at developers and require integration work. Queryra is built specifically for WordPress and WooCommerce — install via WordPress admin, connect with an API key, and you're ready. [See pricing →](https://queryra.com/pricing)
 
 ### Does it work with my theme?
 Yes! Works with any WordPress theme. Hooks into standard WordPress search functionality.
@@ -244,6 +244,21 @@ phpcs --standard=WordPress
 ```
 
 ## Changelog
+
+### 1.4.2 (2026-06-02)
+**Maintenance — UTM tracking, claim audit, Plugin Check compliance**
+- New: AI search admin links carry tracking parameters (UTM) for support-side referral attribution. Sentinel `pre-init` flags fresh installs in logs.
+- Improved: AI search documentation accuracy — refined Partner Program copy, broadened audience wording (sites, blogs, catalogues), and corrected technical phrasing (semantic AI search is indexed on content, not "trained").
+- Improved: Replaced `rel="noreferrer"` with `rel="noopener"` on admin links to enable server-side referrer attribution.
+- Fixed: Plugin Check warnings cleared — plugin name match between header and readme; inline JS values encoded via `wp_json_encode()`.
+
+### 1.4.1 (2026-05-25)
+**B2BKing integration — semantic AI search for bulk order forms**
+- New: B2BKing (B2B for WooCommerce) integration replaces the bulk order form keyword search with Queryra semantic AI search. Loads only when B2BKing is active; core untouched.
+- Security: Visibility-intersect respects B2B group, category, and per-product visibility rules. Fail-closed default when allow-list cannot be verified.
+- Performance: O(1) intersect lookups scale to 100k+ products.
+- UX: Bulk order form rebrand — search placeholder, sort option ("AI Pick"), loader text, and search icon updated to match the Queryra context.
+- Toggle: Single master kill-switch shared with the main "Enable Queryra AI Search" option.
 
 ### 1.4.0 (2026-05-25)
 **WordPress integration improvements & developer hooks**
@@ -392,7 +407,7 @@ Backward compatibility:
 
 ### 1.0.0 (2026-01-23)
 **Initial public release**
-- Production-ready AI search trained on your content
+- Production-ready AI search indexed on your content
 - WordPress.org directory submission
 - Full security audit passed
 

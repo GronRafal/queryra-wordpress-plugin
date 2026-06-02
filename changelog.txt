@@ -1,5 +1,23 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-06-02 - version 1.4.2
+* Improved: AI search documentation accuracy — refined Partner Program
+  copy, broadened audience wording (sites, blogs, catalogues — not
+  stores-only), and corrected technical phrasing (semantic AI search
+  is indexed on your content, not "trained" on it).
+* New: AI search admin links now carry tracking parameters (UTM) so
+  support can attribute referral traffic per install. Sentinel value
+  `pre-init` flags fresh installs in logs for easier diagnostics.
+* Improved: replaced `rel="noreferrer"` with `rel="noopener"` on admin
+  links so AI search referrer attribution works server-side while
+  keeping security best practices intact.
+* Fixed: Plugin Check warnings cleared — plugin name now matches
+  between header and readme; inline JS values encoded via
+  `wp_json_encode()` for safe output escaping.
+* Maintenance: minor AI search copy refinements throughout — softened
+  absolute marketing claims to align with WordPress.org plugin
+  directory guidelines.
+
 2026-05-25 - version 1.4.1
 * New: B2BKing (B2B for WooCommerce) integration — replaces the bulk
   order form keyword search with Queryra semantic AI search. Loads only

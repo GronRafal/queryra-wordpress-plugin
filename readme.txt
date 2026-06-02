@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, connector
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -59,25 +59,25 @@ bulk search. Powered by vector embeddings and LLM intent parsing.
 Queryra has confirmed integrations and tested compatibility with leading WordPress plugins:
 
 **Page Builders:**
-* [Oxygen Builder](https://queryra.com/docs/oxygen-integration) — full Oxygen 4.x and 6.0 support, automatic content extraction
-* [Breakdance](https://queryra.com/docs/breakdance-integration) — native Breakdance content indexing
+* [Oxygen Builder](https://queryra.com/docs/oxygen-integration?utm_source=b9f1ce71) — full Oxygen 4.x and 6.0 support, automatic content extraction
+* [Breakdance](https://queryra.com/docs/breakdance-integration?utm_source=b9f1ce71) — native Breakdance content indexing
 
 **Custom Fields:**
 * [Meta Box](https://docs.metabox.io/compatibility/) — text and group fields indexed automatically
 * ACF (Free + Pro) — text, textarea, WYSIWYG, repeaters, groups
 
 **Multilingual:**
-* [TranslatePress](https://queryra.com/docs/translatepress-integration) — single unified semantic index across all languages
-* [Weglot](https://queryra.com/docs/weglot-integration) — multilingual semantic search
+* [TranslatePress](https://queryra.com/docs/translatepress-integration?utm_source=b9f1ce71) — single unified semantic index across all languages
+* [Weglot](https://queryra.com/docs/weglot-integration?utm_source=b9f1ce71) — multilingual semantic search
 
 **Membership & Affiliate:**
-* [MemberPress](https://queryra.com/docs/memberpress-integration) — semantic search inside member-only content with access control
-* [Easy Affiliate Pro](https://queryra.com/docs/easy-affiliate-pro-integration) — affiliate product search with custom fields
+* [MemberPress](https://queryra.com/docs/memberpress-integration?utm_source=b9f1ce71) — semantic search inside member-only content with access control
+* [Easy Affiliate Pro](https://queryra.com/docs/easy-affiliate-pro-integration?utm_source=b9f1ce71) — affiliate product search with custom fields
 
 **B2B:**
-* [B2BKing](https://queryra.com/docs/b2bking-integration) — semantic AI search in bulk order forms (new in 1.4.1)
+* [B2BKing](https://queryra.com/docs/b2bking-integration?utm_source=b9f1ce71) — semantic AI search in bulk order forms (new in 1.4.1)
 
-More integrations and developer docs → [queryra.com/docs](https://queryra.com/docs)
+More integrations and developer docs → [queryra.com/docs](https://queryra.com/docs?utm_source=b9f1ce71)
 
 = AI Search for Page Builders & Custom Fields =
 
@@ -118,8 +118,8 @@ Perplexity, Google AI Overviews, and Claude can recommend your products.
 
 Want extra visibility?
 
-* **Free Pro access** — join the [Partner Program](https://queryra.com/blog/partner-program-pro-for-free) and get unlimited AI search at no cost
-* **Store promotion** — your store gets featured on queryra.com and promoted across AI search platforms
+* **Partner Program** — qualifying sites can apply for Queryra at no cost. See [Partner Program details](https://queryra.com/blog/partner-program-pro-for-free?utm_source=b9f1ce71).
+* **Site promotion** — your site gets featured on queryra.com and promoted across AI search platforms
 
 = WordPress 7.0 Connectors API & Abilities API =
 
@@ -135,25 +135,26 @@ giving site owners a unified place to manage AI search configuration.
 * **Backward compatible** — Queryra works on WordPress 5.8+. Connector and ability
   features activate automatically on WordPress 7.0 and newer.
 
-This makes Queryra the first AI semantic search plugin built natively for the
-WordPress 7.0 connector ecosystem.
+Queryra is one of the early AI semantic search plugins to register as a
+WordPress 7.0 connector — making API key management consistent with other
+AI providers in Settings → Connectors.
 
 = AI Search Setup in 5 Minutes =
 
-✅ Free trial — no credit card required
+✅ Free demo — no credit card required
 ✅ No OpenAI account needed
 ✅ WooCommerce AI search ready in 5 minutes
 
-[Start your free trial →](https://queryra.com/signup)
+[Start your free demo →](https://queryra.com/signup?utm_source=b9f1ce71)
 
 1. Install and activate
 2. Follow the Setup Wizard
-3. Get your free API key at [queryra.com/signup](https://queryra.com/signup)
+3. Get your free API key at [queryra.com/signup](https://queryra.com/signup?utm_source=b9f1ce71)
 4. One-click WooCommerce product import
 5. Done — AI search now understands your customers
 
 No coding. No configuration headaches.
-[WooCommerce AI Search Setup Guide →](https://queryra.com/docs/wordpress-integration)
+[WooCommerce AI Search Setup Guide →](https://queryra.com/docs/wordpress-integration?utm_source=b9f1ce71)
 
 = WooCommerce Product Search Features =
 
@@ -183,7 +184,7 @@ queries
 = Semantic Search for WordPress Content =
 
 Queryra's semantic search also works with regular WordPress content — posts, pages,
-and custom post types. Perfect for knowledge bases, blogs, and FAQ sections.
+and custom post types. Well-suited for knowledge bases, blogs, and FAQ sections.
 
 = AI Search for B2B and Wholesale Stores =
 
@@ -209,16 +210,16 @@ queries.
 
 = Why Queryra vs Other WooCommerce Product Search Plugins? =
 
-**No OpenAI Key Required** — Other AI search plugins make you create an OpenAI
-account and manage API keys. Queryra AI search includes everything.
+**No OpenAI Account Required** — Queryra includes its own search backend, so
+you don't need to create a separate OpenAI account or manage external API keys.
 
-**Trained on YOUR WooCommerce Store** — Not a generic AI. Semantic search learns
-YOUR products, YOUR descriptions, YOUR categories.
+**Indexed on YOUR WooCommerce Store** — Queryra learns from YOUR products,
+descriptions, and categories — not generic global data.
 
 **Intent-Aware AI Search** — Most semantic search plugins only match meaning.
 Queryra goes further: "wireless headphones under $80, not Beats" applies the price
 filter AND excludes the brand. Vector-only plugins ignore both.
-[Why vector search isn't enough →](https://queryra.com/blog/beyond-vector-search-woocommerce)
+[Why vector search isn't enough →](https://queryra.com/blog/beyond-vector-search-woocommerce?utm_source=b9f1ce71)
 
 == Installation ==
 
@@ -226,11 +227,11 @@ filter AND excludes the brand. Vector-only plugins ignore both.
 
 1. **Install**: Plugins → Add New → Search "AI Search Queryra" → Install → Activate
 2. **Setup Wizard**: Follow the guided AI search wizard that appears automatically
-3. **Get API Key**: Create free account at [queryra.com/signup](https://queryra.com/signup)
+3. **Get API Key**: Create free account at [queryra.com/signup](https://queryra.com/signup?utm_source=b9f1ce71)
 4. **Import Products**: One-click import syncs all WooCommerce products into AI search index
 5. **Enable**: Turn on AI search and semantic search is ready
 
-[WooCommerce AI Search Setup Guide →](https://queryra.com/docs/wordpress-integration)
+[WooCommerce AI Search Setup Guide →](https://queryra.com/docs/wordpress-integration?utm_source=b9f1ce71)
 
 = WooCommerce Compatibility =
 
@@ -272,7 +273,7 @@ exclusions ("not Apple", "without Beats"), attribute requirements ("blue
 cotton breathable"), and use-case contexts ("for hiking", "gift for mom").
 This makes AI Search closer to ChatGPT-style search than to traditional
 keyword or vector-only search plugins.
-[Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce)
+[Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce?utm_source=b9f1ce71)
 
 = How is AI Search different from vector search plugins? =
 
@@ -320,7 +321,7 @@ Yes. Queryra fully supports WordPress 5.8 through 7.0+. The Connectors API and A
 OpenAI, Anthropic, and Google are LLM providers — they generate text and images from prompts. Queryra is a search engine connector. Where LLM connectors create new content, Queryra finds existing content in your site by semantic meaning. They complement each other: an LLM connector can write a product description, then Queryra makes it findable. You can use Queryra alongside LLM connectors in WordPress 7.0 Settings → Connectors.
 
 = Does Queryra work with regular WordPress posts and pages, not just WooCommerce products? =
-Yes. Queryra indexes posts, pages, custom post types, and WooCommerce products. The plugin name mentions WooCommerce because that is the most common use case, but Queryra is a full WordPress AI search connector — perfect for blogs, knowledge bases, documentation sites, news sites, and any WordPress content type.
+Yes. Queryra indexes posts, pages, custom post types, and WooCommerce products. The plugin name mentions WooCommerce because that is the most common use case, but Queryra is a full WordPress AI search connector — well-suited for blogs, knowledge bases, documentation sites, news sites, and any WordPress content type.
 
 = What is AI Search for WooCommerce? =
 AI Search is a semantic search plugin that replaces the default WooCommerce product search with AI-powered search. Instead of matching exact keywords, AI Search understands what customers mean — so "gift for mom who loves candles" finds candles, not zero results.
@@ -344,7 +345,7 @@ No. AI Search is powered by Queryra's backend — no OpenAI account, no API key 
 Yes. AI Search supports 50+ languages out of the box including Polish, German, French, Spanish, Dutch, Japanese, Czech, and more. No configuration needed — customers search in their native language and find products automatically.
 
 = Will AI Search slow down my WooCommerce store? =
-No. AI Search processes queries via an optimized API. Products are indexed in the background. Search results are delivered in milliseconds — faster than most keyword search plugins.
+No. AI Search processes queries via an optimized API. Products are indexed in the background. Search results typically return in under a second — competitive with keyword search for most stores.
 
 = How do I set up WooCommerce product search? =
 Install and activate the plugin, follow the Setup Wizard, get a free API key at queryra.com/signup, and run a one-click product import. AI Search is ready in under 5 minutes. No coding required.
@@ -385,6 +386,13 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 6. AI search settings — simple configuration, one API key, no OpenAI account needed
 
 == Changelog ==
+
+= 1.4.2 =
+* Improved: AI search documentation accuracy — refined Partner Program copy, broadened audience wording (sites, blogs, catalogues — not stores-only), and corrected technical phrasing (semantic AI search is indexed on your content, not "trained" on it).
+* New: AI search admin links now carry tracking parameters (UTM) so support can attribute referral traffic per install. Sentinel value `pre-init` flags fresh installs in logs for easier diagnostics.
+* Improved: replaced `rel="noreferrer"` with `rel="noopener"` on admin links so AI search referrer attribution works server-side while keeping security best practices intact.
+* Fixed: Plugin Check warnings cleared — plugin name now matches between header and readme; inline JS values encoded via `wp_json_encode()` for safe output escaping.
+* Maintenance: minor AI search copy refinements throughout — softened absolute marketing claims to align with WordPress.org plugin directory guidelines.
 
 = 1.4.1 =
 * New: B2BKing (B2B for WooCommerce) integration — replaces the bulk order form keyword search with Queryra semantic AI search. Loads only when B2BKing is active; core untouched.
@@ -521,9 +529,12 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 * Initial release: AI-powered semantic search for WordPress and WooCommerce
 * Semantic search engine understands natural language product queries
 * Auto-sync on publish — new WooCommerce products indexed automatically
-* Free trial included — no OpenAI account required
+* Free demo included — no OpenAI account required
 
 == Upgrade Notice ==
+
+= 1.4.2 =
+Maintenance release: AI search documentation accuracy, Plugin Check compliance fixes, and admin link tracking for support analytics. Safe to update.
 
 = 1.4.1 =
 B2BKing integration: Queryra semantic AI search now replaces the keyword search in B2BKing's bulk order form. Activates automatically when B2BKing is installed; sites without B2BKing are unaffected. Visibility rules (B2B group, category, per-product) are fully respected. Safe to update.
@@ -649,20 +660,20 @@ no third-party CDN requests on the frontend.
 contact@queryra.com. We will investigate on a best-effort basis and credit
 reporters in the changelog.
 
-**Full privacy policy:** [queryra.com/privacy](https://queryra.com/privacy)
+**Full privacy policy:** [queryra.com/privacy](https://queryra.com/privacy?utm_source=b9f1ce71)
 
 == Additional Information ==
 
 = Support =
 
-* [AI Search Documentation](https://queryra.com/docs)
-* [FAQ](https://queryra.com/faq)
-* [WooCommerce Product Search Setup](https://queryra.com/docs/wordpress-integration)
+* [AI Search Documentation](https://queryra.com/docs?utm_source=b9f1ce71)
+* [FAQ](https://queryra.com/faq?utm_source=b9f1ce71)
+* [WooCommerce Product Search Setup](https://queryra.com/docs/wordpress-integration?utm_source=b9f1ce71)
 * Email: support@queryra.com
 
 = Links =
 
 * [WooCommerce AI Search Live Demo](https://woo.queryra.com)
-* [Partner Program](https://queryra.com/blog/partner-program-pro-for-free)
-* [WooCommerce Search & AI Product Discovery Blog](https://queryra.com/blog)
+* [Partner Program](https://queryra.com/blog/partner-program-pro-for-free?utm_source=b9f1ce71)
+* [WooCommerce Search & AI Product Discovery Blog](https://queryra.com/blog?utm_source=b9f1ce71)
 * [GitHub](https://github.com/GronRafal/queryra-wordpress-plugin)

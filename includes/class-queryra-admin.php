@@ -51,7 +51,7 @@ class Queryra_Admin {
 
         // Show "Get API Key" only if no key configured yet.
         if (!get_option('queryra_api_key')) {
-            $get_key_link = '<a href="https://queryra.com/dashboard" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#2271b1;">' . esc_html__('Get API Key', 'queryra-ai-search') . '</a>';
+            $get_key_link = '<a href="' . esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard')) . '" target="_blank" rel="noopener" style="font-weight:600;color:#2271b1;">' . esc_html__('Get API Key', 'queryra-ai-search') . '</a>';
             array_unshift($links, $get_key_link);
         }
 
@@ -65,9 +65,9 @@ class Queryra_Admin {
         if ($file !== QUERYRA_PLUGIN_BASENAME) {
             return $links;
         }
-        $links[] = '<a href="https://woo.queryra.com" target="_blank" rel="noopener noreferrer">' . esc_html__('Live Demo', 'queryra-ai-search') . '</a>';
-        $links[] = '<a href="https://queryra.com/docs" target="_blank" rel="noopener noreferrer">' . esc_html__('Docs', 'queryra-ai-search') . '</a>';
-        $links[] = '<a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" rel="noopener noreferrer">' . esc_html__('Support', 'queryra-ai-search') . '</a>';
+        $links[] = '<a href="' . esc_url(Queryra_Search::tracked_url('https://woo.queryra.com')) . '" target="_blank" rel="noopener">' . esc_html__('Live Demo', 'queryra-ai-search') . '</a>';
+        $links[] = '<a href="' . esc_url(Queryra_Search::tracked_url('https://queryra.com/docs')) . '" target="_blank" rel="noopener">' . esc_html__('Docs', 'queryra-ai-search') . '</a>';
+        $links[] = '<a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" rel="noopener">' . esc_html__('Support', 'queryra-ai-search') . '</a>';
         return $links;
     }
 
@@ -522,7 +522,7 @@ class Queryra_Admin {
                             </table>
 
                             <p style="margin-top: 20px;">
-                                <a href="https://queryra.com/dashboard/api-keys" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/api-keys')); ?>" target="_blank" rel="noopener" class="button button-secondary">
                                     Open Dashboard
                                     <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                 </a>
@@ -589,13 +589,13 @@ class Queryra_Admin {
                                         </label>
                                         <p class="description" style="margin-top: 8px;">
                                             When an AI crawler requests <code>/llms.txt</code>, the plugin responds with a brief site identity and AI Search section.
-                                            Proposed standard by <a href="https://llmstxt.org/" target="_blank" rel="noopener noreferrer">llmstxt.org</a>.
+                                            Proposed standard by <a href="https://llmstxt.org/" target="_blank" rel="noopener">llmstxt.org</a>.
                                             No file is written to disk.
                                         </p>
 
                                         <?php if ($llms_state === 'none'): ?>
                                             <p style="margin-top: 8px;">
-                                                📄 <a href="<?php echo esc_url(home_url('/llms.txt')); ?>" target="_blank" rel="noopener noreferrer">View current /llms.txt →</a>
+                                                📄 <a href="<?php echo esc_url(home_url('/llms.txt')); ?>" target="_blank" rel="noopener">View current /llms.txt →</a>
                                             </p>
                                         <?php elseif ($llms_state === 'has_section'): ?>
                                             <div class="notice notice-success inline" style="margin: 10px 0; padding: 8px 12px;">
@@ -641,7 +641,7 @@ class Queryra_Admin {
 
                                         <?php if ($llms_full_state === 'none'): ?>
                                             <p style="margin-top: 8px;">
-                                                📄 <a href="<?php echo esc_url(home_url('/llms-full.txt')); ?>" target="_blank" rel="noopener noreferrer">View current /llms-full.txt →</a>
+                                                📄 <a href="<?php echo esc_url(home_url('/llms-full.txt')); ?>" target="_blank" rel="noopener">View current /llms-full.txt →</a>
                                             </p>
                                         <?php elseif ($llms_full_state === 'has_section'): ?>
                                             <div class="notice notice-success inline" style="margin: 10px 0; padding: 8px 12px;">
@@ -807,7 +807,7 @@ class Queryra_Admin {
                                                     / <?php echo esc_html(number_format($limit)); ?>
                                                     <span style="color: #646970; font-size: 14px;">(<?php echo esc_html($percentage); ?>%)</span>
                                                 <?php else: ?>
-                                                    <span style="color: #646970; font-size: 14px;">(Unlimited)</span>
+                                                    <span style="color: #646970; font-size: 14px;">(No metering on this plan)</span>
                                                 <?php endif; ?>
                                             </strong>
                                         </div>
@@ -955,7 +955,7 @@ class Queryra_Admin {
                         </ul>
 
                         <p style="margin-top: 20px;">
-                            <a href="https://queryra.com/dashboard/records" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                            <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/records')); ?>" target="_blank" rel="noopener" class="button button-secondary">
                                 Open Dashboard
                                 <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                             </a>
@@ -1074,7 +1074,7 @@ class Queryra_Admin {
                                 Sync happens in Queryra Dashboard where your records are processed and prepared for AI search.
                                 View sync history, logs, and trigger sync manually.
                             </p>
-                            <a href="https://queryra.com/dashboard/sync" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="margin-top: 10px;">
+                            <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/sync')); ?>" target="_blank" rel="noopener" class="button button-secondary" style="margin-top: 10px;">
                                 Open Dashboard
                                 <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                             </a>
@@ -1186,7 +1186,7 @@ class Queryra_Admin {
                         <?php endif; ?>
 
                         <p style="margin-top: 20px;">
-                            <a href="https://queryra.com/dashboard/searches" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                            <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/searches')); ?>" target="_blank" rel="noopener" class="button button-secondary">
                                 View Full Analytics in Dashboard
                                 <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                             </a>
@@ -1305,7 +1305,7 @@ class Queryra_Admin {
                                     <li>Enable customers to find products using natural language queries</li>
                                 </ul>
                                 <p style="margin-bottom: 0;">
-                                    <a href="https://wordpress.org/plugins/woocommerce/" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                    <a href="https://wordpress.org/plugins/woocommerce/" target="_blank" rel="noopener" class="button button-secondary">
                                         Learn More About WooCommerce
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -1348,7 +1348,7 @@ class Queryra_Admin {
                                 </ul>
                                 <p style="margin: 12px 0 0 0; font-size: 13px; color: #646970;">
                                     Cache is managed automatically by WordPress using Transients API.
-                                    <a href="https://developer.wordpress.org/apis/transients/" target="_blank" rel="noopener noreferrer" style="color: #2271b1;">Learn about WordPress Transients →</a>
+                                    <a href="https://developer.wordpress.org/apis/transients/" target="_blank" rel="noopener" style="color: #2271b1;">Learn about WordPress Transients →</a>
                                 </p>
                             </div>
 
@@ -1409,7 +1409,7 @@ class Queryra_Admin {
                                     Dashboard
                                 </th>
                                 <td>
-                                    <a href="https://queryra.com/dashboard" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                    <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard')); ?>" target="_blank" rel="noopener" class="button button-secondary">
                                         Open Dashboard
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -1422,7 +1422,7 @@ class Queryra_Admin {
                                     Resources
                                 </th>
                                 <td>
-                                    <a href="https://queryra.com/docs/wordpress-integration" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                    <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/docs/wordpress-integration')); ?>" target="_blank" rel="noopener" class="button button-secondary">
                                         View Resources
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -1435,7 +1435,7 @@ class Queryra_Admin {
                                     Community Help
                                 </th>
                                 <td>
-                                    <a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                    <a href="https://wordpress.org/support/plugin/queryra-ai-search/" target="_blank" rel="noopener" class="button button-secondary">
                                         Visit Forum
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -1448,7 +1448,7 @@ class Queryra_Admin {
                                     Clubs
                                 </th>
                                 <td>
-                                    <a href="https://queryra.com/dashboard/club" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                    <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/club')); ?>" target="_blank" rel="noopener" class="button button-secondary">
                                         Join a Club
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -1468,7 +1468,7 @@ class Queryra_Admin {
                                     Need more records or searches?
                                 </th>
                                 <td>
-                                    <a href="https://queryra.com/dashboard" target="_blank" rel="noopener noreferrer" class="button button-secondary">
+                                    <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard')); ?>" target="_blank" rel="noopener" class="button button-secondary">
                                         Open Dashboard
                                         <span class="dashicons dashicons-external" style="font-size: 14px; width: 14px; height: 14px; margin-left: 5px;"></span>
                                     </a>
@@ -1572,7 +1572,7 @@ class Queryra_Admin {
 
                                     <?php if (!$has_synced): ?>
                                         <p style="margin: 0 0 5px 0; font-size: 13px; color: #646970;">
-                                            • No synced records. <a href="https://queryra.com/dashboard/sync" target="_blank" rel="noopener noreferrer">Sync in Dashboard</a>
+                                            • No synced records. <a href="<?php echo esc_url(Queryra_Search::tracked_url('https://queryra.com/dashboard/sync')); ?>" target="_blank" rel="noopener">Sync in Dashboard</a>
                                         </p>
                                     <?php endif; ?>
 

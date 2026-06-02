@@ -64,7 +64,7 @@ class Queryra_Connector {
             'type'        => 'search_connector',
             'authentication' => array(
                 'method'          => 'api_key',
-                'credentials_url' => 'https://queryra.com/dashboard/api-keys',
+                'credentials_url' => Queryra_Search::tracked_url('https://queryra.com/dashboard/api-keys'),
                 // Point at our existing option so the Connectors UI and the
                 // Queryra Settings tab share a single source of truth.
                 'setting_name'    => 'queryra_api_key',
@@ -80,9 +80,9 @@ class Queryra_Connector {
             ),
             // Provider metadata to give the Connectors screen context.
             'meta' => array(
-                'website'   => 'https://queryra.com',
-                'docs_url'  => 'https://queryra.com/docs',
-                'signup_url'=> 'https://queryra.com/signup',
+                'website'   => Queryra_Search::tracked_url('https://queryra.com'),
+                'docs_url'  => Queryra_Search::tracked_url('https://queryra.com/docs'),
+                'signup_url'=> Queryra_Search::tracked_url('https://queryra.com/signup'),
                 'category'  => 'search',
             ),
         ));
