@@ -18,11 +18,24 @@ class Queryra_Analytics {
     const API_ENDPOINT = 'https://queryra.com/api/v1/analytics/events';
 
     /**
+     * Option holding the local "Recent issues" log shown in wp-admin.
+     */
+    const RECENT_ERRORS_OPTION = 'queryra_recent_errors';
+
+    /**
+     * Maximum number of entries kept in the local issue log.
+     */
+    const RECENT_ERRORS_MAX = 10;
+
+    /**
      * Track an event
      *
      * @param string $event Event name
+     * @param array  $meta  Optional event-specific metadata (HTTP status,
+     *                      batch info, error text, etc.). Sanitised payload
+     *                      kept under 2 KB to stay non-disruptive.
      */
-    public static function track($event) {
+    public static function track($event, $meta = array()) {
         // Check opt-out
         if (defined('QUERYRA_DISABLE_ANALYTICS') && QUERYRA_DISABLE_ANALYTICS) {
             return;
@@ -43,6 +56,17 @@ class Queryra_Analytics {
             'timestamp'          => gmdate('c'),
         );
 
+        // Merge optional event-specific metadata. Hard cap on JSON length so a
+        // pathological error payload (5MB stack trace, etc.) cannot block the
+        // request — telemetry must be cheap and never affect site performance.
+        if (!empty($meta) && is_array($meta)) {
+            $encoded = wp_json_encode($meta);
+            if (is_string($encoded) && strlen($encoded) > 2048) {
+                $meta = array('truncated' => true, 'size' => strlen($encoded));
+            }
+            $payload['meta'] = $meta;
+        }
+
         // Send non-blocking request
         wp_remote_post(self::API_ENDPOINT, array(
             'body'     => wp_json_encode($payload),
@@ -50,6 +74,97 @@ class Queryra_Analytics {
             'timeout'  => 5,
             'blocking' => false,
         ));
+    }
+
+    /**
+     * Report a plugin error: telemetry event + local issue log.
+     *
+     * Single entry point for every error surface (sync, search, key
+     * validation, integrations). Sends the `error_reported` telemetry
+     * event AND appends the error to the local "Recent issues" log
+     * rendered on the Settings tab — so the site owner sees the same
+     * problems we see, without digging through debug.log.
+     *
+     * The local log is written even when QUERYRA_DISABLE_ANALYTICS is
+     * set: the opt-out covers data leaving the site, not the user's
+     * own visibility into their install.
+     *
+     * @param array $meta Error metadata — same shape as track() meta.
+     *                    Recognised keys for the local log: category,
+     *                    context/stage, code/http_status, error/error_text/reason.
+     */
+    public static function report_error($meta) {
+        self::track('error_reported', $meta);
+        self::remember_error($meta);
+    }
+
+    /**
+     * Append an error to the local "Recent issues" ring buffer.
+     *
+     * Bounded on two axes so a broken API can never bloat the options
+     * table: identical consecutive errors collapse into one entry with
+     * a counter (a down API during a traffic spike = 1 row, not 100),
+     * and the log is capped at RECENT_ERRORS_MAX entries, newest first.
+     *
+     * @param array $meta Error metadata (see report_error()).
+     */
+    private static function remember_error($meta) {
+        if (!is_array($meta)) {
+            return;
+        }
+
+        $message = '';
+        foreach (array('error', 'error_text', 'reason') as $key) {
+            if (!empty($meta[$key]) && is_string($meta[$key])) {
+                $message = $meta[$key];
+                break;
+            }
+        }
+
+        $code = '';
+        if (!empty($meta['code'])) {
+            $code = (string) $meta['code'];
+        } elseif (!empty($meta['http_status'])) {
+            $code = 'HTTP ' . (int) $meta['http_status'];
+        }
+
+        $context = '';
+        foreach (array('context', 'stage', 'integration') as $key) {
+            if (!empty($meta[$key]) && is_string($meta[$key])) {
+                $context = $meta[$key];
+                break;
+            }
+        }
+
+        $entry = array(
+            'time'     => time(),
+            'category' => isset($meta['category']) ? (string) $meta['category'] : 'general',
+            'context'  => $context,
+            'code'     => $code,
+            'message'  => mb_substr($message, 0, 200),
+            'count'    => 1,
+        );
+
+        $entries = get_option(self::RECENT_ERRORS_OPTION, array());
+        if (!is_array($entries)) {
+            $entries = array();
+        }
+
+        // Same error as the newest entry → bump its counter instead of
+        // stacking duplicates.
+        if (!empty($entries)
+            && $entries[0]['category'] === $entry['category']
+            && $entries[0]['code'] === $entry['code']
+            && $entries[0]['message'] === $entry['message']
+        ) {
+            $entries[0]['count'] = (int) $entries[0]['count'] + 1;
+            $entries[0]['time']  = $entry['time'];
+        } else {
+            array_unshift($entries, $entry);
+            $entries = array_slice($entries, 0, self::RECENT_ERRORS_MAX);
+        }
+
+        update_option(self::RECENT_ERRORS_OPTION, $entries, false);
     }
 
     /**

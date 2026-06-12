@@ -1,9 +1,9 @@
 === AI Search for WooCommerce – Semantic Search ===
 Contributors: queryra, aisearch
-Tags: ai search, semantic search, woocommerce search, product search, connector
+Tags: ai search, semantic search, woocommerce search, product search, ai
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -252,8 +252,11 @@ filter AND excludes the brand. Vector-only plugins ignore both.
 
 == Frequently Asked Questions ==
 
-= Does AI Search work for B2B and wholesale stores? =
+= Is Queryra a WordPress AI search plugin, or only for WooCommerce? =
+Yes. Queryra indexes posts, pages, custom post types, and WooCommerce products. The plugin name mentions WooCommerce because that is the most common use case, but Queryra is a full WordPress AI search connector — well-suited for blogs, knowledge bases, documentation sites, news sites, and any WordPress content type.
 
+
+= Does AI Search work for B2B and wholesale stores? =
 Yes. AI Search includes a native B2BKing integration starting in version 1.4.1.
 The bulk order form's keyword search is replaced with semantic AI product search
 — B2B buyers can search "warm winter jackets bulk", "cotton shirts wholesale
@@ -263,7 +266,6 @@ category restrictions, per-product permissions) are fully respected. AI Search
 works equally well for B2C and B2B WooCommerce stores.
 
 = Can AI Search understand price filters and brand exclusions? =
-
 Yes — this is one of AI Search's signature capabilities. Customer queries
 like "wireless headphones under $80, not Beats" automatically apply the price
 filter AND exclude the brand. Most semantic search plugins only match meaning
@@ -276,7 +278,6 @@ keyword or vector-only search plugins.
 [Learn more →](https://queryra.com/blog/beyond-vector-search-woocommerce?utm_source=b9f1ce71)
 
 = How is AI Search different from vector search plugins? =
-
 Vector search alone matches concepts by mathematical similarity, but it
 ignores customer intent — it can find products related to "wireless
 headphones", but doesn't understand "under $80" or "not Beats" as filters.
@@ -288,7 +289,6 @@ Pure vector search plugins (Pinecone-based, ChromaDB-only) miss these intent
 signals — AI Search parses them automatically.
 
 = Can I migrate from Relevanssi, FiboSearch, or SearchWP to AI Search? =
-
 Yes. AI Search runs alongside existing search plugins during testing —
 switch between them via Settings → Queryra → Enable AI Search. There's no
 data migration needed; AI Search builds its own semantic index from your
@@ -298,7 +298,6 @@ the results aren't right for you, switch back instantly. Many stores keep
 their old search plugin as fallback while testing.
 
 = Can I customize AI Search results to match my theme? =
-
 Yes. AI Search uses your theme's existing search results template — no HTML
 or CSS changes needed. AI search results render through your theme's
 standard search.php / archive-product.php template, so they automatically
@@ -319,9 +318,6 @@ Yes. Queryra fully supports WordPress 5.8 through 7.0+. The Connectors API and A
 
 = How is Queryra different from OpenAI, Anthropic, and Google connectors? =
 OpenAI, Anthropic, and Google are LLM providers — they generate text and images from prompts. Queryra is a search engine connector. Where LLM connectors create new content, Queryra finds existing content in your site by semantic meaning. They complement each other: an LLM connector can write a product description, then Queryra makes it findable. You can use Queryra alongside LLM connectors in WordPress 7.0 Settings → Connectors.
-
-= Does Queryra work with regular WordPress posts and pages, not just WooCommerce products? =
-Yes. Queryra indexes posts, pages, custom post types, and WooCommerce products. The plugin name mentions WooCommerce because that is the most common use case, but Queryra is a full WordPress AI search connector — well-suited for blogs, knowledge bases, documentation sites, news sites, and any WordPress content type.
 
 = What is AI Search for WooCommerce? =
 AI Search is a semantic search plugin that replaces the default WooCommerce product search with AI-powered search. Instead of matching exact keywords, AI Search understands what customers mean — so "gift for mom who loves candles" finds candles, not zero results.
@@ -387,210 +383,23 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.4.2 =
-* Improved: AI search documentation accuracy — refined Partner Program copy, broadened audience wording (sites, blogs, catalogues — not stores-only), and corrected technical phrasing (semantic AI search is indexed on your content, not "trained" on it).
-* New: AI search admin links now carry tracking parameters (UTM) so support can attribute referral traffic per install. Sentinel value `pre-init` flags fresh installs in logs for easier diagnostics.
-* Improved: replaced `rel="noreferrer"` with `rel="noopener"` on admin links so AI search referrer attribution works server-side while keeping security best practices intact.
-* Fixed: Plugin Check warnings cleared — plugin name now matches between header and readme; inline JS values encoded via `wp_json_encode()` for safe output escaping.
-* Maintenance: minor AI search copy refinements throughout — softened absolute marketing claims to align with WordPress.org plugin directory guidelines.
+= 1.4.3 =
+* New: "Recent issues" panel on the Settings tab — import, search, API key, and integration problems are now visible in wp-admin instead of hidden in debug.log.
+* New: error reporting for previously silent failure paths (auto-sync, search fallback, B2BKing, key validation, client-side import errors). Honours the QUERYRA_DISABLE_ANALYTICS opt-out.
+* Security: fixed an XSS in the setup wizard test-search results; all API error messages shown in admin are now escaped.
+* Fixed: trashed or unpublished posts are now removed from the AI search index (previously only permanent deletion was synced).
+* Fixed: setup wizard validates the API key before saving — a mistyped key no longer overwrites a working one.
+* Fixed: "Clear All Search Cache" now works on hosts with Redis/Memcached object caching.
+* Fixed: stable bulk import pagination on sites with many posts sharing one publish date.
+* Improved: 5-second search timeout with 60-second back-off after API failure — an API outage can no longer hang the site; empty search results are briefly cached.
+* Improved: failed key validation retries automatically after 15 minutes; admin keeps last-known-good plan data on transient API errors.
 
-= 1.4.1 =
-* New: B2BKing (B2B for WooCommerce) integration — replaces the bulk order form keyword search with Queryra semantic AI search. Loads only when B2BKing is active; core untouched.
-* Security: visibility-intersect ensures products hidden by B2B group, category, or per-product restriction never surface through semantic search. Fail-closed default if the visibility set cannot be verified.
-* Performance: O(1) intersect lookups scale to 100k+ products.
-* UX: bulk order form rebrand when AI Search is enabled — search placeholder "AI search — try anything…", sort option "AI Pick" (replaces "Automatic"), loader text "AI is thinking — not just searching…", and search icon swapped to Google Material Design `auto_awesome` (same icon library B2BKing already uses).
-* Toggle: shares the master "Enable Queryra AI Search" option — single instant kill-switch. When off, B2BKing native search runs as before.
-* Known limitations: pagination counts may show small discrepancies vs Queryra ranking; sort dropdown options other than "AI Pick" are overridden by AI relevance during search.
-
-= 1.4.0 (2026-05-25) =
-* Added: Search ability registered for site automation tools and AI assistants — other plugins and agents can now discover and invoke Queryra semantic search programmatically.
-* Added: Developer filter `queryra_validate_api_key` for external API key validation. Returns true on success, WP_Error on failure.
-* Added: Defensive guard prevents destructive overwrites of the saved API key by external code.
-* Improved: API key field uses partial masking with click-to-edit (last 4 characters visible) on Settings tab and Setup Wizard.
-* Improved: Tested up to the latest WordPress version — fully backward compatible with WordPress 5.8+.
-
-= 1.3.2 (2026-05-20) =
-* Added: AI search compatibility with Oxygen Builder 6.0 — content from pages built with the new Oxygen 6 is now indexed by AI search automatically
-* Added: AI search page builder support extended — Oxygen Builder 6.0 stable joins the list of page builders automatically indexed by AI search (Elementor, Breakdance, Beaver Builder, Classic Oxygen)
-* Improved: AI search coverage for WordPress sites using Oxygen Builder — both Classic Oxygen 4.x and the new Oxygen 6.0 are now auto-detected and indexed by AI search
-* Improved: AI search relevance for WooCommerce stores and WordPress sites built with Oxygen 6.0 page builder
-* Improved: AI search migration path — sites that upgraded from Classic Oxygen 4.x to Oxygen 6.0 stable are still fully indexed by AI search
-
-= 1.3.1 (2026-05-18) =
-* Fixed: Critical — initial import and bulk sync now work on all sites. Sites without custom taxonomies (most blogs and stores using only standard categories and tags) could not sync content to AI search due to a data formatting issue. All sites can now import successfully.
-
-= 1.3.0 (2026-05-14) =
-* Added: AI search now indexes content from Elementor, Breakdance, Beaver Builder, and Oxygen page builders — your product descriptions built with page builders are now fully searchable
-* Added: AI search reads custom fields from ACF (Free + Pro) and Meta Box — text, textarea, WYSIWYG, repeaters, and groups all indexed automatically
-* Added: Custom taxonomies (book_genre, material, property_type, etc.) now sent to AI search index — search by any taxonomy your store uses
-* Added: Smart text filter automatically excludes CSS values, hex colors, URLs, and other technical strings from AI search index
-* Fixed: Search query now properly displays in page title and stays in the search input on results pages
-* Fixed: Duplicate content removed from AI search index — manual excerpts and WooCommerce short descriptions deduplicated against main content for better semantic search accuracy
-* Improved: Bulk import performance dramatically faster on sites with many custom fields — postmeta now prefetched in single query per batch
-* Developer: New filter `queryra_indexable_meta_content` for Pods, JetEngine, and Bricks Builder integration
-* Developer: New filter `queryra_indexable_taxonomies` to control which custom taxonomies are sent to AI search
-* Improved: Semantic search relevance for WooCommerce stores using page builders — AI search now extracts product descriptions from Elementor, Beaver Builder, Breakdance, and Oxygen layouts
-* Improved: AI product search accuracy for WooCommerce stores using ACF and Meta Box custom fields
-* Improved: WordPress search results page now correctly displays the search query for better UX with AI search
-
-= 1.2.0 (2026-05-07) =
-* Added - AI Discoverability: dynamic /llms.txt and /llms-full.txt for AI crawlers
-* Added - JSON-LD structured data (SearchResultsPage + Service schema)
-* Added - X-Search-Engine HTTP header on search responses
-* Added - Static llms.txt detection with copy-paste snippet
-* Added - Plugin row meta links: Live Demo, Docs, Support, Get API Key
-* Added - "Try a test search" shortcut in Settings tab
-* Added - Dismissible tip card — help visitors discover AI search
-* Added - Support tab: Clubs section, "Need more records?" link
-* Improved - Support tab: Documentation → Resources
-* Improved - Security: rel="noopener noreferrer" on external links
-* Removed - Obsolete 1.1.4 upgrade notice
-
-= 1.1.11 (2026-04-20) =
-* Added: AI search plugin fingerprint (meta generator tag + minimal stylesheet) for WordPress ecosystem discoverability — Queryra AI search is now properly indexed by WPScan, WPHive, PluginTests, Wappalyzer, and BuiltWith
-* Added: Privacy section documenting AI search data handling — what content is sent to the semantic search API, what is never sent, and how WooCommerce store owners stay in control
-* Added: Wizard now lets you select which content types to send to AI search (posts, pages, WooCommerce products) instead of importing everything by default
-* Improved: Removed legacy non-batched import code paths — AI search content import is now always batched for reliability on large WooCommerce catalogs
-* Improved: Admin notice dismissal nonce output now escaped with esc_attr() for defense-in-depth security
-
-= 1.1.10 (2026-04-09) =
-* Fixed: Null safety check for WooCommerce product sync operations (PHP 8.0+ compatibility)
-* Fixed: Added nonce verification to admin notice dismissal for improved security
-* Improved: Semantic search index stability during product deletion edge cases
-* Improved: WooCommerce product search reliability for high-traffic stores
-
-= 1.1.9 (2026-04-09) =
-* Improved: AI search ranking optimized for WooCommerce product search relevance
-* Improved: Semantic search accuracy for natural language queries and intent detection
-* Updated: LLM query parser now handles multilingual semantic search queries with better accuracy
-* Updated: AI search index synchronization performance for large WooCommerce catalogs
-* Updated: Documentation and FAQ for WooCommerce AI search setup
-
-= 1.1.8 (2026-03-30) =
-* Updated: AI search now supports 50+ languages out of the box — multilingual semantic search with no configuration needed
-* Updated: WooCommerce product search documentation updated to reflect multilingual AI search support
-
-= 1.1.7 (2026-03-19) =
-* Updated: AI search plugin title optimized for WooCommerce product search discoverability
-* Added: Intent-aware semantic search example — natural language price filter and brand exclusion
-* Improved: AI search pricing documentation centralized to queryra.com/pricing
-
-= 1.1.6 (2026-03-15) =
-* Improved: AI search settings simplified — API URL hardcoded for easier WooCommerce setup
-* Added: Instance ID display in AI search Support tab for faster troubleshooting
-* Improved: Semantic search status endpoint now sends instance ID and plugin type for better tracking
-* Improved: Partner referral tracking for AI search API keys via site URL
-
-= 1.1.5 (2026-03-03) =
-* Added: Batched bulk import with progress bar — AI search now supports WooCommerce stores with 50,000+ products
-* Added: Plan limit check before AI search product import starts
-* Improved: Semantic search index reliability with automatic retry on failed imports
-* Improved: Setup Wizard product import now uses batched AI search sync
-
-= 1.1.4 (2026-02-25) =
-* Added: Configurable AI search cache duration — from 1 minute to permanent caching
-* Added: Record type metadata for WooCommerce products, posts, and pages in semantic search index
-* Added: Content type filtering in AI search results
-* Improved: Search Analytics dashboard with top queries and zero-result query tracking
-* Improved: AI search cache settings UI in WooCommerce admin panel
-
-= 1.1.3 (2026-02-12) =
-* Added: Live WooCommerce AI search demo store at woo.queryra.com — 200+ products, try natural language search
-* Improved: Semantic search plugin description updated with real WooCommerce product search examples
-* Improved: FAQ updated with AI search demo store links and use cases
-* Improved: WooCommerce search integration simplified for better theme compatibility
-
-= 1.1.2 (2026-02-02) =
-* Added: Anonymous AI search usage analytics to improve semantic search accuracy over time
-* Added: Opt-out option for analytics via QUERYRA_DISABLE_ANALYTICS constant
-* Privacy: No personal data collected — see queryra.com/privacy
-
-= 1.1.1 (2026-02-01) =
-* Added: Full WooCommerce product search support powered by AI semantic search
-* Added: WooCommerce product SKU, price, and attribute indexing for AI search
-* Added: Smart product boost controls — promote high-margin products in AI search results
-* Improved: Setup Wizard with one-click WooCommerce product import into AI search index
-* Improved: Semantic search relevance algorithm for better natural language query results
-
-= 1.0.7 (2026-01-29) =
-* Added: AI search plugin icon, banner, and WooCommerce screenshots
-* Fixed: Asset file paths for WordPress.org compliance
-* Improved: FAQ section with direct links to AI search documentation
-
-= 1.0.6 (2026-01-29) =
-* Fixed: AI search documentation links updated
-* Added: Privacy Policy and Terms of Service links for WooCommerce AI search compliance
-
-= 1.0.5 (2026-01-28) =
-* Fixed: AI search dashboard stats display issue
-* Improved: Semantic search PHP 8+ compatibility
-
-= 1.0.0 (2026-01-23) =
-* Initial release: AI-powered semantic search for WordPress and WooCommerce
-* Semantic search engine understands natural language product queries
-* Auto-sync on publish — new WooCommerce products indexed automatically
-* Free demo included — no OpenAI account required
+For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.4.2 =
-Maintenance release: AI search documentation accuracy, Plugin Check compliance fixes, and admin link tracking for support analytics. Safe to update.
-
-= 1.4.1 =
-B2BKing integration: Queryra semantic AI search now replaces the keyword search in B2BKing's bulk order form. Activates automatically when B2BKing is installed; sites without B2BKing are unaffected. Visibility rules (B2B group, category, per-product) are fully respected. Safe to update.
-
-= 1.4.0 =
-New developer hooks, defensive guards, and API key UX improvements. Queryra semantic search is now programmatically callable by other plugins and AI assistants. Fully backward compatible.
-
-= 1.3.2 =
-AI search now supports Oxygen Builder 6.0 — pages built with the latest Oxygen 6 stable are fully indexed by AI search alongside Classic Oxygen 4.x.
-
-= 1.3.1 =
-Critical fix: bulk sync and initial import failed on sites without custom taxonomies (most blogs and stores). Update immediately if you are on 1.3.0.
-
-= 1.3.0 =
-Major update: AI search now indexes Elementor, Breakdance, Beaver Builder, Oxygen page builders,
-ACF and Meta Box custom fields, and all custom taxonomies. Recommended for all stores using page builders or custom
-fields — search results will be significantly more relevant.
-
-= 1.2.0 =
-AI Discoverability release — Queryra now generates llms.txt and JSON-LD schema so ChatGPT, Perplexity, Claude,
-and Google AI Overviews can find your store.
-
-= 1.1.11 =
-Minor improvement release. Adds AI search plugin discoverability for
-WordPress ecosystem tools, wizard content type selection, Privacy section
-documenting AI search data handling, and hardens admin notice escaping.
-Safe to update.
-
-= 1.1.10 =
-Security and stability release. PHP 8.0+ null safety for WooCommerce
-product sync, nonce verification on admin notices, and improved semantic
-search index reliability during product deletions.
-
-= 1.1.9 =
-AI search ranking and semantic search accuracy improvements for WooCommerce
-product search.
-
-= 1.1.8 =
-AI search now supports 50+ languages — multilingual semantic search with no
-configuration needed.
-
-= 1.1.7 =
-AI search branding updated, intent-aware semantic search example added.
-
-= 1.1.6 =
-AI search settings simplified, improved instance tracking and partner support.
-
-= 1.1.5 =
-AI search bulk import now supports WooCommerce stores with 50,000+ products.
-
-= 1.1.4 =
-AI search cache controls and content type filtering added.
-
-= 1.1.1 =
-Major update: full WooCommerce product search with AI semantic search. SKU,
-price, and attribute indexing added.
+= 1.4.3 =
+Security and reliability release: XSS fix in the setup wizard, trashed posts now removed from the AI search index, faster failover when the API is unreachable, and a new "Recent issues" panel so you see problems without debug.log. Update recommended for all users.
 
 == Privacy ==
 

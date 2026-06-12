@@ -27,6 +27,14 @@ class Queryra_Sync {
             add_action('save_post', array($this, 'sync_post_on_save'), 10, 3);
             add_action('before_delete_post', array($this, 'delete_post_on_delete'));
 
+            // Remove records when a post leaves `publish` (trash, draft,
+            // private, pending). before_delete_post only covers permanent
+            // deletion — without this hook a trashed product stays in the
+            // remote index (consuming the plan's record quota and surfacing
+            // in API results) until the trash is emptied, which on
+            // keep-in-trash sites is never.
+            add_action('transition_post_status', array($this, 'sync_post_status_transition'), 10, 3);
+
             // Sync when post becomes sticky/unsticky (margin changes!)
             add_action('post_stuck', array($this, 'sync_post_sticky_change'));
             add_action('post_unstuck', array($this, 'sync_post_sticky_change'));
@@ -38,6 +46,12 @@ class Queryra_Sync {
         // Batched sync AJAX handlers
         add_action('wp_ajax_queryra_get_sync_info', array($this, 'ajax_get_sync_info'));
         add_action('wp_ajax_queryra_sync_batch', array($this, 'ajax_sync_batch'));
+
+        // Client-side error reporter — JS posts here when the AJAX request to
+        // queryra_sync_batch itself fails (timeout, 500, 502, 504, payload
+        // limit, etc.). We forward to analytics so we can diagnose without
+        // asking the customer for debug logs.
+        add_action('wp_ajax_queryra_report_client_error', array($this, 'ajax_report_client_error'));
     }
 
     /**
@@ -48,6 +62,14 @@ class Queryra_Sync {
      * @param bool $update Whether this is an update
      */
     public function sync_post_on_save($post_id, $post, $update) {
+        // No API key = plugin not connected yet. Bail before doing any
+        // record-building work, and before the failure reporting below —
+        // otherwise every save on a keyless install logs an "API key is
+        // required" issue and fires telemetry for a non-problem.
+        if (!get_option('queryra_api_key')) {
+            return;
+        }
+
         // Skip autosaves
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
@@ -70,7 +92,15 @@ class Queryra_Sync {
         }
 
         // Sync this post
-        $this->sync_posts(array($post_id));
+        $result = $this->sync_posts(array($post_id));
+
+        // Emit telemetry + local issue log on failure — this path is
+        // otherwise completely silent: the editor saves a product, the
+        // index never gets it, and nobody knows until search results
+        // look stale. No admin notice here (yet) — just visibility.
+        if (empty($result['success'])) {
+            $this->report_auto_sync_failure('auto_save', $post, $result['message']);
+        }
     }
 
     /**
@@ -80,6 +110,11 @@ class Queryra_Sync {
      * @param int $post_id Post ID
      */
     public function sync_post_sticky_change($post_id) {
+        // Not connected yet — see sync_post_on_save().
+        if (!get_option('queryra_api_key')) {
+            return;
+        }
+
         $post = get_post($post_id);
         if (!$post) {
             return;
@@ -97,7 +132,11 @@ class Queryra_Sync {
         }
 
         // Sync this post with updated margin
-        $this->sync_posts(array($post_id));
+        $result = $this->sync_posts(array($post_id));
+
+        if (empty($result['success'])) {
+            $this->report_auto_sync_failure('sticky_change', $post, $result['message']);
+        }
     }
 
     /**
@@ -106,6 +145,11 @@ class Queryra_Sync {
      * @param int $post_id Post ID
      */
     public function delete_post_on_delete($post_id) {
+        // Not connected yet — see sync_post_on_save().
+        if (!get_option('queryra_api_key')) {
+            return;
+        }
+
         $post = get_post($post_id);
         if (!$post) {
             return;
@@ -117,9 +161,93 @@ class Queryra_Sync {
             return;
         }
 
-        // Delete from Queryra
-        $record_id = 'wp-' . $post_id;
-        $this->api->delete_record($record_id);
+        $this->delete_remote_record($post, 'auto_delete');
+    }
+
+    /**
+     * Remove a record from Queryra when its post leaves `publish`
+     * (trashed, reverted to draft, made private, unpublished).
+     *
+     * Counterpart to sync_post_on_save(): that hook only pushes published
+     * posts, so a publish→trash/draft transition would otherwise leave a
+     * stale record in the remote index. Re-publishing later re-syncs the
+     * post via save_post, so deleting here loses nothing.
+     *
+     * @param string  $new_status New post status
+     * @param string  $old_status Old post status
+     * @param WP_Post $post       Post object
+     */
+    public function sync_post_status_transition($new_status, $old_status, $post) {
+        // Only act when a post stops being publicly visible.
+        if ($old_status !== 'publish' || $new_status === 'publish') {
+            return;
+        }
+
+        // Not connected yet — see sync_post_on_save().
+        if (!get_option('queryra_api_key')) {
+            return;
+        }
+
+        $post_types = get_option('queryra_post_types', array('post', 'page'));
+        if (!in_array($post->post_type, $post_types)) {
+            return;
+        }
+
+        $this->delete_remote_record($post, 'unpublish');
+    }
+
+    /**
+     * Delete a post's record from the remote index, with shared error
+     * handling for both deletion paths (permanent delete / unpublish).
+     *
+     * @param WP_Post $post    Post whose record should be removed
+     * @param string  $context auto_delete|unpublish (for error reporting)
+     */
+    private function delete_remote_record($post, $context) {
+        $record_id = 'wp-' . $post->ID;
+        $response = $this->api->delete_record($record_id);
+
+        if (is_wp_error($response)) {
+            // Skip 404s — WordPress/WooCommerce routinely deletes transient
+            // posts that were never synced (cart/session leftovers, drafts,
+            // auto-generated orders), so "record not found" is expected
+            // noise, not a malfunction. Reporting it would flood the channel
+            // and the user's issue log with non-problems.
+            $error_data = $response->get_error_data();
+            if (is_array($error_data) && isset($error_data['status']) && (int) $error_data['status'] === 404) {
+                return;
+            }
+
+            // Real failure (timeout, 5xx, auth) — the record stays in the
+            // index as a ghost result. Same silent-path problem as save.
+            $this->report_auto_sync_failure($context, $post, $response->get_error_message());
+        }
+    }
+
+    /**
+     * Report a failed automatic sync (save / sticky change / delete).
+     *
+     * Shared by the hook-driven sync paths, which previously discarded
+     * all errors. Event name `error_reported` matches the batch-import
+     * and search handlers — meta.category ("sync") and meta.context
+     * narrow the surface. Bounded metadata, no PII, no post content.
+     *
+     * @param string  $context auto_save|sticky_change|auto_delete
+     * @param WP_Post $post    The post being synced/deleted
+     * @param string  $message Error message from the API layer
+     */
+    private function report_auto_sync_failure($context, $post, $message) {
+        if (!class_exists('Queryra_Analytics')) {
+            return;
+        }
+
+        Queryra_Analytics::report_error(array(
+            'category'  => 'sync',
+            'source'    => 'server',
+            'context'   => $context,
+            'post_type' => $post->post_type,
+            'error'     => mb_substr((string) $message, 0, 200),
+        ));
     }
 
     /**
@@ -453,7 +581,7 @@ class Queryra_Sync {
         $will_sync = ($record_limit > 0) ? min($total_wp_posts, $record_limit) : $total_wp_posts;
 
         // Cache stats for search integration
-        update_option('queryra_cached_stats', $stats);
+        update_option('queryra_cached_stats', $stats, false);
 
         wp_send_json_success(array(
             'total_wp_posts'  => $total_wp_posts,
@@ -489,8 +617,11 @@ class Queryra_Sync {
             'post_status'    => 'publish',
             'posts_per_page' => $batch_size,
             'offset'         => $offset,
-            'orderby'        => 'date',
-            'order'          => 'DESC',
+            // ID as tiebreaker: with hundreds of posts sharing one
+            // post_date (CSV imports), bare date ordering is unstable
+            // across queries — offset pagination could then skip some
+            // posts entirely and sync others twice.
+            'orderby'        => array('date' => 'DESC', 'ID' => 'DESC'),
             'fields'         => 'ids',
         ));
 
@@ -510,10 +641,81 @@ class Queryra_Sync {
                 'message' => $result['message'],
             ));
         } else {
+            // Emit server-side telemetry for the failure so we get attribution
+            // even when the customer cannot share their debug.log. Bounded
+            // metadata (counts + truncated message) — no PII, no post content.
+            //
+            // Event name `error_reported` is a generic plugin error channel —
+            // meta.category narrows the kind of error ("sync" here), meta.source
+            // ("server" vs "client") narrows who emitted it. One event type
+            // keeps the backend API contract minimal and lets us add new
+            // failure surfaces later (search errors, key validation, etc.)
+            // without coordinating a backend change every time.
+            if (class_exists('Queryra_Analytics')) {
+                Queryra_Analytics::report_error(array(
+                    'category'    => 'sync',
+                    'source'      => 'server',
+                    'offset'      => $offset,
+                    'batch_size'  => $batch_size,
+                    'post_count'  => count($post_ids),
+                    'post_types'  => array_values($post_types),
+                    'error'       => mb_substr((string) $result['message'], 0, 200),
+                ));
+            }
+
             wp_send_json_error(array(
                 'message' => $result['message'],
             ));
         }
+    }
+
+    /**
+     * AJAX: Report a client-side import error.
+     *
+     * Called by wizard.js / admin.js when the browser request to
+     * queryra_sync_batch fails outright (HTTP error, timeout, network drop,
+     * payload limit). Forwards a small bounded telemetry event so we can
+     * see error patterns server-side instead of relying on customers to
+     * share debug.log.
+     *
+     * Honours the QUERYRA_DISABLE_ANALYTICS opt-out (handled by
+     * Queryra_Analytics::track), so users who disabled analytics also
+     * disable error telemetry.
+     */
+    public function ajax_report_client_error() {
+        check_ajax_referer('queryra_sync', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified above by check_ajax_referer.
+        $context      = isset($_POST['context']) ? sanitize_text_field(wp_unslash($_POST['context'])) : 'unknown';
+        $http_status  = isset($_POST['http_status']) ? absint($_POST['http_status']) : 0;
+        $error_text   = isset($_POST['error_text']) ? sanitize_text_field(wp_unslash($_POST['error_text'])) : '';
+        $batch_offset = isset($_POST['batch_offset']) ? absint($_POST['batch_offset']) : 0;
+        $batch_size   = isset($_POST['batch_size']) ? absint($_POST['batch_size']) : 0;
+        // phpcs:enable
+
+        if (class_exists('Queryra_Analytics')) {
+            // Shared event name with the server-side handler — meta.category
+            // ("sync" here) and meta.source ("client") narrow the failure
+            // surface. One event type → one backend record schema → one set
+            // of dashboards. Reusable for any future client-side error
+            // (search failure, key check failure, etc.) — just call with a
+            // different category.
+            Queryra_Analytics::report_error(array(
+                'category'     => 'sync',
+                'source'       => 'client',
+                'context'      => $context,
+                'http_status'  => $http_status,
+                'error_text'   => mb_substr($error_text, 0, 300),
+                'batch_offset' => $batch_offset,
+                'batch_size'   => $batch_size,
+            ));
+        }
+
+        wp_send_json_success();
     }
 
     /**

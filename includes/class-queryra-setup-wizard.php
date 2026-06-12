@@ -375,7 +375,7 @@ class Queryra_Setup_Wizard {
         }
 
         // Save fresh stats to cache
-        update_option('queryra_cached_stats', $stats_response);
+        update_option('queryra_cached_stats', $stats_response, false);
         $stats = $stats_response;
 
         // Count posts and pages
@@ -781,17 +781,21 @@ class Queryra_Setup_Wizard {
             return;
         }
 
-        // Save API key
-        update_option('queryra_api_key', $api_key);
-
-        // Test connection
+        // Validate BEFORE saving — the old order (save, then test) meant a
+        // mistyped key permanently overwrote a working one: the wizard
+        // showed "Invalid API key" but the bad key was already stored,
+        // silently breaking auto-sync and search. validate_key() checks
+        // the candidate key without mutating any state.
         $api = new Queryra_API();
-        $test = $api->get_stats();
+        $test = $api->validate_key($api_key);
 
-        if (is_wp_error($test)) {
+        if ($test !== true) {
             wp_send_json_error(array('message' => 'Invalid API key or connection failed'));
             return;
         }
+
+        // Save API key (only after successful validation)
+        update_option('queryra_api_key', $api_key);
 
         // Track signup completed (API key successfully connected)
         Queryra_Analytics::track('signup_completed');
@@ -959,7 +963,10 @@ class Queryra_Setup_Wizard {
                     $next_time
                 );
 
-                wp_send_json_error(array('message' => $friendly_message));
+                // is_html: this message is plugin-authored markup (upgrade
+                // link); wizard.js renders it as HTML only when flagged —
+                // every other error message gets escaped client-side.
+                wp_send_json_error(array('message' => $friendly_message, 'is_html' => true));
                 return;
             }
 

@@ -294,7 +294,127 @@ class Queryra_Admin {
     /**
      * Render settings page
      */
+    /**
+     * Render the "Recent issues" card (Settings tab).
+     *
+     * Surfaces the local error log written by
+     * Queryra_Analytics::report_error() — the same problems the plugin
+     * reports to telemetry, shown to the site owner so import, search,
+     * key, and integration failures are visible without digging through
+     * debug.log. Renders nothing when the log is empty, so a healthy
+     * install never sees this card.
+     */
+    private function render_recent_issues() {
+        $entries = get_option(Queryra_Analytics::RECENT_ERRORS_OPTION, array());
+        if (empty($entries) || !is_array($entries)) {
+            return;
+        }
+
+        // Human-friendly category labels + a suggested next step shown
+        // once per category present in the log.
+        $labels = array(
+            'sync'           => 'Content sync',
+            'search'         => 'AI search',
+            'key_validation' => 'API key',
+            'integration'    => 'Integration',
+        );
+        $hints = array(
+            'sync'           => 'Some content failed to reach the Queryra index. Retry the import from the Records tab — if it keeps failing, import posts/pages and products separately.',
+            'search'         => 'A visitor\'s search temporarily fell back to standard WordPress keyword search. If this repeats, check your API key and plan limits.',
+            'key_validation' => 'Your API key could not be verified. Check the key in Settings below, or get a new one from the Queryra dashboard.',
+            'integration'    => 'A plugin integration (e.g. B2BKing) hit a problem and used its safe fallback.',
+        );
+
+        $categories_present = array();
+        ?>
+        <div class="queryra-card" style="border-left: 4px solid #f0b849;">
+            <h2 style="margin-bottom: 4px;">
+                <span class="dashicons dashicons-warning" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px; color: #f0b849;"></span>
+                Recent issues
+            </h2>
+            <p style="color: #646970; margin-top: 0;">
+                Problems the plugin ran into recently (last <?php echo esc_html(Queryra_Analytics::RECENT_ERRORS_MAX); ?> kept, stored only on your site).
+            </p>
+
+            <table class="widefat striped" style="margin: 10px 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 110px;">When</th>
+                        <th style="width: 130px;">Area</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($entries as $entry): ?>
+                    <?php
+                    $category = isset($entry['category']) ? (string) $entry['category'] : 'general';
+                    $categories_present[$category] = true;
+
+                    $detail_parts = array();
+                    if (!empty($entry['message'])) {
+                        $detail_parts[] = $entry['message'];
+                    }
+                    if (!empty($entry['code'])) {
+                        $detail_parts[] = '(' . $entry['code'] . ')';
+                    }
+                    if (!empty($entry['context'])) {
+                        $detail_parts[] = '— ' . str_replace('_', ' ', $entry['context']);
+                    }
+                    $detail = $detail_parts ? implode(' ', $detail_parts) : 'No details recorded';
+
+                    $count = isset($entry['count']) ? (int) $entry['count'] : 1;
+                    ?>
+                    <tr>
+                        <td style="white-space: nowrap;">
+                            <?php echo !empty($entry['time']) ? esc_html(human_time_diff((int) $entry['time'], time()) . ' ago') : '—'; ?>
+                        </td>
+                        <td>
+                            <?php echo esc_html(isset($labels[$category]) ? $labels[$category] : ucfirst($category)); ?>
+                        </td>
+                        <td>
+                            <?php echo esc_html($detail); ?>
+                            <?php if ($count > 1): ?>
+                                <span style="background: #f0b849; color: #1d2327; border-radius: 10px; padding: 1px 8px; font-size: 11px; font-weight: 600; margin-left: 6px;">
+                                    &times;<?php echo esc_html($count); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <?php foreach (array_keys($categories_present) as $category): ?>
+                <?php if (isset($hints[$category])): ?>
+                    <p style="color: #646970; margin: 6px 0;">
+                        <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                        <strong><?php echo esc_html($labels[$category]); ?>:</strong>
+                        <?php echo esc_html($hints[$category]); ?>
+                    </p>
+                <?php endif; ?>
+            <?php endforeach; ?>
+
+            <form method="post" style="margin-top: 10px;">
+                <?php wp_nonce_field('queryra_clear_recent_errors'); ?>
+                <button type="submit" name="queryra_clear_recent_errors" value="1" class="button button-secondary">
+                    Clear list
+                </button>
+            </form>
+        </div>
+        <?php
+    }
+
     public function render_settings_page() {
+        // Handle "Clear list" from the Recent issues card.
+        $recent_errors_cleared = false;
+        if (isset($_POST['queryra_clear_recent_errors'])) {
+            check_admin_referer('queryra_clear_recent_errors');
+            if (current_user_can('manage_options')) {
+                delete_option(Queryra_Analytics::RECENT_ERRORS_OPTION);
+                $recent_errors_cleared = true;
+            }
+        }
+
         // Get current settings
         $api_key = get_option('queryra_api_key', '');
         $api_url = get_option('queryra_api_url', 'https://queryra.com');
@@ -326,19 +446,25 @@ class Queryra_Admin {
         if (!empty($api_key)) {
             $api = new Queryra_API();
 
-            // Get stats (records, limits, plan) - FRESH from API
-            $stats_response = $api->get_stats();
+            // Get stats (records, limits, plan) - FRESH from API.
+            // 10s timeout: this runs on every plugin admin page view, and
+            // with the default 30s a slow API would hang each tab click
+            // for up to a minute (two calls).
+            $stats_response = $api->get_stats(10);
             if (!is_wp_error($stats_response)) {
                 $stats = $stats_response;
                 // Save to DB for search integration to use
                 update_option('queryra_cached_stats', $stats, false);
             } else {
+                // Keep the last-known-good cached value. The frontend search
+                // path relies on queryra_cached_stats/status for its FREE-plan
+                // pre-flight checks — wiping them on a transient admin-side
+                // failure would make every search fire doomed API calls.
                 $api_error = true;
-                delete_option('queryra_cached_stats');
             }
 
             // Get status (search window for FREE plan) - FRESH from API
-            $status_response = $api->get_status();
+            $status_response = $api->get_status(10);
             if (!is_wp_error($status_response)) {
                 $status = $status_response;
                 // Convert UTC time to WordPress timezone for display
@@ -347,7 +473,6 @@ class Queryra_Admin {
                 update_option('queryra_cached_status', $status, false);
             } else {
                 $api_error = true;
-                delete_option('queryra_cached_status');
             }
         }
 
@@ -364,6 +489,10 @@ class Queryra_Admin {
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Standard WP settings API pattern
             if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true') {
                 echo '<div class="notice notice-success is-dismissible"><p><strong>Settings saved.</strong></p></div>';
+            }
+
+            if ($recent_errors_cleared) {
+                echo '<div class="notice notice-success is-dismissible"><p><strong>Recent issues cleared.</strong></p></div>';
             }
             ?>
 
@@ -419,6 +548,9 @@ class Queryra_Admin {
 
                     <?php if ($active_tab === 'settings'): ?>
                     <!-- Settings Tab -->
+
+                    <?php $this->render_recent_issues(); ?>
+
                     <form method="post" action="options.php">
                         <?php settings_fields('queryra_settings'); ?>
                         <!-- Preserve post types selection -->
@@ -1522,7 +1654,7 @@ class Queryra_Admin {
                                 <strong>Connected to Queryra</strong>
                             </p>
                             <p style="margin: 10px 0; font-size: 14px; color: #646970;">
-                                <?php echo esc_html(number_format($stats['synced_records'])); ?> records synced | Plan: <?php echo esc_html(ucfirst($stats['plan'])); ?>
+                                <?php echo esc_html(number_format(isset($stats['synced_records']) ? (int) $stats['synced_records'] : 0)); ?> records synced | Plan: <?php echo esc_html(ucfirst(isset($stats['plan']) ? $stats['plan'] : 'unknown')); ?>
                             </p>
                         </div>
 
@@ -1534,12 +1666,16 @@ class Queryra_Admin {
                             </h3>
 
                             <?php
-                            // Check all conditions for AI search
+                            // Check all conditions for AI search.
+                            // isset-guarded: the stats/status payload shape
+                            // depends on the API version and plan — a missing
+                            // key must not throw PHP 8 warnings into the page.
                             $plugin_enabled = $ai_search === '1';
-                            $has_synced = $stats['synced_records'] > 0;
+                            $has_synced = !empty($stats['synced_records']);
+                            $is_free_plan = isset($stats['plan']) && $stats['plan'] === 'free';
                             $window_open = true; // Default for paid plans
-                            if ($stats['plan'] === 'free' && $status) {
-                                $window_open = $status['available'];
+                            if ($is_free_plan && $status) {
+                                $window_open = !empty($status['available']);
                             }
 
                             $can_search = $plugin_enabled && $has_synced && $window_open;
@@ -1578,7 +1714,7 @@ class Queryra_Admin {
 
                                     <?php if ($plugin_enabled && $has_synced && !$window_open): ?>
                                         <p style="margin: 0 0 5px 0; font-size: 13px; color: #646970;">
-                                            • Search window closed (FREE plan). Opens in <?php echo esc_html($status['minutes_until_open']); ?> min
+                                            • Search window closed (FREE plan). Opens in <?php echo esc_html(isset($status['minutes_until_open']) ? $status['minutes_until_open'] : '—'); ?> min
                                         </p>
                                     <?php endif; ?>
                                 </div>
@@ -1592,9 +1728,9 @@ class Queryra_Admin {
                                 </p>
                                 <p style="margin: 0 0 5px 0; color: #646970;">
                                     <span class="dashicons dashicons-<?php echo $has_synced ? 'yes' : 'no'; ?>" style="font-size: 14px; width: 14px; height: 14px; color: <?php echo $has_synced ? '#46b450' : '#d63638'; ?>;"></span>
-                                    Synced: <?php echo esc_html(number_format($stats['synced_records'])); ?> records
+                                    Synced: <?php echo esc_html(number_format(isset($stats['synced_records']) ? (int) $stats['synced_records'] : 0)); ?> records
                                 </p>
-                                <?php if ($stats['plan'] === 'free'): ?>
+                                <?php if ($is_free_plan): ?>
                                     <p style="margin: 0; color: #646970;">
                                         <span class="dashicons dashicons-<?php echo $window_open ? 'yes' : 'no'; ?>" style="font-size: 14px; width: 14px; height: 14px; color: <?php echo $window_open ? '#46b450' : '#d63638'; ?>;"></span>
                                         Window: <?php echo $window_open ? 'Open' : 'Closed'; ?>
@@ -1626,9 +1762,18 @@ class Queryra_Admin {
             return;
         }
 
+        // Invalidate every cached search by bumping the version salt that
+        // is part of each cache key. This works regardless of where
+        // transients actually live — on Redis/Memcached hosts they are not
+        // in wp_options, so the SQL cleanup below alone would delete zero
+        // rows while reporting success.
+        $cache_version = (int) get_option('queryra_cache_version', 1);
+        update_option('queryra_cache_version', $cache_version + 1);
+
         global $wpdb;
 
-        // Delete all Queryra search transients
+        // Delete orphaned transient rows from the DB (sites without an
+        // external object cache).
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Bulk transient cleanup
         $deleted = $wpdb->query("
             DELETE FROM {$wpdb->options}

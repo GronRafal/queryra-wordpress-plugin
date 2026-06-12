@@ -1,5 +1,47 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-06-10 - version 1.4.3
+* New: "Recent issues" panel on the Settings tab — import, search, API
+  key, and integration problems are now visible in wp-admin (last 10,
+  stored locally, repeated errors collapsed with a counter) instead of
+  hidden in debug.log.
+* New: error reporting (telemetry) for previously silent failure paths —
+  auto-sync on post save/delete, frontend search fallback, B2BKing
+  integration, API key validation, and client-side import errors
+  (timeout, HTTP 413/5xx). Anonymous, bounded payloads, honours the
+  QUERYRA_DISABLE_ANALYTICS opt-out; the local issue log works even
+  with analytics disabled.
+* Security: fixed an XSS in the setup wizard test-search results —
+  record names returned from the API are now escaped before rendering
+  in admin. All server/API error messages shown in admin JS are
+  escaped as well.
+* Fixed: trashed or unpublished posts are now removed from the AI
+  search index. Previously only permanent deletion was synced, so a
+  trashed product stayed in the index (consuming record quota) until
+  the trash was emptied.
+* Fixed: setup wizard now validates the API key BEFORE saving it — a
+  mistyped key no longer overwrites a working one.
+* Fixed: "Clear All Search Cache" now works on hosts with Redis or
+  Memcached object caching (cache-version invalidation instead of
+  SQL-only transient cleanup).
+* Fixed: bulk import pagination is now stable on sites with many posts
+  sharing the same publish date (ID tiebreaker) — no more skipped
+  records during large imports.
+* Improved: AI search API calls on the visitor-facing search path now
+  use a 5-second timeout (was 30s) with a 60-second back-off after a
+  failure — a slow or unreachable API can no longer pile up hung
+  requests on the site.
+* Improved: searches with no matches are briefly cached, so repeated
+  misspelled queries and bot traffic no longer burn an API call per
+  page view.
+* Improved: admin no longer wipes cached plan/status data on a
+  transient API error; failed key validation is automatically retried
+  after 15 minutes (previously a network blip marked a good key
+  invalid until it was re-saved).
+* Maintenance: PHP 8 undefined-array-key warnings fixed in the admin
+  sidebar, multibyte-safe truncation of error messages, cached options
+  no longer autoloaded.
+
 2026-06-02 - version 1.4.2
 * Improved: AI search documentation accuracy — refined Partner Program
   copy, broadened audience wording (sites, blogs, catalogues — not

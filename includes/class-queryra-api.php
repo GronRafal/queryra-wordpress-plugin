@@ -153,9 +153,14 @@ class Queryra_API {
      * @param string $endpoint API endpoint
      * @param array $query_params Query parameters
      * @param array $body Request body (for POST)
+     * @param int $timeout Request timeout in seconds. Default 30 suits
+     *                     admin-initiated calls (bulk sync); latency-sensitive
+     *                     paths (frontend search) must pass a short value —
+     *                     a hung API call inside pre_get_posts holds a PHP
+     *                     worker for the full duration.
      * @return mixed Response or WP_Error
      */
-    private function request($method, $endpoint, $query_params = array(), $body = null) {
+    private function request($method, $endpoint, $query_params = array(), $body = null, $timeout = 30) {
         // Build URL
         $url = rtrim($this->api_url, '/') . $endpoint;
 
@@ -166,7 +171,7 @@ class Queryra_API {
         // Request args
         $args = array(
             'method' => $method,
-            'timeout' => 30,
+            'timeout' => $timeout,
             'headers' => array(
                 'Content-Type' => 'application/json',
                 'User-Agent' => 'Queryra-WordPress/' . QUERYRA_VERSION
@@ -218,14 +223,14 @@ class Queryra_API {
      *
      * @return array Response
      */
-    public function get_stats() {
+    public function get_stats($timeout = 30) {
         if (empty($this->api_key)) {
             return new WP_Error('no_api_key', 'API key is required');
         }
 
         $response = $this->request('GET', '/api/v1/records/stats', array(
             'key' => $this->api_key
-        ));
+        ), null, $timeout);
 
         return $response;
     }
@@ -235,12 +240,12 @@ class Queryra_API {
      *
      * @return array Response
      */
-    public function get_status() {
+    public function get_status($timeout = 30) {
         if (empty($this->api_key)) {
             return new WP_Error('no_api_key', 'API key is required');
         }
 
-        $response = $this->request('GET', '/api/v1/status', $this->build_status_params());
+        $response = $this->request('GET', '/api/v1/status', $this->build_status_params(), null, $timeout);
 
         return $response;
     }
@@ -284,11 +289,16 @@ class Queryra_API {
             return new WP_Error('no_query', 'Search query is required');
         }
 
+        // 5s timeout — search runs on the visitor-facing request path
+        // (pre_get_posts, B2BKing live search). With the default 30s, a
+        // slow API would hang every uncached search page and exhaust
+        // PHP workers under modest traffic; 5s bounds the worst case
+        // before the WordPress-search fallback kicks in.
         $response = $this->request('GET', '/api/v1/search', array(
             'key' => $this->api_key,
             'q' => $query,
             'limit' => $limit
-        ));
+        ), null, 5);
 
         return $response;
     }

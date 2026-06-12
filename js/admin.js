@@ -1,5 +1,12 @@
 jQuery(document).ready(function($) {
 
+    // Escape a value before concatenating it into HTML. Server error
+    // messages can embed raw Queryra API response text — injecting them
+    // unescaped into admin pages is an XSS sink.
+    function escapeHtml(value) {
+        return $('<div>').text(String(value)).html();
+    }
+
     // Import All to Queryra (batched)
     $('#queryra-sync-all').on('click', function() {
         var $button = $(this);
@@ -123,8 +130,49 @@ jQuery(document).ready(function($) {
 
                     sendNextBatch();
                 },
-                error: function(xhr, status, error) {
-                    onSyncError('Batch failed: ' + error);
+                error: function(xhr, textStatus, error) {
+                    // Build a meaningful message — the bare jQuery error string
+                    // ("error" / "timeout") is useless for diagnosing a stuck
+                    // batch when the same condition will reproduce on retry.
+                    var httpStatus = xhr && xhr.status ? xhr.status : 0;
+                    var responseExcerpt = xhr && xhr.responseText
+                        ? String(xhr.responseText).substring(0, 300)
+                        : '';
+                    var userMessage = 'Batch failed';
+
+                    if (httpStatus === 0) {
+                        userMessage += ' — the request was interrupted (likely a timeout or hosting limit). Try uploading Posts + Pages first, then Products separately from Settings.';
+                    } else if (httpStatus === 413) {
+                        userMessage += ' (HTTP 413 — payload too large). Try splitting the import: send Posts + Pages first, Products later, from Settings.';
+                    } else if (httpStatus === 504 || httpStatus === 502 || httpStatus === 503) {
+                        userMessage += ' (HTTP ' + httpStatus + ' — server timeout). Try splitting Posts/Pages from Products in Settings, or retry in a few minutes.';
+                    } else if (httpStatus === 500) {
+                        userMessage += ' (HTTP 500 — server error). Check wp-content/debug.log on your site for details, then contact support.';
+                    } else {
+                        userMessage += ' (HTTP ' + httpStatus + ' / ' + textStatus + '): ' + (error || 'unknown error');
+                    }
+
+                    // Fire-and-forget telemetry — surface the failure pattern
+                    // server-side so we can diagnose without asking customers
+                    // for debug.log. Server-side handler respects the
+                    // QUERYRA_DISABLE_ANALYTICS opt-out.
+                    try {
+                        $.ajax({
+                            url: queryraData.ajaxUrl,
+                            type: 'POST',
+                            data: {
+                                action: 'queryra_report_client_error',
+                                nonce: queryraData.nonce,
+                                context: 'admin_sync',
+                                http_status: httpStatus,
+                                error_text: responseExcerpt,
+                                batch_offset: offset,
+                                batch_size: currentBatch
+                            }
+                        });
+                    } catch (e) { /* never let telemetry break the UX */ }
+
+                    onSyncError(userMessage);
                 }
             });
         }
@@ -143,7 +191,7 @@ jQuery(document).ready(function($) {
 
         function onSyncError(msg) {
             $('#queryra-batch-status').html(
-                '<span style="color: #dc3232;">Error: ' + msg + '</span><br>' +
+                '<span style="color: #dc3232;">Error: ' + escapeHtml(msg) + '</span><br>' +
                 '<small style="color: #646970;">Already imported records are safe. You can re-run import anytime.</small>'
             );
             $button.prop('disabled', false);
@@ -153,7 +201,7 @@ jQuery(document).ready(function($) {
     }
 
     function showSyncError($status, $button, msg) {
-        $status.html('<span style="color: #dc3232;">' + msg + '</span>')
+        $status.html('<span style="color: #dc3232;">' + escapeHtml(msg) + '</span>')
                .removeClass('queryra-status-loading')
                .addClass('queryra-status-error');
         $button.prop('disabled', false);
@@ -193,12 +241,12 @@ jQuery(document).ready(function($) {
                         location.reload();
                     }, 2000);
                 } else {
-                    $status.html('✗ ' + response.data)
+                    $status.html('✗ ' + escapeHtml(response.data))
                            .css('color', '#dc3232');
                 }
             },
             error: function(xhr, status, error) {
-                $status.html('✗ Failed: ' + error)
+                $status.html('✗ Failed: ' + escapeHtml(error))
                        .css('color', '#dc3232');
             },
             complete: function() {

@@ -4,6 +4,14 @@
 
 jQuery(document).ready(function($) {
 
+    // Escape a value before concatenating it into HTML. Record names and
+    // API error messages pass through the Queryra API but originate from
+    // post titles (which authors without unfiltered_html can seed with
+    // markup) — injecting them raw into admin pages is a stored-XSS sink.
+    function escapeHtml(value) {
+        return $('<div>').text(String(value)).html();
+    }
+
     // Step 1: Connection mode toggle
     $('input[name="connection_mode"]').on('change', function() {
         if ($(this).val() === 'existing') {
@@ -235,8 +243,49 @@ jQuery(document).ready(function($) {
 
                     sendBatch();
                 },
-                error: function() {
-                    onImportError('Import batch failed. Please try again.');
+                error: function(xhr, textStatus) {
+                    // Build a meaningful message for the user. The default
+                    // "try again" is useless when the same condition (timeout,
+                    // payload too big, hosting limit) will reproduce on retry.
+                    var httpStatus = xhr && xhr.status ? xhr.status : 0;
+                    var responseExcerpt = xhr && xhr.responseText
+                        ? String(xhr.responseText).substring(0, 300)
+                        : '';
+                    var userMessage = 'Import batch failed';
+
+                    if (httpStatus === 0) {
+                        userMessage += ' — the request was interrupted (likely a timeout or hosting limit). Try uploading Posts + Pages first, then Products separately from Settings.';
+                    } else if (httpStatus === 413) {
+                        userMessage += ' (HTTP 413 — payload too large). Try splitting the import: send Posts + Pages first, Products later, from Settings.';
+                    } else if (httpStatus === 504 || httpStatus === 502 || httpStatus === 503) {
+                        userMessage += ' (HTTP ' + httpStatus + ' — server timeout). Try splitting Posts/Pages from Products in Settings, or retry in a few minutes.';
+                    } else if (httpStatus === 500) {
+                        userMessage += ' (HTTP 500 — server error). Check wp-content/debug.log on your site for details, then contact support.';
+                    } else {
+                        userMessage += ' (HTTP ' + httpStatus + ' / ' + textStatus + '). Please try again, or contact support if it repeats.';
+                    }
+
+                    // Fire-and-forget telemetry so we see the failure pattern
+                    // server-side without asking the customer for debug logs.
+                    // Honours QUERYRA_DISABLE_ANALYTICS — the server-side
+                    // handler will no-op when analytics is disabled.
+                    try {
+                        $.ajax({
+                            url: queryraWizard.ajaxUrl,
+                            type: 'POST',
+                            data: {
+                                action: 'queryra_report_client_error',
+                                nonce: queryraWizard.syncNonce,
+                                context: 'wizard_import',
+                                http_status: httpStatus,
+                                error_text: responseExcerpt,
+                                batch_offset: offset,
+                                batch_size: currentBatch
+                            }
+                        });
+                    } catch (e) { /* never let telemetry break the UX */ }
+
+                    onImportError(userMessage);
                 }
             });
         }
@@ -383,8 +432,8 @@ jQuery(document).ready(function($) {
                         results.forEach(function(item, index) {
                             var bgColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9';
                             html += '<div style="display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #f0f0f1; background: ' + bgColor + ';">';
-                            html += '<span style="font-weight: 500; color: #1d2327;">' + item.name + '</span>';
-                            html += '<span style="color: #2271b1; font-weight: 600;">' + item.score + '</span>';
+                            html += '<span style="font-weight: 500; color: #1d2327;">' + escapeHtml(item.name) + '</span>';
+                            html += '<span style="color: #2271b1; font-weight: 600;">' + escapeHtml(item.score) + '</span>';
                             html += '</div>';
                         });
 
@@ -395,7 +444,13 @@ jQuery(document).ready(function($) {
                         $('#queryra-test-results').show();
                     }
                 } else {
-                    $('#queryra-search-error').html('<div style="background: #fef2f2; border-left: 4px solid #dc3232; padding: 12px; border-radius: 4px; color: #dc3232;"><span class="dashicons dashicons-warning"></span> ' + response.data.message + '</div>').show();
+                    // is_html marks the server's own formatted message (FREE
+                    // plan window notice with upgrade link). Everything else
+                    // is plain text — possibly a raw API error — so escape it.
+                    var errMsg = response.data.is_html
+                        ? response.data.message
+                        : escapeHtml(response.data.message);
+                    $('#queryra-search-error').html('<div style="background: #fef2f2; border-left: 4px solid #dc3232; padding: 12px; border-radius: 4px; color: #dc3232;"><span class="dashicons dashicons-warning"></span> ' + errMsg + '</div>').show();
                 }
             },
             error: function() {

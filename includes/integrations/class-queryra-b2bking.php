@@ -74,10 +74,34 @@ class Queryra_B2BKing {
             $this->api = new Queryra_API();
         }
 
+        // Negative cache shared with the main search path: the API failed
+        // within the last minute, so go straight to B2BKing's native list
+        // instead of stalling the bulk order form on another doomed call.
+        if (get_transient('queryra_api_down')) {
+            return $all_ids;
+        }
+
         $response = $this->api->search($term, self::SEARCH_LIMIT);
 
         // Fallback: API error or empty → native B2BKing list (never break UX).
         if (is_wp_error($response) || empty($response['results']) || !is_array($response['results'])) {
+            // Emit telemetry only on real errors (not on a legitimate empty
+            // result set), so we see when Queryra's search call broke inside
+            // the B2BKing path without flooding the channel.
+            if (is_wp_error($response)) {
+                if (class_exists('Queryra_Analytics')) {
+                    Queryra_Analytics::report_error(array(
+                        'category'    => 'integration',
+                        'integration' => 'b2bking',
+                        'source'      => 'server',
+                        'stage'       => 'semantic_search',
+                        'code'        => $response->get_error_code(),
+                        'error'       => mb_substr((string) $response->get_error_message(), 0, 200),
+                    ));
+                }
+                // Same 60s back-off as the main search path.
+                set_transient('queryra_api_down', 1, MINUTE_IN_SECONDS);
+            }
             return $all_ids;
         }
 
@@ -176,6 +200,23 @@ class Queryra_B2BKing {
         // B2BKing's allow-list = return zero rather than leak hidden
         // products.
         if (empty($allowed) || !is_array($allowed)) {
+            // Emit telemetry — the fail-closed path means the customer just
+            // saw zero search results for a query that should have worked.
+            // Without this event, the customer has no way to surface the
+            // problem and we cannot tell installation-side problems from
+            // legitimate empty result sets.
+            if (class_exists('Queryra_Analytics')) {
+                global $b2bking_plugin;
+                Queryra_Analytics::report_error(array(
+                    'category'         => 'integration',
+                    'integration'      => 'b2bking',
+                    'source'           => 'server',
+                    'stage'            => 'visibility_filter',
+                    'reason'           => 'transient_unavailable',
+                    'plugin_object'    => is_object($b2bking_plugin) ? 'present' : 'missing',
+                    'method_available' => (is_object($b2bking_plugin) && method_exists($b2bking_plugin, 'get_visibility_set_transient')) ? 'yes' : 'no',
+                ));
+            }
             return array();
         }
 

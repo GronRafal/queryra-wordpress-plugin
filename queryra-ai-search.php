@@ -3,7 +3,7 @@
  * Plugin Name: AI Search for WooCommerce – Semantic Search
  * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.4.2
+ * Version: 1.4.3
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.4.2');
+define('QUERYRA_VERSION', '1.4.3');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -271,6 +271,19 @@ class Queryra_Search {
                 'key_hash'     => $hash,
             );
             self::log('verify_api_key — ERROR, storing validation option message="' . $message . '"');
+
+            // Emit telemetry — key validation failed. Tells us how many
+            // customers paste wrong keys, how many keys expire, and the
+            // distribution of error reasons. Helps tune the onboarding /
+            // dashboard "Get API key" flow.
+            if (class_exists('Queryra_Analytics')) {
+                Queryra_Analytics::report_error(array(
+                    'category' => 'key_validation',
+                    'source'   => 'server',
+                    'code'     => is_wp_error($result) ? $result->get_error_code() : 'unknown',
+                    'error'    => mb_substr((string) $message, 0, 200),
+                ));
+            }
         }
 
         // PERSISTENT storage (not transient) so the status survives the
@@ -322,7 +335,19 @@ class Queryra_Search {
         $last_hash    = (string) get_option('queryra_api_key_validated_hash', '');
 
         if ($current_hash === $last_hash) {
-            // Key unchanged since last validation — nothing to do.
+            // Key unchanged since last validation. If that validation
+            // FAILED, retry every 15 minutes — otherwise a transient
+            // network blip during validation would brand a perfectly good
+            // key "invalid" forever (nothing re-checks until the key
+            // itself changes).
+            $validation = get_option('queryra_api_key_validation');
+            if (is_array($validation)
+                && isset($validation['level']) && $validation['level'] === 'error'
+                && (time() - (isset($validation['validated_at']) ? (int) $validation['validated_at'] : 0)) > 15 * MINUTE_IN_SECONDS
+            ) {
+                self::log('LAZY validate — previous validation errored >15 min ago, retrying');
+                $this->verify_api_key($key);
+            }
             return;
         }
 

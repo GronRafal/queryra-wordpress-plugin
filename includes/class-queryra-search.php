@@ -218,11 +218,24 @@ class Queryra_Search_Integration {
             return; // No records in Queryra at all
         }
 
-        // Cache key (unique per search term)
-        $cache_key = 'queryra_search_' . md5($search_term);
+        // Cache key (unique per search term). Salted with a version number
+        // so "Clear All Search Cache" works on Redis/Memcached too —
+        // external object caches don't keep transients in wp_options, so
+        // the admin's SQL cleanup can't reach them; bumping the version
+        // orphans every old entry instead.
+        $cache_version = (int) get_option('queryra_cache_version', 1);
+        $cache_key = 'queryra_search_' . md5($cache_version . '|' . $search_term);
 
         // Check cache FIRST - even if stale, it's better than SQL
         $cached_ids = get_transient($cache_key);
+
+        // Cached "no results" marker (empty array): this term was asked
+        // recently and the API had nothing — fall back to WordPress search
+        // without burning another API call. Misspelled queries repeat a
+        // lot; without this marker each repeat costs a full API round-trip.
+        if (is_array($cached_ids) && count($cached_ids) === 0) {
+            return;
+        }
 
         // SMART STRATEGY for FREE plan:
         // If window closed BUT we have cache → use cache (even if stale)
@@ -262,6 +275,14 @@ class Queryra_Search_Integration {
                 return; // Fallback to WordPress search
             }
 
+            // Negative cache: the API failed within the last minute. Skip
+            // straight to the WordPress fallback instead of paying another
+            // doomed HTTP round-trip per search — during an outage every
+            // uncached search would otherwise stall for the full timeout.
+            if (get_transient('queryra_api_down')) {
+                return;
+            }
+
             // Fetch all matching results from API (API filters by relevance threshold)
             $results = $this->api->search($search_term, 999);
 
@@ -271,7 +292,8 @@ class Queryra_Search_Integration {
                 $error_data = $results->get_error_data();
 
                 // Special handling for FREE plan window closed
-                if (strpos($error_msg, 'FREE plan') !== false || strpos($error_msg, 'window') !== false) {
+                $is_window_closed = (strpos($error_msg, 'FREE plan') !== false || strpos($error_msg, 'window') !== false);
+                if ($is_window_closed) {
                     if ($error_data && isset($error_data['data']['errors']['api_error'][0])) {
                         $error_info = $error_data['data']['errors']['api_error'][0];
 
@@ -284,14 +306,41 @@ class Queryra_Search_Integration {
                             'minutes_until_open' => isset($error_info['minutes_until_open']) ? $error_info['minutes_until_open'] : null
                         );
 
-                        update_option('queryra_cached_status', $updated_status);
+                        update_option('queryra_cached_status', $updated_status, false);
                     }
+                }
+
+                // Emit telemetry — frontend semantic search just silently fell
+                // back to WP keyword search. Without this event we have zero
+                // signal that a customer's search is broken until they email.
+                // Skip the FREE-plan window-closed case: it's a business state,
+                // not a malfunction, and would otherwise flood the channel.
+                if (!$is_window_closed && class_exists('Queryra_Analytics')) {
+                    Queryra_Analytics::report_error(array(
+                        'category' => 'search',
+                        'source'   => 'server',
+                        'code'     => $results->get_error_code(),
+                        'error'    => mb_substr((string) $error_msg, 0, 200),
+                    ));
+                }
+
+                // Mark the API as down for 60s so concurrent/subsequent
+                // searches fall back immediately instead of each repeating
+                // the failed call. Also naturally rate-limits the error
+                // telemetry above to ~1 event per minute during an outage.
+                if (!$is_window_closed) {
+                    set_transient('queryra_api_down', 1, MINUTE_IN_SECONDS);
                 }
 
                 return; // Let WordPress handle search normally
             }
 
             if (empty($results['results'])) {
+                // Cache the empty outcome briefly (short TTL — new content
+                // may match soon) unless caching is disabled entirely.
+                if ($this->cache_duration !== 0) {
+                    set_transient($cache_key, array(), 5 * MINUTE_IN_SECONDS);
+                }
                 return; // Let WordPress handle search normally
             }
 
@@ -299,7 +348,7 @@ class Queryra_Search_Integration {
             // Convert "wp-123" → 123, filter out non-WordPress records
             $all_ids = array();
             foreach ($results['results'] as $result) {
-                if (strpos($result['id'], 'wp-') === 0) {
+                if (!empty($result['id']) && strpos($result['id'], 'wp-') === 0) {
                     $id = (int) str_replace('wp-', '', $result['id']);
                     if ($id > 0) {
                         $all_ids[] = $id;
@@ -310,7 +359,17 @@ class Queryra_Search_Integration {
             // Track first search (only once per installation)
             if (!get_option('queryra_first_search_tracked')) {
                 Queryra_Analytics::track('first_search');
-                update_option('queryra_first_search_tracked', true);
+                update_option('queryra_first_search_tracked', true, false);
+            }
+
+            // Results contained no WordPress records ("wp-" prefix) — treat
+            // like an empty result: brief negative cache + native fallback,
+            // consistent with the empty-results branch above.
+            if (empty($all_ids)) {
+                if ($this->cache_duration !== 0) {
+                    set_transient($cache_key, array(), 5 * MINUTE_IN_SECONDS);
+                }
+                return;
             }
 
             // Cache the results based on settings
