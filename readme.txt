@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, ai
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -383,23 +383,18 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.4.3 =
-* New: "Recent issues" panel on the Settings tab — import, search, API key, and integration problems are now visible in wp-admin instead of hidden in debug.log.
-* New: error reporting for previously silent failure paths (auto-sync, search fallback, B2BKing, key validation, client-side import errors). Honours the QUERYRA_DISABLE_ANALYTICS opt-out.
-* Security: fixed an XSS in the setup wizard test-search results; all API error messages shown in admin are now escaped.
-* Fixed: trashed or unpublished posts are now removed from the AI search index (previously only permanent deletion was synced).
-* Fixed: setup wizard validates the API key before saving — a mistyped key no longer overwrites a working one.
-* Fixed: "Clear All Search Cache" now works on hosts with Redis/Memcached object caching.
-* Fixed: stable bulk import pagination on sites with many posts sharing one publish date.
-* Improved: 5-second search timeout with 60-second back-off after API failure — an API outage can no longer hang the site; empty search results are briefly cached.
-* Improved: failed key validation retries automatically after 15 minutes; admin keeps last-known-good plan data on transient API errors.
+= 1.4.4 =
+* New: Custom Post Type support — index any public custom post type (recipes, vehicles, portfolios, etc.), not just posts, pages, and products. Enable each type in Settings → Content or the setup wizard, then run Import All.
+* New: ACF / Meta Box custom fields and custom taxonomies on custom post types are indexed automatically.
+* Improved: Records tab now counts and lists enabled custom post types; trashing a custom post type entry removes it from the index.
+* Improved: anonymous analytics report custom post type usage to prioritise compatibility (honours QUERYRA_DISABLE_ANALYTICS).
 
 For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.4.3 =
-Security and reliability release: XSS fix in the setup wizard, trashed posts now removed from the AI search index, faster failover when the API is unreachable, and a new "Recent issues" panel so you see problems without debug.log. Update recommended for all users.
+= 1.4.4 =
+Custom Post Type support: AI search now indexes any public custom post type (recipes, vehicles, portfolios, and more), including their ACF/Meta Box fields and custom taxonomies. Enable them in Settings → Content, then run Import All.
 
 == Privacy ==
 

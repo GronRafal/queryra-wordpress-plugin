@@ -1,5 +1,21 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-06-15 - version 1.4.4
+* New: Custom Post Type support — AI search now indexes any public custom
+  post type (recipes, vehicles, portfolios, listings, courses, etc.), not
+  just posts, pages, and WooCommerce products. Enable each type in
+  Settings → Content or during the setup wizard, then run Import All.
+* New: ACF / Meta Box custom fields and custom taxonomies on those custom
+  post types are indexed automatically — the extraction engine is
+  post-type agnostic, so no extra configuration is needed.
+* Improved: Records tab "Active in WordPress" now counts and lists enabled
+  custom post types alongside posts, pages, and products.
+* Improved: trashing or unpublishing a custom post type entry removes it
+  from the index, same as for posts/pages/products.
+* Improved: anonymous usage analytics now report a breakdown of public
+  custom post types and their published-post counts, to help prioritise
+  compatibility work. No personal data; honours QUERYRA_DISABLE_ANALYTICS.
+
 2026-06-10 - version 1.4.3
 * New: "Recent issues" panel on the Settings tab — import, search, API
   key, and integration problems are now visible in wp-admin (last 10,

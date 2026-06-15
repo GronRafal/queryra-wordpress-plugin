@@ -151,20 +151,25 @@ class Queryra_Admin {
             return $result;
         }
 
-        // Filter to only valid values and remove empty strings
-        $sanitized = array_map('sanitize_text_field', $value);
-        $sanitized = array_filter($sanitized, function($item) {
-            return !empty($item);
-        });
+        // Whitelist = any public post type registered on this site, minus
+        // internal/system types. This lets custom post types (recipes,
+        // vehicles, portfolios, etc.) be indexed: the sync query, ACF
+        // extraction and taxonomy collection are all post-type agnostic,
+        // so accepting CPTs here is the only gate that needs opening.
+        $exclude      = array('attachment', 'revision', 'nav_menu_item', 'wp_block');
+        $public_types = get_post_types(array('public' => true));
+        $allowed      = array_diff($public_types, $exclude);
 
-        // Add page if selected
-        if (in_array('page', $sanitized)) {
-            $result[] = 'page';
-        }
-
-        // Add product if selected
-        if (in_array('product', $sanitized)) {
-            $result[] = 'product';
+        // sanitize_key matches WordPress' own post-type slug rules
+        // (lowercase, alphanumerics, hyphen/underscore).
+        $sanitized = array_map('sanitize_key', $value);
+        foreach ($sanitized as $type) {
+            if ($type === '' || $type === 'post') {
+                continue; // empty placeholder / already included
+            }
+            if (in_array($type, $allowed, true) && !in_array($type, $result, true)) {
+                $result[] = $type;
+            }
         }
 
         return $result;
@@ -871,9 +876,32 @@ class Queryra_Admin {
                                             <strong>Pages</strong>
                                         </label>
 
+                                        <?php
+                                        // Custom post types registered on this site (recipes,
+                                        // vehicles, portfolios, etc.). 'post' is always on,
+                                        // 'page' has its own row above, and 'product' is
+                                        // configured on the dedicated WooCommerce tab — so we
+                                        // skip those three and list the rest dynamically.
+                                        $cpt_skip = array('post', 'page', 'product');
+                                        foreach ($available_post_types as $pt_name => $pt_object):
+                                            if (in_array($pt_name, $cpt_skip, true)) {
+                                                continue;
+                                            }
+                                            $pt_label = isset($pt_object->labels->name) ? $pt_object->labels->name : $pt_name;
+                                        ?>
+                                        <label style="display: block; margin-bottom: 8px;">
+                                            <input type="checkbox"
+                                                   name="queryra_post_types[]"
+                                                   value="<?php echo esc_attr($pt_name); ?>"
+                                                   <?php checked(in_array($pt_name, $post_types)); ?>>
+                                            <strong><?php echo esc_html($pt_label); ?></strong>
+                                            <span style="color: #646970; font-size: 13px; margin-left: 8px;">(custom post type)</span>
+                                        </label>
+                                        <?php endforeach; ?>
+
                                         <p class="description">
                                             <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                            Posts are always included. Check Pages to also include them in search.
+                                            Posts are always included. Check any other content type to include it in AI search. After enabling a new type, run <strong>Import All</strong> to send its existing content to Queryra.
                                         </p>
                                     </td>
                                 </tr>
@@ -996,6 +1024,28 @@ class Queryra_Admin {
                             if ($products_active) {
                                 $active_count += $published_products;
                             }
+
+                            // Custom post types selected for sync (recipes,
+                            // vehicles, etc.) — counted into the active total
+                            // and the breakdown alongside posts/pages/products.
+                            $cpt_skip = array('post', 'page', 'product');
+                            $active_custom_types = array();
+                            foreach ($selected_post_types as $pt_name) {
+                                if (in_array($pt_name, $cpt_skip, true)) {
+                                    continue;
+                                }
+                                $pt_obj = get_post_type_object($pt_name);
+                                if (!$pt_obj) {
+                                    continue; // type no longer registered
+                                }
+                                $cpt_counts = wp_count_posts($pt_name);
+                                $cpt_published = isset($cpt_counts->publish) ? (int) $cpt_counts->publish : 0;
+                                $active_custom_types[] = array(
+                                    'label' => isset($pt_obj->labels->name) ? $pt_obj->labels->name : $pt_name,
+                                    'count' => $cpt_published,
+                                );
+                                $active_count += $cpt_published;
+                            }
                             ?>
 
                             <!-- WordPress Active Content -->
@@ -1019,6 +1069,11 @@ class Queryra_Admin {
                                         }
                                         if ($products_active && $published_products > 0) {
                                             $parts[] = number_format($published_products) . ' product' . ($published_products != 1 ? 's' : '');
+                                        }
+                                        foreach ($active_custom_types as $ct) {
+                                            if ($ct['count'] > 0) {
+                                                $parts[] = number_format($ct['count']) . ' ' . strtolower($ct['label']);
+                                            }
                                         }
                                         echo esc_html(implode(', ', $parts));
                                         ?>)

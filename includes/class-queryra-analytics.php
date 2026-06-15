@@ -53,6 +53,7 @@ class Queryra_Analytics {
             'products_count'     => self::count_products(),
             'posts_count'        => self::count_posts(),
             'pages_count'        => self::count_pages(),
+            'custom_post_types'  => self::count_custom_post_types(),
             'timestamp'          => gmdate('c'),
         );
 
@@ -262,5 +263,31 @@ class Queryra_Analytics {
     private static function count_pages() {
         $count = wp_count_posts('page');
         return isset($count->publish) ? (int) $count->publish : 0;
+    }
+
+    /**
+     * Map of public custom post types → published-post count.
+     *
+     * Excludes the built-in/handled types (post, page, product) and
+     * WordPress internal types. Lets us see across installs who relies on
+     * custom post types and how much content lives there — i.e. real demand
+     * for CPT indexing. Keys = which CPTs, count(keys) = how many types,
+     * values = how many posts each.
+     *
+     * @return array slug => (int) published count
+     */
+    private static function count_custom_post_types() {
+        $exclude = array('post', 'page', 'product', 'attachment', 'revision', 'nav_menu_item', 'wp_block');
+        $result  = array();
+
+        foreach (get_post_types(array('public' => true)) as $type) {
+            if (in_array($type, $exclude, true)) {
+                continue;
+            }
+            $count = wp_count_posts($type);
+            $result[$type] = isset($count->publish) ? (int) $count->publish : 0;
+        }
+
+        return $result;
     }
 }

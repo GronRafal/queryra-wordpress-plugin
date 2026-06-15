@@ -393,12 +393,32 @@ class Queryra_Setup_Wizard {
             $published_products = isset($products_count->publish) ? $products_count->publish : 0;
         }
 
+        // Custom post types — same discovery rule as the Settings → Content
+        // tab so the wizard offers exactly the types a user can later toggle.
+        // Skip post/page/product (their own rows above) and internal types.
+        $cpt_skip       = array('post', 'page', 'product', 'attachment', 'revision', 'nav_menu_item', 'wp_block');
+        $custom_types   = array();
+        $custom_total   = 0;
+        foreach (get_post_types(array('public' => true), 'objects') as $pt_object) {
+            if (in_array($pt_object->name, $cpt_skip, true)) {
+                continue;
+            }
+            $cpt_count = wp_count_posts($pt_object->name);
+            $cpt_published = isset($cpt_count->publish) ? (int) $cpt_count->publish : 0;
+            $custom_types[] = array(
+                'name'  => $pt_object->name,
+                'label' => isset($pt_object->labels->name) ? $pt_object->labels->name : $pt_object->name,
+                'count' => $cpt_published,
+            );
+            $custom_total += $cpt_published;
+        }
+
         // Get plan info
         $plan = isset($stats['plan']) ? ucfirst($stats['plan']) : 'Free';
         $limit = isset($stats['record_limit']) ? $stats['record_limit'] : 100;
 
         // Calculate total content available
-        $total_content = $published_posts + $published_pages + $published_products;
+        $total_content = $published_posts + $published_pages + $published_products + $custom_total;
 
         // Calculate what will be imported (all content types, up to limit)
         $will_import = min($total_content, $limit);
@@ -465,6 +485,13 @@ class Queryra_Setup_Wizard {
                         <span>Products</span>
                     </label>
                     <?php endif; ?>
+                    <?php foreach ($custom_types as $cpt): ?>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
+                        <input type="checkbox" class="queryra-type-checkbox" value="<?php echo esc_attr($cpt['name']); ?>" data-count="<?php echo (int) $cpt['count']; ?>" checked <?php disabled($cpt['count'], 0); ?>>
+                        <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($cpt['count']); ?></strong>
+                        <span><?php echo esc_html($cpt['label']); ?></span>
+                    </label>
+                    <?php endforeach; ?>
                 </div>
 
                 <!-- Summary: within limit -->
@@ -823,14 +850,16 @@ class Queryra_Setup_Wizard {
             $raw = array_map('sanitize_key', wp_unslash($_POST['post_types']));
         }
 
-        $allowed = array('post', 'page');
-        if (class_exists('WooCommerce')) {
-            $allowed[] = 'product';
-        }
+        // Whitelist = any public post type registered on this site, minus
+        // internal/system types. Matches Queryra_Admin::sanitize_post_types()
+        // so the wizard and the Settings tab accept the exact same set,
+        // including custom post types (recipes, vehicles, portfolios, etc.).
+        $exclude = array('attachment', 'revision', 'nav_menu_item', 'wp_block');
+        $allowed = array_diff(get_post_types(array('public' => true)), $exclude);
 
         $selected = array();
         foreach ($raw as $type) {
-            if (in_array($type, $allowed, true)) {
+            if (in_array($type, $allowed, true) && !in_array($type, $selected, true)) {
                 $selected[] = $type;
             }
         }
