@@ -20,7 +20,11 @@
  * @package Queryra_AI_Search
  */
 
-// Security: this file must only ever execute inside WordPress' uninstall flow.
+// Security: block direct web access (Plugin Check requires the ABSPATH
+// guard) and only ever execute inside WordPress' uninstall flow.
+if (!defined('ABSPATH')) {
+    exit;
+}
 if (!defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }

@@ -1,5 +1,21 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-07-11 - version 1.5.0
+* Fixed (critical): the WordPress 7.0 Connectors status notice no longer
+  runs on every wp-admin page. It now renders ONLY on the Connectors screen
+  and reads the API-key status server-side from the stored validation
+  result. The previous build injected a script on every admin page
+  (including the post editor) that repeatedly polled a REST endpoint — on
+  rate-limited / managed hosts (nginx limits, Cloudflare, mod_security)
+  this could trigger an HTTP 429 cascade and break admin assets (jQuery,
+  the block editor), causing a blank admin screen.
+* Removed: the /wp-json/queryra/v1/key-status REST endpoint and ALL
+  client-side polling (the setInterval loop and per-click refetch). Key
+  status is now a single server-side read — zero background requests from
+  the admin.
+* Improved: admin JavaScript debug logging is silent unless WP_DEBUG is
+  enabled (now matches the PHP logger).
+
 2026-06-15 - version 1.4.4
 * New: Custom Post Type support — AI search now indexes any public custom
   post type (recipes, vehicles, portfolios, listings, courses, etc.), not

@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: AI Search for WooCommerce – Semantic Search
- * Plugin URI: https://github.com/GronRafal/queryra-wordpress-plugin
+ * Plugin URI: https://queryra.com
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.4.4
+ * Version: 1.5.0
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.4.4');
+define('QUERYRA_VERSION', '1.5.0');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -119,13 +119,15 @@ class Queryra_Search {
         // WP-CLI, direct DB, future third parties).
         add_action('admin_init', array($this, 'maybe_lazy_validate_key'));
 
-        // REST endpoint + floating notice on the WP 7.0 Connectors screen.
-        // The Connectors React app covers the standard admin_notices area
-        // and unconditionally shows a misleading "connected successfully"
-        // toast even when our background validation says the key is invalid.
-        // We overlay our own authoritative green/red notice on that screen
-        // so the user always sees the truth.
-        add_action('rest_api_init',         array($this, 'register_key_status_endpoint'));
+        // Floating notice on the WP 7.0 Connectors screen ONLY. The
+        // Connectors React app covers the standard admin_notices area and
+        // unconditionally shows a misleading "connected successfully" toast
+        // even when our background validation says the key is invalid. We
+        // overlay our own authoritative green/red notice on that screen so
+        // the user always sees the truth. Status is read server-side from the
+        // persisted queryra_api_key_validation option — no REST endpoint and
+        // no polling (a global polling loop here previously caused a 429
+        // cascade that broke admin assets on rate-limited hosts).
         add_action('admin_notices',         array($this, 'render_connectors_floating_notice'));
     }
 
@@ -568,104 +570,83 @@ class Queryra_Search {
     }
 
     /**
-     * Register the REST endpoint our JS overlay polls to get the
-     * authoritative API key validation status. Admin-only.
-     */
-    public function register_key_status_endpoint() {
-        register_rest_route('queryra/v1', '/key-status', array(
-            'methods'             => 'GET',
-            'callback'            => array($this, 'rest_key_status_handler'),
-            'permission_callback' => function() {
-                return current_user_can('manage_options');
-            },
-        ));
-    }
-
-    public function rest_key_status_handler($request = null) {
-        // TEST MODE: ?force_invalid=1 forces an error response. Lets us
-        // test the JS toast-hijack on a valid key without invalidating it.
-        if (is_object($request) && method_exists($request, 'get_param')) {
-            $force_invalid = $request->get_param('force_invalid');
-            if (!empty($force_invalid)) {
-                self::log('REST /key-status — TEST MODE force_invalid=1, returning fake error');
-                return rest_ensure_response(array(
-                    'level'        => 'error',
-                    'message'      => 'FORCED INVALID FOR TESTING (force_invalid=1)',
-                    'validated_at' => time(),
-                ));
-            }
-        }
-
-        $validation = get_option('queryra_api_key_validation');
-        self::log('REST /key-status — option=' . (empty($validation) ? 'NULL' : 'level=' . $validation['level']));
-        if (empty($validation) || empty($validation['level'])) {
-            $key = get_option('queryra_api_key');
-            return rest_ensure_response(array(
-                'level'   => empty($key) ? 'missing' : 'unknown',
-                'message' => '',
-            ));
-        }
-        return rest_ensure_response(array(
-            'level'        => $validation['level'],
-            'message'      => isset($validation['message']) ? $validation['message'] : '',
-            'validated_at' => isset($validation['validated_at']) ? $validation['validated_at'] : null,
-            // Stable identifier for this exact validation result — used by
-            // the floating notice to remember user-dismissed state via
-            // localStorage. Changes only when key or status changes.
-            'key_hash'     => isset($validation['key_hash']) ? $validation['key_hash'] : null,
-        ));
-    }
-
-    /**
-     * Render a floating notice overlay on the WP 7.0 Connectors screen.
+     * Render a floating notice overlay on the WP 7.0 Connectors screen ONLY.
      * The React-driven Connectors UI covers the standard admin_notices area
      * and unconditionally shows a misleading "connected successfully" toast.
-     * Our overlay polls the REST endpoint, then renders green/red status on
-     * top so the user always sees the authoritative result.
+     * We read the validation status server-side and inject it once, then
+     * render green/red status on top so the user always sees the
+     * authoritative result. No REST endpoint, no polling.
      */
     public function render_connectors_floating_notice() {
-        // No server-side screen check — render on every admin page where
-        // the user can manage_options. The JS itself decides whether to
-        // activate (it watches the URL + DOM for WP/ai's toast markers).
-        // This sidesteps the unreliable get_current_screen() ID matching
-        // we hit before.
         if (!current_user_can('manage_options')) {
             return;
         }
 
-        self::log('render_connectors_floating_notice — emitting JS hijacker on admin page');
+        // GATE: emit ONLY on the WP 7.0 Connectors screen. That screen is the
+        // one place the React UI hides the standard admin_notices area and
+        // shows a misleading toast we must correct. Emitting anywhere else put
+        // this script (previously with a REST-polling loop) on every admin
+        // page including the post editor — a production incident on
+        // rate-limited hosts (429 cascade → broken jQuery/editor assets).
+        // Match by screen id AND URL: WP/ai registers the screen under
+        // different parents across releases.
+        $screen      = function_exists('get_current_screen') ? get_current_screen() : null;
+        $screen_id   = $screen ? $screen->id : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only screen detection, no state change
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+        $known_ids   = array('settings_page_connectors', 'toplevel_page_connectors', 'ai_page_connectors', 'connectors');
+        $is_connectors_screen =
+            in_array($screen_id, $known_ids, true) ||
+            (strpos($request_uri, 'page=connectors') !== false);
 
-        $rest_url     = esc_url_raw(rest_url('queryra/v1/key-status'));
-        $rest_nonce   = wp_create_nonce('wp_rest');
+        if (!$is_connectors_screen) {
+            return;
+        }
+
+        // Authoritative status, read SERVER-SIDE from the persisted validation
+        // option and injected into the page once. No REST endpoint, no
+        // polling, no setInterval. (Same shape the old REST handler returned.)
+        $validation = get_option('queryra_api_key_validation');
+        if (empty($validation) || empty($validation['level'])) {
+            $status = array(
+                'level'   => get_option('queryra_api_key') ? 'unknown' : 'missing',
+                'message' => '',
+            );
+        } else {
+            $status = array(
+                'level'    => $validation['level'],
+                'message'  => isset($validation['message']) ? $validation['message'] : '',
+                'key_hash' => isset($validation['key_hash']) ? $validation['key_hash'] : null,
+            );
+        }
+
+        self::log('render_connectors_floating_notice — Connectors screen, level=' . $status['level']);
+
         $settings_url = esc_url(admin_url('admin.php?page=queryra-search&tab=settings'));
+        $debug_flag   = defined('WP_DEBUG') && WP_DEBUG;
         ?>
         <div id="queryra-connectors-floating-notice" style="display:none;"></div>
         <script>
         (function() {
-            var REST_URL     = <?php echo wp_json_encode($rest_url); ?>;
-            var REST_NONCE   = <?php echo wp_json_encode($rest_nonce); ?>;
-            var SETTINGS_URL = <?php echo wp_json_encode($settings_url); ?>;
-            var PREFIX       = '[Queryra JS]';
+            var INITIAL_STATUS = <?php echo wp_json_encode($status); ?>;
+            var SETTINGS_URL   = <?php echo wp_json_encode($settings_url); ?>;
+            var DEBUG          = <?php echo wp_json_encode($debug_flag); ?>;
+            var PREFIX         = '[Queryra JS]';
 
+            // Console logging only when WP_DEBUG is on — silent in production.
             function log() {
-                if (window.console && console.log) {
+                if (DEBUG && window.console && console.log) {
                     var args = Array.prototype.slice.call(arguments);
                     args.unshift(PREFIX);
                     console.log.apply(console, args);
                 }
             }
 
-            // Detect if we are on the Connectors page (URL-based, stable).
-            var onConnectorsPage = window.location.search.indexOf('page=connectors') !== -1;
-            log('init — onConnectorsPage=' + onConnectorsPage + ' url=' + window.location.href);
-
-            // Allow forcing invalid for testing without touching the real key:
-            //   1. URL:    add ?queryra_force_invalid=1 to the admin URL
-            //   2. Console: window.QUERYRA_FORCE_INVALID = true; before save
-            var forceInvalidURL = window.location.search.indexOf('queryra_force_invalid=1') !== -1;
-            if (forceInvalidURL) {
-                window.QUERYRA_FORCE_INVALID = true;
-                log('init — TEST MODE: queryra_force_invalid=1 detected, will force error');
+            // TEST MODE: ?queryra_force_invalid=1 forces an error result so the
+            // toast-hijack can be verified on a valid key without touching it.
+            if (window.location.search.indexOf('queryra_force_invalid=1') !== -1) {
+                INITIAL_STATUS = { level: 'error', message: 'FORCED INVALID FOR TESTING (queryra_force_invalid=1)' };
+                log('TEST MODE: forcing invalid status');
             }
 
             var el = document.getElementById('queryra-connectors-floating-notice');
@@ -763,35 +744,11 @@ class Queryra_Search {
                 });
             }
 
-            function fetchStatus(cb) {
-                var url = REST_URL;
-                if (window.QUERYRA_FORCE_INVALID) {
-                    url += (url.indexOf('?') === -1 ? '?' : '&') + 'force_invalid=1';
-                    log('fetchStatus — using TEST MODE url with force_invalid=1');
-                }
-                log('fetchStatus — GET ' + url);
-                fetch(url, {
-                    credentials: 'same-origin',
-                    headers: { 'X-WP-Nonce': REST_NONCE, 'Accept': 'application/json' }
-                })
-                .then(function(r) {
-                    log('fetchStatus — response status=' + r.status);
-                    return r.ok ? r.json() : null;
-                })
-                .then(function(status) {
-                    log('fetchStatus — got status:', status);
-                    if (cb) cb(status);
-                })
-                .catch(function(e) {
-                    log('fetchStatus — error:', e);
-                });
-            }
-
             // ====================================================================
             // TOAST HIJACKER
             // Watches the DOM for WP/ai's "connected successfully" toast for the
-            // Queryra connector and, if our REST endpoint reports the key is
-            // actually invalid, rewrites the toast in place.
+            // Queryra connector and, if the server-injected status (INITIAL_STATUS)
+            // says the key is actually invalid, rewrites the toast in place.
             // ====================================================================
             function looksLikeWpAiToast(node) {
                 if (!node || node.nodeType !== 1) return false;
@@ -803,93 +760,68 @@ class Queryra_Search {
             }
 
             function hijackToast(toastEl) {
-                log('hijackToast — candidate node detected, text="' + (toastEl.textContent || '').slice(0, 120) + '"');
-                fetchStatus(function(status) {
-                    if (!status) {
-                        log('hijackToast — no status, leaving toast alone');
-                        return;
-                    }
-                    log('hijackToast — applying status level=' + status.level + ' to toast');
+                // Decision uses the server-injected status — no network call.
+                var status = INITIAL_STATUS;
+                if (!status || status.level !== 'error') {
+                    log('hijackToast — status not error (' + (status && status.level) + '), leaving toast as-is');
+                    return;
+                }
+                log('hijackToast — candidate node detected, rewriting to error');
 
-                    if (status.level === 'error') {
-                        // Rewrite toast text + color
-                        var msg = status.message || 'Invalid API key';
-                        toastEl.style.background     = '#dc3232';
-                        toastEl.style.color          = '#fff';
-                        toastEl.style.borderColor    = '#dc3232';
-                        toastEl.textContent          = 'Queryra: ' + msg;
-                        log('hijackToast — REWROTE to error message');
+                var msg = status.message || 'Invalid API key';
+                toastEl.style.background  = '#dc3232';
+                toastEl.style.color       = '#fff';
+                toastEl.style.borderColor = '#dc3232';
+                toastEl.textContent       = 'Queryra: ' + msg;
 
-                        // React may re-render and overwrite our changes; pin it
-                        // for a few seconds by repeating the rewrite.
-                        var ticks = 0;
-                        var pin = setInterval(function() {
-                            if (++ticks > 10) { clearInterval(pin); return; }
-                            if (toastEl.isConnected) {
-                                toastEl.style.background = '#dc3232';
-                                toastEl.style.color = '#fff';
-                                if (toastEl.textContent.indexOf('Queryra:') !== 0) {
-                                    toastEl.textContent = 'Queryra: ' + msg;
-                                }
-                            } else {
-                                clearInterval(pin);
-                            }
-                        }, 200);
-                    } else if (status.level === 'success') {
-                        log('hijackToast — status is success, leaving WP/ai toast as-is');
+                // React may re-render and overwrite our changes; pin it for a
+                // couple of seconds by repeating the rewrite (DOM-only, bounded).
+                var ticks = 0;
+                var pin = setInterval(function() {
+                    if (++ticks > 10) { clearInterval(pin); return; }
+                    if (toastEl.isConnected) {
+                        toastEl.style.background = '#dc3232';
+                        toastEl.style.color = '#fff';
+                        if (toastEl.textContent.indexOf('Queryra:') !== 0) {
+                            toastEl.textContent = 'Queryra: ' + msg;
+                        }
                     } else {
-                        log('hijackToast — status is ' + status.level + ', no action');
+                        clearInterval(pin);
                     }
-                });
+                }, 200);
             }
 
-            // Start the observer only on Connectors page (toasts elsewhere are
-            // irrelevant). Watches the WHOLE body subtree because we do not
-            // know exactly where WP/ai mounts its toast portal.
-            if (onConnectorsPage) {
-                log('init — setting up MutationObserver for WP/ai toasts');
-                var observer = new MutationObserver(function(mutations) {
-                    for (var i = 0; i < mutations.length; i++) {
-                        var m = mutations[i];
-                        for (var j = 0; j < m.addedNodes.length; j++) {
-                            var n = m.addedNodes[j];
-                            if (looksLikeWpAiToast(n)) {
-                                hijackToast(n);
-                            } else if (n.querySelectorAll) {
-                                // Toast may be a child of the added node
-                                var nested = n.querySelectorAll('*');
-                                for (var k = 0; k < nested.length; k++) {
-                                    if (looksLikeWpAiToast(nested[k])) {
-                                        hijackToast(nested[k]);
-                                        break;
-                                    }
+            // Watch the body subtree for WP/ai's toast and correct it in place
+            // (we don't know exactly where WP/ai mounts its toast portal). The
+            // whole function only runs on the Connectors screen, so no extra
+            // gate is needed here. DOM-only — no network.
+            log('init — Connectors screen, level=' + (INITIAL_STATUS && INITIAL_STATUS.level));
+            var observer = new MutationObserver(function(mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                    var m = mutations[i];
+                    for (var j = 0; j < m.addedNodes.length; j++) {
+                        var n = m.addedNodes[j];
+                        if (looksLikeWpAiToast(n)) {
+                            hijackToast(n);
+                        } else if (n.querySelectorAll) {
+                            // Toast may be a child of the added node
+                            var nested = n.querySelectorAll('*');
+                            for (var k = 0; k < nested.length; k++) {
+                                if (looksLikeWpAiToast(nested[k])) {
+                                    hijackToast(nested[k]);
+                                    break;
                                 }
                             }
                         }
                     }
-                });
-                observer.observe(document.body, { childList: true, subtree: true });
-                log('init — observer attached');
-            }
-
-            // Initial fetch for the floating notice (works on all admin pages).
-            fetchStatus(showFloatingNotice);
-
-            // Poll status briefly after page load to catch saves in flight.
-            var ticks = 0;
-            var interval = setInterval(function() {
-                if (++ticks > 15) { clearInterval(interval); return; }
-                fetchStatus(showFloatingNotice);
-            }, 2000);
-
-            // Click anywhere → re-check (catches Save button without us
-            // depending on a specific selector inside WP/ai's React tree).
-            document.addEventListener('click', function(e) {
-                if (e.target && e.target.tagName === 'BUTTON') {
-                    setTimeout(function() { fetchStatus(showFloatingNotice); }, 800);
-                    setTimeout(function() { fetchStatus(showFloatingNotice); }, 2500);
                 }
             });
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            // Render the floating status notice ONCE from the injected value.
+            // No polling, no REST, no setInterval — status is already known
+            // server-side, so a single render is all that's needed.
+            showFloatingNotice(INITIAL_STATUS);
         })();
         </script>
         <?php

@@ -1,9 +1,9 @@
 === AI Search for WooCommerce – Semantic Search ===
 Contributors: queryra, aisearch
-Tags: ai search, semantic search, woocommerce search, product search, ai
+Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.4.4
+Stable tag: 1.5.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -383,18 +383,16 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.4.4 =
-* New: Custom Post Type support — index any public custom post type (recipes, vehicles, portfolios, etc.), not just posts, pages, and products. Enable each type in Settings → Content or the setup wizard, then run Import All.
-* New: ACF / Meta Box custom fields and custom taxonomies on custom post types are indexed automatically.
-* Improved: Records tab now counts and lists enabled custom post types; trashing a custom post type entry removes it from the index.
-* Improved: anonymous analytics report custom post type usage to prioritise compatibility (honours QUERYRA_DISABLE_ANALYTICS).
+= 1.5.0 =
+* Fixed (critical): the Connectors status notice ran on every wp-admin page and repeatedly polled a REST endpoint — on rate-limited/managed hosts this could cause HTTP 429 errors and break admin assets (a blank admin screen). It now renders only on the Connectors screen and reads status server-side: no polling, no REST endpoint.
+* Improved: admin debug logging is silent unless WP_DEBUG is enabled.
 
 For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.4.4 =
-Custom Post Type support: AI search now indexes any public custom post type (recipes, vehicles, portfolios, and more), including their ACF/Meta Box fields and custom taxonomies. Enable them in Settings → Content, then run Import All.
+= 1.5.0 =
+Critical admin fix: removes background polling on wp-admin pages that could trigger HTTP 429 errors and a blank admin screen on rate-limited or managed hosts. Update recommended for all users.
 
 == Privacy ==
 
