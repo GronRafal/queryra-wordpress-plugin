@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -383,16 +383,21 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.5.0 =
-* Fixed (critical): the Connectors status notice ran on every wp-admin page and repeatedly polled a REST endpoint — on rate-limited/managed hosts this could cause HTTP 429 errors and break admin assets (a blank admin screen). It now renders only on the Connectors screen and reads status server-side: no polling, no REST endpoint.
-* Improved: admin debug logging is silent unless WP_DEBUG is enabled.
+= 1.5.1 =
+* New: optional setup question when the wizard opens — what kind of site this is, and what you want better search to do for it. One click, fully optional, with a visible Skip.
+* Privacy: your answer is not stored on your site — it is sent to Queryra once and that is it. You can answer or update it any time in Settings → Site Profile.
+* Fixed (important): the search cache was silently switched to "Disabled" whenever any other settings tab was saved, which meant many sites were sending an API call for every single search. The setting now survives saves from every tab.
+* Maintenance: because of that bug, updating restores the 1 day cache default on sites left at "Disabled". If you turned caching off on purpose, set it back on the Cache tab.
+* Fixed: deactivation feedback now uses one comment box whose prompt matches the reason you pick. Previously, text typed under one reason was dropped if you chose another, and two reasons had no box at all.
+* Improved: deactivation feedback adds a "trial limits were too small" reason and an optional email address if you would like a reply.
+* Fixed: the activation event was missing on some hosts and reported zero content counts when it did arrive.
 
 For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.5.0 =
-Critical admin fix: removes background polling on wp-admin pages that could trigger HTTP 429 errors and a blank admin screen on rate-limited or managed hosts. Update recommended for all users.
+= 1.5.1 =
+Fixes a bug that silently turned off the search cache whenever settings were saved, which made every search hit the API. Updating restores the 1 day cache default if your duration was left at "Disabled" — set it back on the Cache tab if that was intentional. Also improves the deactivation feedback form and adds an optional setup question. Recommended for all users.
 
 == Privacy ==
 
@@ -421,13 +426,31 @@ API. The API returns matching post IDs, which WordPress then renders
 normally from your own database.
 
 **Anonymous usage analytics:**
-On plugin activation and deactivation, Queryra sends: a randomly generated
-instance UUID (stored locally, no link to any user), WordPress version,
-PHP version, plugin version, WooCommerce active flag, and counts of posts,
-pages and products. This helps us prioritize compatibility fixes. You can
-disable this entirely by adding the following line to your wp-config.php:
+On plugin lifecycle events (activation, deactivation, setup milestones and
+error reports), Queryra sends: a randomly generated instance UUID (stored
+locally, no link to any user), WordPress version, PHP version, plugin
+version, WooCommerce active flag, whether AI search is switched on, which
+content types you enabled for indexing, and counts of posts, pages,
+products and public custom post types. This helps us prioritize
+compatibility fixes. You can disable this entirely by adding the following
+line to your wp-config.php:
 
 `define('QUERYRA_DISABLE_ANALYTICS', true);`
+
+**Site profile (optional, user-declared):**
+When the setup wizard opens you may optionally answer what kind of site you
+run and what you expect from search. Your answer is sent to Queryra once and
+is not stored on your site; only a small flag stays locally so the question
+is not asked twice. Skipping sends no answer — only the fact that you
+skipped, so we can tell a decline apart from never having seen the question.
+You can answer or update it at any time in Settings → Site Profile.
+
+**Deactivation feedback (optional):**
+If you choose to submit the feedback form when deactivating, your selected
+reason and comments are sent to Queryra together with your site URL, the
+plugin version and — only if you enter one — your email address for a
+reply. Skipping the form sends no feedback content; the deactivation event
+records only whether the form was submitted, skipped, or never shown.
 
 = What Queryra NEVER sends =
 

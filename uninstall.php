@@ -36,9 +36,12 @@ function queryra_uninstall_cleanup() {
     global $wpdb;
 
     // Junk options: caches, internal flags/hashes, local logs.
-    // NOT removed (kept on purpose): queryra_instance_id, queryra_api_key,
-    // queryra_api_url, queryra_enabled, queryra_ai_search, queryra_auto_sync,
-    // queryra_post_types.
+    // NOT removed (kept on purpose) — the anonymous install id plus every
+    // user-configured setting, so a reinstall picks up where it left off:
+    //   queryra_instance_id, queryra_api_key, queryra_api_url,
+    //   queryra_enabled, queryra_ai_search, queryra_auto_sync,
+    //   queryra_post_types, queryra_cache_duration, queryra_output_schema,
+    //   queryra_generate_llms_txt, queryra_generate_llms_full_txt.
     $options = array(
         'queryra_cached_stats',
         'queryra_cached_status',
@@ -49,9 +52,17 @@ function queryra_uninstall_cleanup() {
         'queryra_first_search_tracked',
         'queryra_wizard_import_done',
         'queryra_ux_tip_dismissed',
+        // "Setup survey already handled" flag. Same category as the flags
+        // above. No survey data is stored on the site — the answer went out
+        // as an event — so nothing is lost by clearing it.
+        'queryra_site_profile_done',
+        // Legacy: a pre-release build briefly stored the survey ANSWER here.
+        // Nothing reads it any more; clear it so no answer data is left behind.
+        'queryra_site_profile',
         'queryra_plugin_version',
         'queryra_recent_errors',
         'queryra_deactivation_feedback',
+        'queryra_pending_activation_event',
     );
     foreach ($options as $option) {
         delete_option($option);

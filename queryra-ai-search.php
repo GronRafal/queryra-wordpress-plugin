@@ -3,7 +3,7 @@
  * Plugin Name: AI Search for WooCommerce – Semantic Search
  * Plugin URI: https://queryra.com
  * Description: AI-powered semantic search for your WordPress content. Automatically sends posts, pages, and custom post types to Queryra.
- * Version: 1.5.0
+ * Version: 1.5.1
  * Author: Queryra
  * Author URI: https://queryra.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('QUERYRA_VERSION', '1.5.0');
+define('QUERYRA_VERSION', '1.5.1');
 define('QUERYRA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QUERYRA_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('QUERYRA_PLUGIN_FILE', __FILE__);
@@ -73,6 +73,13 @@ class Queryra_Search {
     private function __construct() {
         // Initialize plugin
         add_action('plugins_loaded', array($this, 'init'));
+
+        // Deferred activation ping — on wp_loaded, NOT plugins_loaded. Post
+        // types (core `post`/`page` via create_initial_post_types, and
+        // WooCommerce `product`) are registered on `init`, so anything
+        // counting content earlier gets zeros: wp_count_posts() returns an
+        // empty object for a post type that is not registered yet.
+        add_action('wp_loaded', array($this, 'maybe_send_activation_event'));
 
         // Activation/deactivation hooks
         register_activation_hook(__FILE__, array($this, 'activate'));
@@ -451,6 +458,7 @@ class Queryra_Search {
         // Run upgrade routine if version changed
         $this->maybe_upgrade();
 
+
         // Initialize sync
         new Queryra_Sync();
 
@@ -506,6 +514,29 @@ class Queryra_Search {
     }
 
     /**
+     * Send the deferred activation event.
+     *
+     * Two timing problems are solved here:
+     *  1. The activation request redirects and exits right after the
+     *     activation hook, which on some hosts kills the non-blocking
+     *     analytics request before it leaves the box — so activate() only
+     *     raises a flag and the event is sent on a later request.
+     *  2. This must run on `wp_loaded`, i.e. AFTER `init`, because post
+     *     types are registered on `init` (core post/page at priority 0,
+     *     WooCommerce `product` at 5). Firing earlier reports zero posts,
+     *     pages and products for every activation.
+     *
+     * Delete-before-send keeps a concurrent request from double-firing.
+     */
+    public function maybe_send_activation_event() {
+        if (!get_option('queryra_pending_activation_event')) {
+            return;
+        }
+        delete_option('queryra_pending_activation_event');
+        Queryra_Analytics::track('plugin_activated');
+    }
+
+    /**
      * Run one-time upgrade tasks when plugin version changes.
      */
     private function maybe_upgrade() {
@@ -519,6 +550,27 @@ class Queryra_Search {
         if (version_compare($stored_version, '1.1.6', '<') && get_option('queryra_api_key')) {
             $api = new Queryra_API();
             $api->get_status();
+        }
+
+        // 1.5.1: heal a cache duration that a bug set to 0 ("Disabled").
+        // Every settings tab posts to one settings group, and the cache
+        // duration field only existed on the Cache tab — so options.php
+        // wrote an empty value over it whenever any other tab was saved,
+        // and intval(null) made that 0. Sites ended up sending an API call
+        // for every single search without ever choosing that.
+        //
+        // A deliberate "Disabled" is indistinguishable from a bug-zeroed
+        // one, so this restores the default for both. The trade is
+        // deliberate: leaving it costs quota, speed and backend load on
+        // every affected site and is invisible to the owner, while undoing
+        // it is one click on the Cache tab. Documented in the changelog and
+        // the upgrade notice. Runs once — sites already on 1.5.1+ are
+        // untouched, and a fresh install has no stored value to heal.
+        if (version_compare($stored_version, '1.5.1', '<')
+            && (int) get_option('queryra_cache_duration', 86400) === 0
+        ) {
+            update_option('queryra_cache_duration', 86400);
+            self::log('upgrade 1.5.1 — cache duration was 0 (bug), restored to 86400');
         }
 
         update_option('queryra_plugin_version', QUERYRA_VERSION);
@@ -548,22 +600,50 @@ class Queryra_Search {
             add_option('queryra_post_types', array('post', 'page'));
         }
 
-        // Set transient for first-time activation redirect to wizard
+        // Activation → send the user to the wizard. That is also where the
+        // setup survey is shown, so this redirect is what makes the question
+        // appear right after activating.
         set_transient('queryra_activation_redirect', true, 30);
 
         // Flush rewrite rules
         flush_rewrite_rules();
 
-        // Track activation (anonymous)
-        Queryra_Analytics::track('plugin_activated');
+        // Track activation (anonymous) — DEFERRED. The activation request
+        // redirects and exits almost immediately after this hook, which on
+        // some hosts (local Docker, slow TLS) kills the non-blocking
+        // analytics request before it ever leaves the box — activations
+        // were silently missing from the events panel. Flag it here and
+        // send on the first normal request instead (see init()).
+        update_option('queryra_pending_activation_event', 1);
     }
 
     /**
      * Deactivation
      */
     public function deactivate() {
+        // feedback_status distinguishes HOW the deactivation happened
+        // (spec 2026-07-20, Part I item 3):
+        //   submitted — survey modal filled and sent (answer went separately
+        //               via the deactivation_feedback event),
+        //   skipped   — modal shown, user clicked "Skip & Deactivate",
+        //   not_shown — no flag on the request: WP-CLI, bulk action, update
+        //               (the plugins-page modal never existed).
+        // The flag rides the deactivation request itself — a transmission
+        // that happens regardless of the modal — so a skip sends interaction
+        // STATE only, never a survey answer (Guideline 7 boundary).
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only telemetry state; the deactivation request itself is nonce-verified by core.
+        $fb = isset($_GET['queryra_fb']) ? sanitize_key(wp_unslash($_GET['queryra_fb'])) : '';
+        $feedback_status = in_array($fb, array('submitted', 'skipped'), true) ? $fb : 'not_shown';
+
         // Track deactivation (anonymous)
-        Queryra_Analytics::track('plugin_deactivated');
+        Queryra_Analytics::track('plugin_deactivated', array(
+            'feedback_status' => $feedback_status,
+        ));
+
+        // Clear the "setup survey already handled" flag. No survey data is
+        // stored on the site — only this flag — and dropping it here means a
+        // deactivate/activate cycle asks the question again.
+        delete_option('queryra_site_profile_done');
 
         // Flush rewrite rules
         flush_rewrite_rules();

@@ -270,6 +270,12 @@ class Queryra_API {
             $params['site_url'] = get_site_url();
         }
 
+        // NOTE: the setup survey answer is deliberately NOT sent here. Survey
+        // data is not stored on the site at all — it goes out once as the
+        // `site_profile` analytics event (which carries instance_id, so the
+        // backend attaches it to the right install) and that is the end of it.
+        // Nothing to re-send on every status ping.
+
         return $params;
     }
 

@@ -40,6 +40,14 @@ class Queryra_Setup_Wizard {
         add_action('wp_ajax_queryra_wizard_check_status', array($this, 'ajax_check_status'));
         add_action('wp_ajax_queryra_wizard_test_search', array($this, 'ajax_test_search'));
         add_action('wp_ajax_queryra_wizard_mark_import_done', array($this, 'ajax_mark_import_done'));
+
+        // Site-profile question (install survey / onboarding ad — SPEC
+        // 2026-07-20). Saves the answer or the skip; skip sends NOTHING.
+        add_action('wp_ajax_queryra_wizard_save_site_profile', array($this, 'ajax_save_site_profile'));
+
+        // Setup survey — rendered on the wizard screen (activation redirects
+        // there), asked once per activation.
+        add_action('admin_footer', array($this, 'maybe_render_site_profile_prompt'));
     }
 
     /**
@@ -154,6 +162,9 @@ class Queryra_Setup_Wizard {
             </div>
         </div>
         <?php
+        // The site-profile question is NOT rendered here — it comes from the
+        // single admin_footer path (maybe_render_site_profile_prompt), which
+        // covers this page too. One render path = no double-modal, no drift.
     }
 
     /**
@@ -788,6 +799,344 @@ class Queryra_Setup_Wizard {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Setup survey, shown on the wizard screen.
+     *
+     * Activation redirects to the wizard, so this is what the user sees
+     * immediately after activating — before doing any setup, which is the
+     * point: asking at the end would lose the answer for everyone who
+     * struggles with or abandons installation.
+     *
+     * Deliberately simple, mirroring the deactivation modal: one screen,
+     * one condition (question not dealt with yet), state in one option.
+     */
+    public function maybe_render_site_profile_prompt() {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        // ONE screen only: the wizard — where activation lands the user.
+        // Same shape as the deactivation modal, which is scoped to the
+        // plugins page. No time windows, no extra state to drift.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only screen detection
+        $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+        if ($page !== 'queryra-setup-wizard') {
+            return;
+        }
+
+        // ONE condition: a flag saying the question was already dealt with
+        // (answered or skipped). No survey data is kept locally — the answer
+        // goes out as an event and that's it. The flag is cleared on
+        // deactivation, so a deactivate/activate cycle asks again.
+        if (get_option('queryra_site_profile_done')) {
+            return;
+        }
+
+        $this->render_site_profile_modal('wizard');
+    }
+
+    /**
+     * Site-profile modal markup: TWO questions on ONE screen.
+     *
+     * Q1 (radio, no default) tells us who the user is; Q2 (multi-select, NO
+     * selection limit) is deliberately an AD dressed as a question — the user
+     * reads a benefit list of what the product can do (including features
+     * they didn't know about: insights, bot protection) at the moment of
+     * highest attention, and "sells" them to themselves by clicking. The
+     * click distribution is a secondary bonus signal for homepage/pricing
+     * copy. Visual pattern recycled from the battle-tested deactivation
+     * modal. Self-contained (inline style + vanilla JS) so it works on both
+     * the wizard page and the settings screen without extra enqueues.
+     *
+     * @param string $source wizard|settings
+     */
+    private function render_site_profile_modal($source) {
+        // Several entry points can fire in one request (wizard page render,
+        // then admin_footer). Render at most once per page load.
+        static $rendered = false;
+        if ($rendered) {
+            return;
+        }
+        $rendered = true;
+
+        $ajax_url = admin_url('admin-ajax.php');
+        $nonce    = wp_create_nonce('queryra_wizard');
+        ?>
+        <style>
+            #queryra-site-profile-modal {
+                position: fixed; z-index: 999999; left: 0; top: 0; width: 100%; height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+            #queryra-site-profile-content {
+                position: relative; background: #fff; margin: 4% auto; padding: 0;
+                border: 1px solid #dcdcde; border-radius: 4px; width: 90%; max-width: 560px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); max-height: 88vh; overflow-y: auto;
+            }
+            #queryra-site-profile-header { padding: 20px 25px; border-bottom: 1px solid #dcdcde; background: #f6f7f7; }
+            #queryra-site-profile-header h2 { margin: 0; font-size: 18px; line-height: 1.4; }
+            #queryra-site-profile-body { padding: 25px; }
+            #queryra-site-profile-body h3 { margin: 0 0 12px; font-size: 14px; color: #1d2327; }
+            .queryra-sp-option { margin-bottom: 8px; }
+            .queryra-sp-option label {
+                display: flex; align-items: flex-start; padding: 9px 10px; cursor: pointer;
+                border: 1px solid #dcdcde; border-radius: 4px; transition: background 0.15s, border-color 0.15s;
+            }
+            .queryra-sp-option label:hover { background: #f6f7f7; border-color: #2271b1; }
+            .queryra-sp-option input { margin: 3px 8px 0 0; flex-shrink: 0; }
+            #queryra-sp-expectations { display: none; margin-top: 22px; }
+            #queryra-sp-expectations.active { display: block; }
+            .queryra-sp-confirm { display: none; margin: 4px 0 0 30px; font-size: 12px; color: #2271b1; }
+            .queryra-sp-confirm.active { display: block; }
+            #queryra-site-profile-footer {
+                padding: 20px 25px; border-top: 1px solid #dcdcde; background: #f6f7f7;
+                display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+            }
+            #queryra-site-profile-footer .queryra-sp-skip { color: #646970; text-decoration: none; font-size: 13px; }
+            #queryra-site-profile-footer .queryra-sp-skip:hover { color: #135e96; }
+            .queryra-sp-helper { flex-basis: 100%; margin: 12px 0 0; font-size: 12px; color: #646970; }
+        </style>
+        <div id="queryra-site-profile-modal">
+            <div id="queryra-site-profile-content">
+                <div id="queryra-site-profile-header">
+                    <h2>Before we start — a couple of quick questions (optional)</h2>
+                </div>
+                <div id="queryra-site-profile-body">
+                    <h3>What kind of site is this for?</h3>
+                    <?php
+                    // No option is pre-selected — a default would poison the data.
+                    $profiles = array(
+                        'store'     => 'An online store — I sell products',
+                        'content'   => 'A blog, news or content site',
+                        'directory' => 'A directory, catalog or knowledge base',
+                        'client'    => "I'm building this for a client",
+                        'exploring' => 'Just exploring for now',
+                    );
+                    foreach ($profiles as $value => $label) :
+                    ?>
+                    <div class="queryra-sp-option">
+                        <label>
+                            <input type="radio" name="queryra_sp_profile" value="<?php echo esc_attr($value); ?>">
+                            <span><?php echo esc_html($label); ?></span>
+                        </label>
+                    </div>
+                    <?php endforeach; ?>
+
+                    <!-- Q2 slides in only after Q1 is answered (one screen, two beats). -->
+                    <div id="queryra-sp-expectations">
+                        <h3>What do you want better search to do for your site?</h3>
+                        <div class="queryra-sp-option">
+                            <label>
+                                <input type="checkbox" name="queryra_sp_expect" value="sell_more">
+                                <span><strong>Sell more</strong> — customers find what they mean, not just what they type</span>
+                            </label>
+                        </div>
+                        <div class="queryra-sp-option">
+                            <label>
+                                <input type="checkbox" name="queryra_sp_expect" value="understand">
+                                <span><strong>Understand real questions</strong> — typos, full sentences, 100+ languages</span>
+                            </label>
+                        </div>
+                        <div class="queryra-sp-option">
+                            <label>
+                                <input type="checkbox" name="queryra_sp_expect" value="replace_theme">
+                                <span><strong>Replace a theme search</strong> that keeps returning nothing</span>
+                            </label>
+                        </div>
+                        <div class="queryra-sp-option">
+                            <label>
+                                <input type="checkbox" name="queryra_sp_expect" value="insights" id="queryra-sp-insights">
+                                <span><strong>See what visitors search for</strong> — including what they couldn't find</span>
+                            </label>
+                            <!-- Ad-loop closer: promised → shown where it's delivered. -->
+                            <p class="queryra-sp-confirm" id="queryra-sp-insights-confirm">
+                                You'll find this in your dashboard under Search History.
+                            </p>
+                        </div>
+                        <div class="queryra-sp-option">
+                            <label>
+                                <input type="checkbox" name="queryra_sp_expect" value="bot_protection">
+                                <span><strong>Stop bots and spam</strong> from flooding your search</span>
+                            </label>
+                        </div>
+                        <div class="queryra-sp-option">
+                            <label>
+                                <input type="checkbox" name="queryra_sp_expect" value="exploring2">
+                                <span>Just exploring</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="queryra-site-profile-footer">
+                    <a href="#" class="queryra-sp-skip">Skip</a>
+                    <button type="button" class="button button-primary" id="queryra-sp-continue" disabled>Continue</button>
+                    <p class="queryra-sp-helper">
+                        This helps us make the plugin better for sites like yours. Your answer is optional and you can skip it.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function() {
+            var AJAX_URL = <?php echo wp_json_encode($ajax_url); ?>;
+            var NONCE    = <?php echo wp_json_encode($nonce); ?>;
+            var SOURCE   = <?php echo wp_json_encode($source); ?>;
+
+            var modal = document.getElementById('queryra-site-profile-modal');
+            if (!modal) { return; }
+
+            var expectations = document.getElementById('queryra-sp-expectations');
+            var continueBtn  = document.getElementById('queryra-sp-continue');
+
+            // Q1 answered → reveal Q2, enable Continue.
+            var radios = modal.querySelectorAll('input[name="queryra_sp_profile"]');
+            for (var i = 0; i < radios.length; i++) {
+                radios[i].addEventListener('change', function() {
+                    expectations.classList.add('active');
+                    continueBtn.disabled = false;
+                });
+            }
+
+            // Insights confirmation line (ad-loop closer).
+            var insights = document.getElementById('queryra-sp-insights');
+            if (insights) {
+                insights.addEventListener('change', function() {
+                    var confirmLine = document.getElementById('queryra-sp-insights-confirm');
+                    if (confirmLine) {
+                        confirmLine.classList.toggle('active', insights.checked);
+                    }
+                });
+            }
+
+            function send(params, always) {
+                var body = new URLSearchParams();
+                body.append('action', 'queryra_wizard_save_site_profile');
+                body.append('nonce', NONCE);
+                body.append('source', SOURCE);
+                for (var key in params) {
+                    if (Array.isArray(params[key])) {
+                        for (var j = 0; j < params[key].length; j++) {
+                            body.append(key + '[]', params[key][j]);
+                        }
+                    } else {
+                        body.append(key, params[key]);
+                    }
+                }
+                fetch(AJAX_URL, { method: 'POST', credentials: 'same-origin', body: body })
+                    .then(always, always);
+            }
+
+            function close() { modal.style.display = 'none'; }
+
+            // Skip: record the skip LOCALLY so we don't nag again — the
+            // handler sends nothing remote for skips (Guideline 7).
+            modal.querySelector('.queryra-sp-skip').addEventListener('click', function(e) {
+                e.preventDefault();
+                send({ skipped: 1 }, close);
+            });
+
+            // Clicking the dark backdrop just closes the modal — records
+            // nothing, sends nothing (same behavior as the deactivation
+            // modal). The question may show again on a later visit.
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) { close(); }
+            });
+
+            continueBtn.addEventListener('click', function() {
+                var picked = modal.querySelector('input[name="queryra_sp_profile"]:checked');
+                if (!picked) { return; }
+                var expects = [];
+                var boxes = modal.querySelectorAll('input[name="queryra_sp_expect"]:checked');
+                for (var k = 0; k < boxes.length; k++) { expects.push(boxes[k].value); }
+                continueBtn.disabled = true;
+                send({ site_profile: picked.value, expectations: expects }, close);
+            });
+        })();
+        </script>
+        <?php
+    }
+
+    /**
+     * AJAX: persist the site-profile answer (or skip).
+     *
+     * Skip = local record ONLY, nothing leaves the site (wp.org Guideline 7:
+     * sending data after the user declined would be automated collection
+     * without confirmation). An answer = explicit consent via a visible
+     * click, so it is stored locally AND reported: once as a `site_profile`
+     * analytics event, and continuously as extra params on the existing
+     * /status ping (see Queryra_API::build_status_params()) so the backend
+     * can attach it to the account — no new endpoint, no dedicated call path.
+     */
+    public function ajax_save_site_profile() {
+        check_ajax_referer('queryra_wizard', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified above by check_ajax_referer.
+        $skipped = !empty($_POST['skipped']);
+        $profile = isset($_POST['site_profile']) ? sanitize_key(wp_unslash($_POST['site_profile'])) : '';
+        $source  = isset($_POST['source']) ? sanitize_key(wp_unslash($_POST['source'])) : 'wizard';
+
+        $allowed_profiles     = array('store', 'content', 'directory', 'client', 'exploring');
+        $allowed_expectations = array('sell_more', 'understand', 'replace_theme', 'insights', 'bot_protection', 'exploring2');
+
+        $expectations = array();
+        if (isset($_POST['expectations']) && is_array($_POST['expectations'])) {
+            foreach (array_map('sanitize_key', wp_unslash($_POST['expectations'])) as $expect) {
+                if (in_array($expect, $allowed_expectations, true) && !in_array($expect, $expectations, true)) {
+                    $expectations[] = $expect;
+                }
+            }
+        }
+        // phpcs:enable
+
+        if (!in_array($source, array('wizard', 'settings'), true)) {
+            $source = 'wizard';
+        }
+
+        // SKIP: send the interaction STATE only — no answer, no content.
+        // Mirrors feedback_status on plugin_deactivated (spec Part I item 3,
+        // "Analogicznie wizard: qualification_status"). Guideline 7 boundary:
+        // we never transmit a survey answer from someone who declined, but
+        // "the question was shown and declined" is state, not user data —
+        // and without it a skip is indistinguishable from never having seen
+        // the question at all, which is exactly what we need to measure.
+        if ($skipped) {
+            if (class_exists('Queryra_Analytics')) {
+                Queryra_Analytics::track('site_profile', array(
+                    'qualification_status' => 'skipped',
+                    'site_profile_source'  => $source,
+                    'site_profile_at'      => gmdate('c'),
+                ));
+            }
+            update_option('queryra_site_profile_done', 1, false);
+            wp_send_json_success();
+        }
+
+        if (!in_array($profile, $allowed_profiles, true)) {
+            wp_send_json_error(array('message' => 'Invalid profile'));
+        }
+
+        // The ANSWER is not stored locally — it goes out as an event and that
+        // is the end of it. The event carries instance_id, so the backend
+        // attaches it to the right install/account. All we keep on the site is
+        // a flag saying it was already sent, so we don't ask twice.
+        if (class_exists('Queryra_Analytics')) {
+            Queryra_Analytics::track('site_profile', array(
+                'qualification_status' => 'submitted',
+                'site_profile'         => $profile,
+                'expectations'         => $expectations,
+                'site_profile_source'  => $source,
+                'site_profile_at'      => gmdate('c'),
+            ));
+        }
+
+        update_option('queryra_site_profile_done', 1, false);
+
+        wp_send_json_success();
     }
 
     /**

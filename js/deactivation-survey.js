@@ -38,17 +38,20 @@ jQuery(document).ready(function($) {
         console.log('Looking for:', pluginPath);
     }
 
-    // Show/hide reason details when radio button selected
+    // One shared textarea: reveal it and swap the prompt to match the chosen
+    // reason. Whatever the user already typed is deliberately KEPT when they
+    // change their mind — with per-reason fields it used to be silently
+    // dropped, because submit only read the selected reason's textarea.
     $('input[name="queryra_deactivation_reason"]').on('change', function() {
-        // Hide all details
-        $('.queryra-deactivation-reason-details').removeClass('active');
+        var $wrap = $('#queryra-deactivation-details-wrap');
+        var prompt = $(this).data('prompt');
 
-        // Show details for selected reason (if it has a textarea)
-        var $details = $(this).closest('.queryra-deactivation-reason').find('.queryra-deactivation-reason-details');
-        if ($details.length > 0) {
-            $details.addClass('active');
-            $details.find('textarea').focus();
+        if (prompt) {
+            $('#queryra-deactivation-details').attr('placeholder', prompt);
         }
+
+        $wrap.addClass('active');
+        $('#queryra-deactivation-details').focus();
 
         // Enable submit button
         $('#queryra-deactivation-submit').prop('disabled', false);
@@ -60,11 +63,17 @@ jQuery(document).ready(function($) {
         resetModal();
     });
 
-    // Skip link - deactivate without feedback
+    // Skip link — deactivate without any survey ANSWER. The interaction
+    // STATE (feedback_status=skipped) rides as a flag on the deactivation
+    // request itself — a transmission that happens regardless of the modal —
+    // so the backend can tell "saw the modal, declined" from "WP-CLI/bulk
+    // deactivation, modal never existed" (= no flag = not_shown). No survey
+    // payload is ever sent for a skip (Guideline 7 boundary per spec
+    // 2026-07-20, Part I item 3).
     $('.queryra-deactivation-skip').on('click', function(e) {
         e.preventDefault();
         modal.fadeOut(200);
-        window.location.href = deactivateLink;
+        window.location.href = deactivateLink + '&queryra_fb=skipped';
     });
 
     // Submit button - send feedback and deactivate
@@ -73,10 +82,8 @@ jQuery(document).ready(function($) {
         var originalText = $button.text();
 
         var reason = $('input[name="queryra_deactivation_reason"]:checked').val();
-        var $details = $('input[name="queryra_deactivation_reason"]:checked')
-            .closest('.queryra-deactivation-reason')
-            .find('textarea');
-        var details = $details.length > 0 ? $details.val() : '';
+        // Single shared field — nothing to hunt for, nothing to lose.
+        var details = $('#queryra-deactivation-details').val() || '';
 
         // Disable button and show loading
         $button.prop('disabled', true).text('Submitting...');
@@ -89,19 +96,21 @@ jQuery(document).ready(function($) {
                 action: 'queryra_deactivation_feedback',
                 nonce: queryraDeactivation.nonce,
                 reason: reason,
-                details: details
+                details: details,
+                reply_email: $('#queryra-deactivation-reply-email').val()
             },
             success: function(response) {
                 // Close modal
                 modal.fadeOut(200);
 
-                // Redirect to deactivate
-                window.location.href = deactivateLink;
+                // Redirect to deactivate, flagging feedback_status=submitted
+                window.location.href = deactivateLink + '&queryra_fb=submitted';
             },
             error: function() {
-                // Even if AJAX fails, still deactivate
+                // Even if AJAX fails, still deactivate (the answer may be
+                // lost, but the interaction state still rides the flag)
                 modal.fadeOut(200);
-                window.location.href = deactivateLink;
+                window.location.href = deactivateLink + '&queryra_fb=submitted';
             }
         });
     });
@@ -117,8 +126,9 @@ jQuery(document).ready(function($) {
     // Reset modal state
     function resetModal() {
         $('input[name="queryra_deactivation_reason"]').prop('checked', false);
-        $('.queryra-deactivation-reason-details').removeClass('active');
-        $('.queryra-deactivation-reason-details textarea').val('');
+        $('#queryra-deactivation-details-wrap').removeClass('active');
+        $('#queryra-deactivation-details').val('');
+        $('#queryra-deactivation-reply-email').val('');
         $('#queryra-deactivation-submit').prop('disabled', true).text('Submit & Deactivate');
     }
 

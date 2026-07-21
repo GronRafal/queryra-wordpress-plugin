@@ -1,5 +1,55 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-07-21 - version 1.5.1
+* New: optional setup survey shown when the setup wizard opens — "What kind
+  of site is this for?" and "What do you want better search to do for your
+  site?". Both are optional, answering is a single click, and a visible
+  Skip is always available. Asked before setup rather than after, so it
+  still reaches people who run into trouble during installation.
+* Privacy: the survey answer is not stored on your site at all. It is sent
+  once to Queryra and that is the end of it; only a small flag stays
+  locally so the question is not asked twice. You can answer or update it
+  at any time in Settings → Site Profile.
+* New: deactivation and survey events now record the interaction state —
+  whether the form was submitted, skipped, or never shown at all (for
+  example a WP-CLI or bulk deactivation). Declining is recorded as a
+  decline; no answer content is ever sent for a skip.
+* Improved: deactivation feedback — new reason "The trial limits were too
+  small for my store", follow-up prompts tailored to the selected reason,
+  an optional reply-to email address, and a clear disclosure of what is
+  included with the feedback.
+* Fixed: the deactivation feedback form now uses a single comment box
+  whose prompt changes with the selected reason. Previously each reason
+  had its own box, so text typed under one reason was silently dropped
+  after picking another — and two reasons ("temporary deactivation",
+  "I don't need it anymore") had no box at all.
+* Improved: deactivation feedback is recorded as an analytics event
+  (the source of truth) in addition to the email notification, so replies
+  no longer get lost to bouncing mailboxes.
+* Fixed (important): the search cache was silently switched to "Disabled"
+  whenever any other settings tab was saved. All tabs share one settings
+  group and the cache duration only existed on the Cache tab, so saving
+  elsewhere wrote an empty value over it — meaning many sites were sending
+  an API call for every single search without knowing. The setting now
+  survives saves from every tab.
+* Maintenance: because of the bug above, updating to this version restores
+  the 1 day cache default on sites where the duration had been left at
+  "Disabled". If you deliberately turned caching off, set it back on the
+  Cache tab — the change is one click and applies immediately.
+* Fixed: the plugin activation event was missing on some hosts, and when
+  it did arrive it reported zero posts, pages and products. It is now sent
+  on the first request after activation, after WordPress has registered
+  all post types, so the content counts are correct.
+* New: usage analytics now report which content types are enabled for
+  indexing and how many published items that adds up to. Previously only
+  per-type counts were sent, so a site without WooCommerce looked empty
+  even when it had hundreds of posts — one figure now describes any site,
+  store or not.
+* New: usage analytics now include whether AI search is switched on. The
+  feature ships disabled, and without this flag a site with plenty of
+  indexed content but no searches was ambiguous — never enabled, or simply
+  no visitors?
+
 2026-07-11 - version 1.5.0
 * Fixed (critical): the WordPress 7.0 Connectors status notice no longer
   runs on every wp-admin page. It now renders ONLY on the Connectors screen

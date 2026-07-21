@@ -245,6 +245,40 @@ phpcs --standard=WordPress
 
 ## Changelog
 
+### 1.5.1 (2026-07-21)
+**Setup survey, deactivation feedback rework, cache fix**
+- New: optional setup question shown when the wizard opens — what kind of site this is, and what you want better search to do for it. One click, fully optional, visible Skip. Asked before setup so it still reaches people who hit trouble during installation.
+- Privacy: the answer is not stored on the site — it is sent to Queryra once and only a small flag stays locally so the question is not asked twice. Answerable and updatable in Settings → Site Profile.
+- New: deactivation and survey events record interaction state (submitted / skipped / never shown), so a decline can be told apart from a WP-CLI or bulk deactivation. No answer content is ever sent for a skip.
+- Fixed (important): the search cache was silently switched to "Disabled" whenever any other settings tab was saved — all tabs share one settings group and the cache duration only existed on the Cache tab, so saving elsewhere wrote an empty value over it. Many sites were sending an API call for every single search without knowing.
+- Fixed: deactivation feedback now uses one comment box whose prompt changes with the selected reason. Previously each reason had its own box, so text typed under one reason was silently dropped after picking another — and two reasons had no box at all.
+- Improved: deactivation feedback adds a "trial limits were too small" reason, an optional reply-to email address, and is recorded as an analytics event (source of truth) alongside the email notification.
+- Fixed: the activation event was missing on some hosts, and reported zero posts/pages/products when it did arrive. It is now sent after WordPress has registered all post types.
+- New: usage analytics include whether AI search is switched on — the feature ships disabled, so "indexed content but no searches" was previously ambiguous.
+
+### 1.5.0 (2026-07-11)
+**Critical admin fix — Connectors polling removed**
+- Fixed (critical): the WordPress 7.0 Connectors status notice ran on every wp-admin page and injected a script that repeatedly polled a REST endpoint. On rate-limited or managed hosts (nginx limits, Cloudflare, mod_security) this could trigger an HTTP 429 cascade that broke admin assets (jQuery, the block editor) and produced a blank admin screen. The notice now renders only on the Connectors screen and reads status server-side.
+- Removed: the `/wp-json/queryra/v1/key-status` REST endpoint and all client-side polling. Key status is a single server-side read — zero background requests from the admin.
+- Improved: admin JavaScript debug logging is silent unless `WP_DEBUG` is enabled, matching the PHP logger.
+
+### 1.4.4 (2026-06-15)
+**Custom Post Type support**
+- New: AI search indexes any public custom post type (recipes, vehicles, portfolios, listings, courses), not just posts, pages and WooCommerce products. Enable each type in Settings → Content or during the setup wizard.
+- New: ACF / Meta Box custom fields and custom taxonomies on those types are indexed automatically — the extraction engine is post-type agnostic.
+- Improved: Records tab counts and lists enabled custom post types; trashing or unpublishing a CPT entry removes it from the index.
+- Improved: anonymous analytics report a breakdown of public custom post types and their published-post counts.
+
+### 1.4.3 (2026-06-10)
+**Error visibility, security and resilience**
+- New: "Recent issues" panel on the Settings tab — import, search, API key and integration problems are visible in wp-admin instead of hidden in `debug.log`.
+- New: error reporting for previously silent failure paths — auto-sync on save/delete, search fallback, B2BKing integration, key validation, and client-side import errors. Anonymous and bounded; honours `QUERYRA_DISABLE_ANALYTICS`.
+- Security: fixed an XSS in the setup wizard test-search results — record names returned from the API are escaped before rendering in admin.
+- Fixed: trashed or unpublished posts are removed from the index (previously only permanent deletion was synced, so trashed products kept consuming record quota).
+- Fixed: the setup wizard validates the API key before saving it, so a mistyped key no longer overwrites a working one.
+- Fixed: "Clear All Search Cache" works on hosts with Redis or Memcached object caching; bulk import pagination is stable when many posts share a publish date.
+- Improved: visitor-facing search uses a 5-second timeout with a 60-second back-off after failure, so a slow API cannot pile up hung requests.
+
 ### 1.4.2 (2026-06-02)
 **Maintenance — UTM tracking, claim audit, Plugin Check compliance**
 - New: AI search admin links carry tracking parameters (UTM) for support-side referral attribution. Sentinel `pre-init` flags fresh installs in logs.

@@ -130,8 +130,7 @@ class Queryra_Deactivation_Survey {
 
             .queryra-deactivation-reason-details {
                 display: none;
-                margin-top: 10px;
-                padding-left: 28px;
+                margin-top: 14px;
             }
 
             .queryra-deactivation-reason-details.active {
@@ -154,8 +153,16 @@ class Queryra_Deactivation_Survey {
                 border-top: 1px solid #dcdcde;
                 background: #f6f7f7;
                 display: flex;
+                flex-wrap: wrap;
                 justify-content: space-between;
                 align-items: center;
+            }
+
+            .queryra-deactivation-disclosure {
+                flex-basis: 100%;
+                margin: 12px 0 0;
+                font-size: 12px;
+                color: #646970;
             }
 
             #queryra-deactivation-modal-footer .button {
@@ -193,84 +200,57 @@ class Queryra_Deactivation_Survey {
                 <div id="queryra-deactivation-modal-body">
                     <p>If you have a moment, please let us know why you're deactivating Queryra:</p>
 
+                    <?php
+                    // ONE shared textarea below the list, with a prompt that
+                    // swaps per reason (data-prompt). Two bugs this avoids,
+                    // both hit in real use:
+                    //  1. Per-reason textareas meant switching the radio
+                    //     silently dropped whatever had already been typed —
+                    //     submit only ever read the SELECTED reason's field.
+                    //  2. Reasons without a textarea ("temporary", "don't
+                    //     need it") left people with nothing to write in.
+                    // The spec's requirement is a question-specific PROMPT,
+                    // which the swapping placeholder satisfies exactly.
+                    $reasons = array(
+                        'not_working'      => array('It\'s not working', 'What happened?'),
+                        'found_better'     => array('I found a better plugin', 'Which plugin are you switching to?'),
+                        'temporary'        => array('It\'s a temporary deactivation', 'Anything we could do better before you come back? (optional)'),
+                        'missing_features' => array('Missing features I need', 'What was missing?'),
+                        // First willingness-to-pay signal we collect anywhere.
+                        'too_expensive'    => array('Too expensive', 'What price would make sense for your store?'),
+                        'trial_limits'     => array('The trial limits were too small for my store', 'Which limit did you hit first? (records, searches...)'),
+                        'dont_need'        => array('I don\'t need it anymore', 'Tell us more (optional)'),
+                        'other'            => array('Other', 'Tell us more (optional)'),
+                    );
+                    ?>
                     <div class="queryra-deactivation-reasons">
+                        <?php foreach ($reasons as $value => $reason) : ?>
                         <div class="queryra-deactivation-reason">
                             <label>
-                                <input type="radio" name="queryra_deactivation_reason" value="not_working">
+                                <input type="radio" name="queryra_deactivation_reason"
+                                       value="<?php echo esc_attr($value); ?>"
+                                       data-prompt="<?php echo esc_attr($reason[1]); ?>">
                                 <span class="queryra-deactivation-reason-text">
-                                    <strong>It's not working</strong>
+                                    <strong><?php echo esc_html($reason[0]); ?></strong>
                                 </span>
                             </label>
-                            <div class="queryra-deactivation-reason-details">
-                                <textarea placeholder="What isn't working? We'd love to help fix it..."></textarea>
-                            </div>
                         </div>
+                        <?php endforeach; ?>
+                    </div>
 
-                        <div class="queryra-deactivation-reason">
-                            <label>
-                                <input type="radio" name="queryra_deactivation_reason" value="found_better">
-                                <span class="queryra-deactivation-reason-text">
-                                    <strong>I found a better plugin</strong>
-                                </span>
-                            </label>
-                            <div class="queryra-deactivation-reason-details">
-                                <textarea placeholder="Which plugin are you switching to?"></textarea>
-                            </div>
-                        </div>
+                    <div class="queryra-deactivation-reason-details" id="queryra-deactivation-details-wrap">
+                        <textarea id="queryra-deactivation-details" placeholder="Tell us more (optional)"></textarea>
+                    </div>
 
-                        <div class="queryra-deactivation-reason">
-                            <label>
-                                <input type="radio" name="queryra_deactivation_reason" value="temporary">
-                                <span class="queryra-deactivation-reason-text">
-                                    <strong>It's a temporary deactivation</strong>
-                                </span>
-                            </label>
-                        </div>
-
-                        <div class="queryra-deactivation-reason">
-                            <label>
-                                <input type="radio" name="queryra_deactivation_reason" value="missing_features">
-                                <span class="queryra-deactivation-reason-text">
-                                    <strong>Missing features I need</strong>
-                                </span>
-                            </label>
-                            <div class="queryra-deactivation-reason-details">
-                                <textarea placeholder="What features would you like to see?"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="queryra-deactivation-reason">
-                            <label>
-                                <input type="radio" name="queryra_deactivation_reason" value="too_expensive">
-                                <span class="queryra-deactivation-reason-text">
-                                    <strong>Too expensive</strong>
-                                </span>
-                            </label>
-                            <div class="queryra-deactivation-reason-details">
-                                <textarea placeholder="What pricing would work better for you?"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="queryra-deactivation-reason">
-                            <label>
-                                <input type="radio" name="queryra_deactivation_reason" value="dont_need">
-                                <span class="queryra-deactivation-reason-text">
-                                    <strong>I don't need it anymore</strong>
-                                </span>
-                            </label>
-                        </div>
-
-                        <div class="queryra-deactivation-reason">
-                            <label>
-                                <input type="radio" name="queryra_deactivation_reason" value="other">
-                                <span class="queryra-deactivation-reason-text">
-                                    <strong>Other</strong>
-                                </span>
-                            </label>
-                            <div class="queryra-deactivation-reason-details">
-                                <textarea placeholder="Please share your reason..."></textarea>
-                            </div>
-                        </div>
+                    <!-- Optional reply-to. Lesson from a real case: our reply to a
+                         user's feedback bounced off a nonexistent wordpress@ sender
+                         address, so we ask for a real address to answer at. -->
+                    <div class="queryra-deactivation-email" style="margin-top: 15px;">
+                        <label for="queryra-deactivation-reply-email" style="display: block; margin-bottom: 5px; color: #50575e; font-size: 13px;">
+                            Your email, if you'd like a reply (optional)
+                        </label>
+                        <input type="email" id="queryra-deactivation-reply-email" placeholder="you@example.com"
+                               style="width: 100%; padding: 8px; border: 1px solid #dcdcde; border-radius: 3px;">
                     </div>
                 </div>
                 <div id="queryra-deactivation-modal-footer">
@@ -279,6 +259,13 @@ class Queryra_Deactivation_Survey {
                         <button type="button" class="button button-secondary" id="queryra-deactivation-cancel">Cancel</button>
                         <button type="button" class="button button-primary" id="queryra-deactivation-submit" disabled>Submit & Deactivate</button>
                     </div>
+                    <!-- Guideline 7 disclosure: the URL/version are part of the
+                         payload, so we say it where the user clicks Submit —
+                         that click after this text is the explicit consent
+                         (works for users without a Queryra account too). -->
+                    <p class="queryra-deactivation-disclosure">
+                        Your site URL, plugin version and the email you enter (if any) are included with your feedback.
+                    </p>
                 </div>
             </div>
         </div>
@@ -291,13 +278,21 @@ class Queryra_Deactivation_Survey {
     public function ajax_handle_feedback() {
         check_ajax_referer('queryra_deactivation', 'nonce');
 
-        $reason = isset($_POST['reason']) ? sanitize_text_field(wp_unslash($_POST['reason'])) : '';
-        $details = isset($_POST['details']) ? sanitize_textarea_field(wp_unslash($_POST['details'])) : '';
+        // Deactivating plugins requires this capability — so does sending
+        // feedback about deactivating them.
+        if (!current_user_can('activate_plugins')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+
+        $reason      = isset($_POST['reason']) ? sanitize_text_field(wp_unslash($_POST['reason'])) : '';
+        $details     = isset($_POST['details']) ? sanitize_textarea_field(wp_unslash($_POST['details'])) : '';
+        $reply_email = isset($_POST['reply_email']) ? sanitize_email(wp_unslash($_POST['reply_email'])) : '';
 
         // Store feedback locally (optional - can also send to API)
         $feedback_data = array(
             'reason' => $reason,
             'details' => $details,
+            'reply_email' => $reply_email,
             'date' => current_time('mysql'),
             'site_url' => get_site_url(),
             'plugin_version' => QUERYRA_VERSION,
@@ -309,7 +304,40 @@ class Queryra_Deactivation_Survey {
         $all_feedback[] = $feedback_data;
         update_option('queryra_deactivation_feedback', $all_feedback, false);
 
-        // Send feedback via email
+        // EVENT is the source of truth (not the email — mailboxes bounce and
+        // get lost; events land next to the instance in the analytics panel).
+        // Consent basis: the modal shows an explicit disclosure directly under
+        // the Submit button ("Your site URL and plugin version are included
+        // with your feedback"), and reply_email is volunteered by the user.
+        // This runs BEFORE the actual deactivation redirect, so the plugin is
+        // still active and the event fires normally.
+        if (class_exists('Queryra_Analytics')) {
+            $event_meta = array(
+                'reason'      => $reason,
+                'details'     => mb_substr($details, 0, 500),
+                'reply_email' => $reply_email,
+                'site_url'    => get_site_url(),
+            );
+
+            // The analytics layer replaces meta WHOLESALE with a truncation
+            // stub when its JSON exceeds ~2 KB. 500 non-Latin characters
+            // JSON-escape to ~6 bytes each and would blow that budget —
+            // losing reason and reply_email too. Shrink only the details
+            // until the encoded meta fits, so the high-value fields always
+            // survive (a Bulgarian "what was missing" answer is exactly the
+            // kind of feedback this event exists to carry).
+            while (strlen((string) wp_json_encode($event_meta)) > 1900 && mb_strlen($event_meta['details']) > 0) {
+                $event_meta['details'] = mb_substr(
+                    $event_meta['details'],
+                    0,
+                    (int) floor(mb_strlen($event_meta['details']) * 0.7)
+                );
+            }
+
+            Queryra_Analytics::track('deactivation_feedback', $event_meta);
+        }
+
+        // Courtesy notification only — the event above is authoritative.
         $this->send_feedback_via_email($feedback_data);
 
         wp_send_json_success(array(
@@ -340,6 +368,10 @@ class Queryra_Deactivation_Survey {
             $body .= "DETAILS:\n" . $feedback_data['details'] . "\n\n";
         }
 
+        if (!empty($feedback_data['reply_email'])) {
+            $body .= "REPLY TO: " . $feedback_data['reply_email'] . "\n\n";
+        }
+
         $body .= "---\n\n";
         $body .= "Site URL: " . $feedback_data['site_url'] . "\n";
         $body .= "Plugin Version: " . $feedback_data['plugin_version'] . "\n";
@@ -351,6 +383,12 @@ class Queryra_Deactivation_Survey {
             'Content-Type: text/plain; charset=UTF-8',
             'From: WordPress <wordpress@' . wp_parse_url(get_site_url(), PHP_URL_HOST) . '>'
         );
+
+        // Replying to the notification should reach the actual person, not
+        // the (often nonexistent) wordpress@ sender address.
+        if (!empty($feedback_data['reply_email'])) {
+            $headers[] = 'Reply-To: ' . $feedback_data['reply_email'];
+        }
 
         // Send email (non-blocking - if it fails, don't break deactivation)
         @wp_mail($to, $subject, $body, $headers);

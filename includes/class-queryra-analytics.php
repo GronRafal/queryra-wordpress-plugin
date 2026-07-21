@@ -50,10 +50,25 @@ class Queryra_Analytics {
             'php_version'        => phpversion(),
             'plugin_version'     => QUERYRA_VERSION,
             'woocommerce_active' => class_exists('WooCommerce'),
+            // Whether the master AI-search switch is ON. It ships OFF, so
+            // without this flag an install with plenty of synced records but
+            // no search traffic is ambiguous: never enabled, or enabled with
+            // no visitors? Those need opposite responses (onboarding vs
+            // marketing), and nothing on the backend can tell them apart.
+            'ai_search_enabled'  => get_option('queryra_ai_search') === '1',
             'products_count'     => self::count_products(),
             'posts_count'        => self::count_posts(),
             'pages_count'        => self::count_pages(),
             'custom_post_types'  => self::count_custom_post_types(),
+            // Which content types the owner actually enabled, and how many
+            // published items that adds up to. The per-type counts above are
+            // raw site inventory; THIS is the number that matters — how many
+            // records this install should end up with. Works the same for a
+            // WooCommerce store and a blog, so a single figure describes any
+            // site, and comparing it against the records actually synced
+            // reveals a half-finished import.
+            'post_types_enabled' => self::get_enabled_post_types(),
+            'indexable_count'    => self::count_indexable(),
             'timestamp'          => gmdate('c'),
         );
 
@@ -263,6 +278,40 @@ class Queryra_Analytics {
     private static function count_pages() {
         $count = wp_count_posts('page');
         return isset($count->publish) ? (int) $count->publish : 0;
+    }
+
+    /**
+     * Post types the owner enabled for indexing (queryra_post_types).
+     *
+     * @return array List of post type slugs.
+     */
+    private static function get_enabled_post_types() {
+        $types = get_option('queryra_post_types', array('post', 'page'));
+
+        return is_array($types) ? array_values(array_filter(array_map('strval', $types))) : array();
+    }
+
+    /**
+     * Published items across the enabled post types.
+     *
+     * Skips types that are not registered (a plugin providing a CPT may be
+     * inactive while the type is still listed in the option) so a stale
+     * selection cannot inflate the number.
+     *
+     * @return int
+     */
+    private static function count_indexable() {
+        $total = 0;
+
+        foreach (self::get_enabled_post_types() as $type) {
+            if (!post_type_exists($type)) {
+                continue;
+            }
+            $count  = wp_count_posts($type);
+            $total += isset($count->publish) ? (int) $count->publish : 0;
+        }
+
+        return $total;
     }
 
     /**

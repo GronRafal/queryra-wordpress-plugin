@@ -117,7 +117,7 @@ class Queryra_Admin {
         ));
         register_setting('queryra_settings', 'queryra_cache_duration', array(
             'type' => 'integer',
-            'sanitize_callback' => 'intval',
+            'sanitize_callback' => array($this, 'sanitize_cache_duration'),
             'default' => 86400
         ));
         // AI Discoverability — enabled by default so the plugin earns
@@ -137,6 +137,30 @@ class Queryra_Admin {
             'sanitize_callback' => 'rest_sanitize_boolean',
             'default' => true
         ));
+    }
+
+    /**
+     * Sanitize the cache duration, preserving it when the field is absent.
+     *
+     * All tabs post to the same settings group, and options.php writes NULL
+     * for every registered option missing from $_POST. With a plain intval()
+     * that turned into 0 = "Disabled", so saving any tab that did not carry
+     * a cache-duration field silently switched search caching off. Hidden
+     * fields now carry it across tabs; this guard is the safety net so the
+     * bug cannot come back if a future form forgets one.
+     *
+     * @param mixed $value Raw submitted value (null when the field is absent).
+     * @return int Seconds, -1 = forever, 0 = disabled.
+     */
+    public function sanitize_cache_duration($value) {
+        if ($value === null || $value === '') {
+            return (int) get_option('queryra_cache_duration', 86400);
+        }
+
+        $value   = intval($value);
+        $allowed = array(0, 60, 600, 3600, 86400, 604800, -1);
+
+        return in_array($value, $allowed, true) ? $value : 86400;
     }
 
     /**
@@ -300,6 +324,51 @@ class Queryra_Admin {
      * Render settings page
      */
     /**
+     * Render the "Site profile" card (Settings tab).
+     *
+     * Lets the user give (or update) the answer to the wizard's "What kind of
+     * site is this for?" question at any time — SPEC 2026-07-20 §3 wants the
+     * answer to be changeable. Stateless by design: the answer is sent as an
+     * event and nothing about it is stored on the site, so the control has no
+     * "current value" to preselect. POST handled in render_settings_page().
+     */
+    private function render_site_profile_setting() {
+        $profiles = array(
+            'store'     => 'An online store — I sell products',
+            'content'   => 'A blog, news or content site',
+            'directory' => 'A directory, catalog or knowledge base',
+            'client'    => "I'm building this for a client",
+            'exploring' => 'Just exploring for now',
+        );
+        ?>
+        <div class="queryra-card">
+            <h2>
+                <span class="dashicons dashicons-admin-users" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                Site Profile
+            </h2>
+            <p style="color: #646970;">
+                What kind of site is this for? Your answer helps us make the plugin better for
+                sites like yours (optional). It is sent to Queryra and not stored on your site.
+            </p>
+            <form method="post">
+                <?php wp_nonce_field('queryra_site_profile_setting'); ?>
+                <select name="queryra_site_profile_value" style="min-width: 320px;">
+                    <option value="">— Select —</option>
+                    <?php foreach ($profiles as $value => $label) : ?>
+                        <option value="<?php echo esc_attr($value); ?>">
+                            <?php echo esc_html($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" name="queryra_save_site_profile_setting" value="1" class="button button-secondary" style="margin-left: 8px;">
+                    Send
+                </button>
+            </form>
+        </div>
+        <?php
+    }
+
+    /**
      * Render the "Recent issues" card (Settings tab).
      *
      * Surfaces the local error log written by
@@ -420,6 +489,34 @@ class Queryra_Admin {
             }
         }
 
+        // Handle the site-profile answer from the Settings tab (the wizard
+        // question can be answered/updated here — decency requirement, SPEC
+        // 2026-07-20 §3). Same standalone-form pattern as "Clear list".
+        // Stateless: the answer is sent as an event, never stored locally.
+        // The only thing recorded is the flag saying the question was dealt
+        // with, so the wizard modal stops asking.
+        $site_profile_saved = false;
+        if (isset($_POST['queryra_save_site_profile_setting'])) {
+            check_admin_referer('queryra_site_profile_setting');
+            if (current_user_can('manage_options')) {
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above by check_admin_referer.
+                $new_profile      = isset($_POST['queryra_site_profile_value']) ? sanitize_key(wp_unslash($_POST['queryra_site_profile_value'])) : '';
+                $allowed_profiles = array('store', 'content', 'directory', 'client', 'exploring');
+                if (in_array($new_profile, $allowed_profiles, true)) {
+                    // Answered via a visible, explicit control = consent.
+                    Queryra_Analytics::track('site_profile', array(
+                        'qualification_status' => 'submitted',
+                        'site_profile'         => $new_profile,
+                        'expectations'         => array(),
+                        'site_profile_source'  => 'settings',
+                        'site_profile_at'      => gmdate('c'),
+                    ));
+                    update_option('queryra_site_profile_done', 1, false);
+                    $site_profile_saved = true;
+                }
+            }
+        }
+
         // Get current settings
         $api_key = get_option('queryra_api_key', '');
         $api_url = get_option('queryra_api_url', 'https://queryra.com');
@@ -429,6 +526,10 @@ class Queryra_Admin {
         $generate_llms_txt      = get_option('queryra_generate_llms_txt', '1');
         $generate_llms_full_txt = get_option('queryra_generate_llms_full_txt', '1');
         $output_schema          = get_option('queryra_output_schema', '1');
+        // Read once here so every tab can carry it in a hidden field — all
+        // tabs save into one settings group, and an option missing from the
+        // POST is written as NULL by options.php.
+        $cache_duration         = get_option('queryra_cache_duration', 86400);
 
         // Get available post types (exclude attachment/media and revisions)
         $all_post_types = get_post_types(array('public' => true), 'objects');
@@ -499,6 +600,10 @@ class Queryra_Admin {
             if ($recent_errors_cleared) {
                 echo '<div class="notice notice-success is-dismissible"><p><strong>Recent issues cleared.</strong></p></div>';
             }
+
+            if ($site_profile_saved) {
+                echo '<div class="notice notice-success is-dismissible"><p><strong>Thanks — your answer was sent to Queryra.</strong></p></div>';
+            }
             ?>
 
             <?php settings_errors('queryra_post_types'); ?>
@@ -564,6 +669,8 @@ class Queryra_Admin {
                         <?php endforeach; ?>
                         <!-- Preserve auto import setting (configured in Content tab) -->
                         <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
+                        <!-- Preserve cache duration (configured in Cache tab) -->
+                        <input type="hidden" name="queryra_cache_duration" value="<?php echo esc_attr($cache_duration); ?>">
 
                         <div class="queryra-card">
                             <h2>
@@ -830,6 +937,8 @@ class Queryra_Admin {
                         <?php submit_button('Save Settings'); ?>
                     </form>
 
+                    <?php $this->render_site_profile_setting(); ?>
+
                     <?php elseif ($active_tab === 'content'): ?>
                     <!-- Content Tab -->
                     <form method="post" action="options.php">
@@ -842,6 +951,8 @@ class Queryra_Admin {
                         <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
                         <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
                         <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
+                        <!-- Preserve cache duration (configured in Cache tab) -->
+                        <input type="hidden" name="queryra_cache_duration" value="<?php echo esc_attr($cache_duration); ?>">
                         <!-- Preserve product post type if selected in WooCommerce tab -->
                         <?php if (in_array('product', $post_types)): ?>
                             <input type="hidden" name="queryra_post_types[]" value="product">
@@ -1394,6 +1505,8 @@ class Queryra_Admin {
                         <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
                         <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
                         <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
+                        <!-- Preserve cache duration (configured in Cache tab) -->
+                        <input type="hidden" name="queryra_cache_duration" value="<?php echo esc_attr($cache_duration); ?>">
                             <!-- Preserve non-product post types from Content tab -->
                             <?php foreach ($post_types as $pt): ?>
                                 <?php if ($pt !== 'product'): ?>
@@ -1503,7 +1616,6 @@ class Queryra_Admin {
 
                     <?php elseif ($active_tab === 'cache'): ?>
                     <!-- Cache Tab -->
-                    <?php $cache_duration = get_option('queryra_cache_duration', 86400); ?>
                     <form method="post" action="options.php">
                         <?php settings_fields('queryra_settings'); ?>
                         <!-- Preserve other settings -->
