@@ -209,6 +209,12 @@ class Queryra_Search_Integration {
             return;
         }
 
+        // Scope filters from the request (filter_<dimension>=<value>). Forwarded
+        // to the API, which filters BEFORE retrieval so the ranked set is already
+        // scoped — unlike the queryra_result_ids hook, which trims AFTER retrieval
+        // and can leave a handful of results out of the top matches.
+        $filters = $this->get_request_filters();
+
         // Get cached stats and status from WordPress DB (saved by admin page)
         $stats = get_option('queryra_cached_stats');
         $status = get_option('queryra_cached_status');
@@ -218,13 +224,19 @@ class Queryra_Search_Integration {
             return; // No records in Queryra at all
         }
 
-        // Cache key (unique per search term). Salted with a version number
-        // so "Clear All Search Cache" works on Redis/Memcached too —
-        // external object caches don't keep transients in wp_options, so
-        // the admin's SQL cleanup can't reach them; bumping the version
-        // orphans every old entry instead.
+        // Cache key (unique per search term + scope filters). Salted with a
+        // version number so "Clear All Search Cache" works on Redis/Memcached
+        // too — external object caches don't keep transients in wp_options, so
+        // the admin's SQL cleanup can't reach them; bumping the version orphans
+        // every old entry instead.
         $cache_version = (int) get_option('queryra_cache_version', 1);
-        $cache_key = 'queryra_search_' . md5($cache_version . '|' . $search_term);
+        $cache_seed    = $cache_version . '|' . $search_term;
+        if (!empty($filters)) {
+            // Only appended when filters are present, so existing cached
+            // (unfiltered) searches keep their keys and are not invalidated.
+            $cache_seed .= '|' . wp_json_encode($filters);
+        }
+        $cache_key = 'queryra_search_' . md5($cache_seed);
 
         // Check cache FIRST - even if stale, it's better than SQL
         $cached_ids = get_transient($cache_key);
@@ -284,7 +296,7 @@ class Queryra_Search_Integration {
             }
 
             // Fetch all matching results from API (API filters by relevance threshold)
-            $results = $this->api->search($search_term, 999);
+            $results = $this->api->search($search_term, 999, $filters);
 
             // If API fails or returns error, fallback to WordPress search
             if (is_wp_error($results)) {
@@ -391,6 +403,33 @@ class Queryra_Search_Integration {
             return;
         }
 
+        /**
+         * Filter the ranked post IDs before they reach WordPress.
+         *
+         * Lets the site narrow the result set by its OWN rules — membership
+         * access, B2B groups, facets — before the query runs. The site is the
+         * only party that knows its access model, so that logic belongs here
+         * rather than in a per-plugin integration on our side.
+         *
+         * Note this filters AFTER retrieval: on a large catalogue the engine
+         * may return 20 and the callback leave 3. Scoping before retrieval is
+         * a separate matter.
+         *
+         * Filter name suggested by @jonnwalker on the WordPress.org forum.
+         *
+         * @param array  $cached_ids  Ranked post IDs, best match first.
+         * @param string $search_term The raw search query.
+         */
+        $cached_ids = apply_filters('queryra_result_ids', $cached_ids, $search_term);
+
+        // A callback that removed everything must yield NO results. An empty
+        // array in post__in means "no restriction" to WP_Query — it would show
+        // the entire site, the exact opposite of what the callback intended.
+        if (empty($cached_ids) || !is_array($cached_ids)) {
+            $query->set('post__in', array(0));
+            return;
+        }
+
         // === SIMPLE APPROACH ===
         // Just set the IDs and let WordPress/WooCommerce handle everything else
         // (pagination, posts_per_page, sorting display)
@@ -410,6 +449,41 @@ class Queryra_Search_Integration {
 
         // Backward-compat: keep this for any custom theme that already reads it.
         $query->set('queryra_search_term', $search_term);
+    }
+
+    /**
+     * Collect scope filters from the current search request.
+     *
+     * A site narrows results by adding filter_<dimension>=<value> parameters
+     * to its search form, e.g. /?s=shoes&filter_product_cat=boots. Dimension
+     * is a taxonomy slug (or "type"); value is a term/slug. We only sanitise
+     * the SHAPE here and forward the flat pairs — the API validates each
+     * dimension against its own metadata allow-list and builds the query, so
+     * nothing user-supplied is ever turned into a query clause on our side.
+     *
+     * @return array Map of dimension => value, key-sorted (stable cache keys).
+     */
+    private function get_request_filters() {
+        $filters = array();
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only front-end search; same trust level as the core 's' query var
+        foreach ($_GET as $raw_key => $raw_value) {
+            if (!is_string($raw_key) || strpos($raw_key, 'filter_') !== 0) {
+                continue;
+            }
+            if (!is_scalar($raw_value)) {
+                continue; // filter_x[]=… array forms are not supported yet
+            }
+            $dimension = sanitize_key(substr($raw_key, 7)); // drop "filter_"
+            $value     = sanitize_text_field(wp_unslash((string) $raw_value));
+            if ($dimension === '' || $value === '') {
+                continue;
+            }
+            $filters[$dimension] = $value;
+        }
+
+        ksort($filters);
+        return $filters;
     }
 
     /**

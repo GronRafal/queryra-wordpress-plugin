@@ -286,7 +286,7 @@ class Queryra_API {
      * @param int $limit Maximum number of results (default: 20)
      * @return array Response with results
      */
-    public function search($query, $limit = 20) {
+    public function search($query, $limit = 20, $filters = array()) {
         if (empty($this->api_key)) {
             return new WP_Error('no_api_key', 'API key is required');
         }
@@ -295,16 +295,33 @@ class Queryra_API {
             return new WP_Error('no_query', 'Search query is required');
         }
 
+        $params = array(
+            'key' => $this->api_key,
+            'q' => $query,
+            'limit' => $limit
+        );
+
+        // Optional scope filters, forwarded verbatim as filter_<dimension>=<value>
+        // query parameters. The API validates each dimension against its own
+        // metadata allow-list (tax_<slug>, type) and applies them BEFORE
+        // retrieval. We never build a query clause here — only flat pairs — so
+        // there is nothing to inject. sanitize_key() re-guards the shape in case
+        // a caller (e.g. an integration) passes filters directly.
+        if (!empty($filters) && is_array($filters)) {
+            foreach ($filters as $dimension => $value) {
+                $dimension = sanitize_key((string) $dimension);
+                if ($dimension !== '' && is_scalar($value)) {
+                    $params['filter_' . $dimension] = (string) $value;
+                }
+            }
+        }
+
         // 5s timeout — search runs on the visitor-facing request path
         // (pre_get_posts, B2BKing live search). With the default 30s, a
         // slow API would hang every uncached search page and exhaust
         // PHP workers under modest traffic; 5s bounds the worst case
         // before the WordPress-search fallback kicks in.
-        $response = $this->request('GET', '/api/v1/search', array(
-            'key' => $this->api_key,
-            'q' => $query,
-            'limit' => $limit
-        ), null, 5);
+        $response = $this->request('GET', '/api/v1/search', $params, null, 5);
 
         return $response;
     }

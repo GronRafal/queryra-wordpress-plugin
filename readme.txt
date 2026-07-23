@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -71,7 +71,7 @@ Queryra has confirmed integrations and tested compatibility with leading WordPre
 * [Weglot](https://queryra.com/docs/weglot-integration?utm_source=b9f1ce71) — multilingual semantic search
 
 **Membership & Affiliate:**
-* [MemberPress](https://queryra.com/docs/memberpress-integration?utm_source=b9f1ce71) — semantic search inside member-only content with access control
+* [MemberPress](https://queryra.com/docs/memberpress-integration?utm_source=b9f1ce71) — semantic search across member-only content, alongside MemberPress access rules
 * [Easy Affiliate Pro](https://queryra.com/docs/easy-affiliate-pro-integration?utm_source=b9f1ce71) — affiliate product search with custom fields
 
 **B2B:**
@@ -383,21 +383,16 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.5.1 =
-* New: optional setup question when the wizard opens — what kind of site this is, and what you want better search to do for it. One click, fully optional, with a visible Skip.
-* Privacy: your answer is not stored on your site — it is sent to Queryra once and that is it. You can answer or update it any time in Settings → Site Profile.
-* Fixed (important): the search cache was silently switched to "Disabled" whenever any other settings tab was saved, which meant many sites were sending an API call for every single search. The setting now survives saves from every tab.
-* Maintenance: because of that bug, updating restores the 1 day cache default on sites left at "Disabled". If you turned caching off on purpose, set it back on the Cache tab.
-* Fixed: deactivation feedback now uses one comment box whose prompt matches the reason you pick. Previously, text typed under one reason was dropped if you chose another, and two reasons had no box at all.
-* Improved: deactivation feedback adds a "trial limits were too small" reason and an optional email address if you would like a reply.
-* Fixed: the activation event was missing on some hosts and reported zero content counts when it did arrive.
+= 1.5.2 =
+* New: scope filters via URL — add `filter_<taxonomy>=<term>` to your search form (e.g. `/?s=shoes&filter_product_cat=boots`) and results are narrowed by that taxonomy before ranking, so counts stay exact. Combine several filters. Searches without `filter_` parameters are unchanged.
+* New: `queryra_result_ids` filter — lets your site narrow AI search results in PHP by its own rules (membership access, B2B groups). Receives the ranked post IDs and the search term; if your callback removes every result, the search correctly returns nothing. Suggested by [@jonnwalker](https://profiles.wordpress.org/jonnwalker/).
 
 For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.5.1 =
-Fixes a bug that silently turned off the search cache whenever settings were saved, which made every search hit the API. Updating restores the 1 day cache default if your duration was left at "Disabled" — set it back on the Cache tab if that was intentional. Also improves the deactivation feedback form and adds an optional setup question. Recommended for all users.
+= 1.5.2 =
+Adds filtering for developers: narrow AI search results by taxonomy through `filter_<taxonomy>=<term>` URL parameters, or in PHP via the new `queryra_result_ids` filter — useful for membership sites, B2B stores and faceted catalogues. No change in behaviour unless you use them.
 
 == Privacy ==
 

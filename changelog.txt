@@ -1,5 +1,22 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-07-22 - version 1.5.2
+* New: scope filters via URL — a search request may carry
+  filter_<dimension>=<value> parameters (e.g. /?s=shoes&filter_product_cat=boots),
+  which are forwarded to the AI search API and applied BEFORE ranking, so the
+  returned set is already narrowed. Dimension is a taxonomy slug (or "type"),
+  value is a term/slug; several filters can be combined. A site adds these to
+  its own search form. Nothing changes for searches without filter_ parameters.
+* New: `queryra_result_ids` filter, applied to the ranked post IDs returned by
+  the AI search API before they reach WordPress. Lets a site narrow the result
+  set by its own rules — membership access, B2B groups, facets — which is
+  logic only the site can know. Receives the ID array and the raw search term.
+  If a callback removes every result the search returns nothing, rather than
+  falling back to showing the whole site. (This trims AFTER retrieval; the
+  filter_ URL parameters above narrow BEFORE retrieval and give exact counts.)
+  Filter name suggested by @jonnwalker (https://profiles.wordpress.org/jonnwalker/)
+  on the WordPress.org support forum.
+
 2026-07-21 - version 1.5.1
 * New: optional setup survey shown when the setup wizard opens — "What kind
   of site is this for?" and "What do you want better search to do for your
