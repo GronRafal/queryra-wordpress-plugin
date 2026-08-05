@@ -137,6 +137,15 @@ class Queryra_Admin {
             'sanitize_callback' => 'rest_sanitize_boolean',
             'default' => true
         ));
+        // "Powered by Queryra" credit link inside the structured data.
+        // OFF by default per WP.org Guideline 10 (credit links must be opt-in
+        // and default to not show). Stored as '1'/'' so a missing option =
+        // disabled — no upgrade migration needed for existing installs.
+        register_setting('queryra_settings', 'queryra_powered_by', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => false
+        ));
     }
 
     /**
@@ -369,6 +378,183 @@ class Queryra_Admin {
     }
 
     /**
+     * Render the "Search filters" reference (Support tab).
+     *
+     * Lists the filter parameters that work ON THIS SITE, with ready-to-copy
+     * examples built from the site's own taxonomies and terms. Reference
+     * material rather than a tip, so it is not dismissible — this is what
+     * someone comes back to months later while building a search form.
+     *
+     * The exact parameter cannot be guessed: taxonomy filters carry a tax_
+     * prefix (the search index's own naming) and match on the term NAME, not
+     * its slug. Printing the real strings is the only dependable way to get
+     * it right, and it keeps the reference honest — a taxonomy that is not
+     * indexed simply never appears here.
+     */
+    private function render_filters_reference() {
+        $post_types = get_option('queryra_post_types', array('post', 'page'));
+        if (!is_array($post_types) || empty($post_types)) {
+            $post_types = array('post');
+        }
+
+        $taxonomies = class_exists('Queryra_Sync')
+            ? Queryra_Sync::get_indexed_taxonomies($post_types)
+            : array();
+
+        // Built-in dimensions. Categories, tags and brands reach the index in
+        // their own record fields no matter which taxonomy fed them (posts use
+        // category/post_tag, products use product_cat/product_tag), which is
+        // why they are filtered by a single name rather than a taxonomy slug.
+        $rows = array(
+            array(
+                'param'    => 'filter_type',
+                'label'    => 'Content type',
+                'values'   => $post_types,
+                // The complete set, unlike the term rows below which show a
+                // sample — so no trailing ellipsis.
+                'complete' => true,
+            ),
+            array(
+                'param'  => 'filter_category',
+                'label'  => 'Category',
+                'values' => $this->sample_terms(array('category', 'product_cat')),
+            ),
+            array(
+                'param'  => 'filter_tag',
+                'label'  => 'Tag',
+                'values' => $this->sample_terms(array('post_tag', 'product_tag')),
+            ),
+        );
+
+        if (class_exists('WooCommerce')) {
+            $rows[] = array(
+                'param'  => 'filter_brand',
+                'label'  => 'Product brand',
+                'values' => $this->sample_terms(array('product_brand', 'yith_product_brand', 'pwb-brand')),
+            );
+        }
+
+        // Custom taxonomies, which keep their slug behind a tax_ prefix.
+        // Sample values come from the site's own terms, so the examples are
+        // literally copy-and-paste rather than illustrative.
+        $primary = null;
+        foreach ($taxonomies as $slug => $tax_object) {
+            $terms = $this->sample_terms(array($slug));
+
+            $rows[] = array(
+                'param'  => 'filter_tax_' . $slug,
+                'label'  => isset($tax_object->labels->name) ? $tax_object->labels->name : $slug,
+                'values' => $terms,
+            );
+
+            if ($primary === null && !empty($terms)) {
+                $primary = array('param' => 'filter_tax_' . $slug, 'value' => $terms[0]);
+            }
+        }
+
+        // Prefer a custom taxonomy for the worked example, then a category,
+        // and finally the type dimension — so the card still teaches something
+        // on a site with no taxonomies at all.
+        if ($primary === null) {
+            foreach ($rows as $row) {
+                if (!empty($row['values'])) {
+                    $primary = array('param' => $row['param'], 'value' => reset($row['values']));
+                    break;
+                }
+            }
+        }
+        if ($primary === null) {
+            $primary = array('param' => 'filter_type', 'value' => reset($post_types));
+        }
+
+        $example_param = $primary['param'] . '=' . rawurlencode($primary['value']);
+        $example_url   = home_url('/') . '?s=' . rawurlencode(strtolower($primary['value'])) . '&' . $example_param;
+        ?>
+        <div class="queryra-card">
+            <h2>
+                <span class="dashicons dashicons-filter" style="font-size: 24px; width: 24px; height: 24px; margin-right: 8px;"></span>
+                Search filters
+            </h2>
+            <p style="color: #646970;">
+                Narrow AI search results by adding parameters to your search URL. Filtering happens before ranking,
+                so the results you get back are the best matches <em>within</em> the filter — not a top-10 list with
+                most of it removed. Searches without <code>filter_</code> parameters behave exactly as before.
+            </p>
+
+            <p style="margin-bottom: 4px;"><strong>Add to your search form:</strong></p>
+            <p><code style="padding: 6px 10px; background: #f0f0f0; user-select: all; display: inline-block;">&amp;<?php echo esc_html($example_param); ?></code></p>
+
+            <p style="margin-bottom: 4px;"><strong>Full example:</strong></p>
+            <p><code style="padding: 6px 10px; background: #f0f0f0; user-select: all; display: inline-block; word-break: break-all;"><?php echo esc_html($example_url); ?></code></p>
+
+            <table class="widefat striped" style="margin: 18px 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Parameter</th>
+                        <th>Values on this site</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($rows as $row) : ?>
+                    <tr>
+                        <td>
+                            <code><?php echo esc_html($row['param']); ?></code>
+                            <br><span style="color: #646970; font-size: 12px;"><?php echo esc_html($row['label']); ?></span>
+                        </td>
+                        <td>
+                            <?php if (!empty($row['values'])) : ?>
+                                <?php echo esc_html(implode(', ', $row['values'])); ?><?php echo (empty($row['complete']) && count($row['values']) >= 3) ? ', …' : ''; ?>
+                            <?php else : ?>
+                                <span style="color: #646970;">nothing on this site yet</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <p class="description">
+                <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                Values are the <strong>term name</strong>, not the slug — <code>software development</code>, not
+                <code>software-development</code>. Encode spaces as <code>%20</code>. Capitalisation does not matter.
+                Combining several filters narrows further; each one must match.
+            </p>
+        </div>
+        <?php
+    }
+
+    /**
+     * A few real term names from the first of the given taxonomies that has any.
+     *
+     * Used to build copy-and-paste examples from the site's own content rather
+     * than invented ones. Several taxonomies can feed a single filter — posts
+     * use `category` while products use `product_cat`, and both arrive in the
+     * index as the same field — so the first one with terms wins.
+     *
+     * @param array $taxonomies Candidate taxonomy slugs, in priority order.
+     * @param int   $limit      How many names to return.
+     * @return array Term names (possibly empty).
+     */
+    private function sample_terms($taxonomies, $limit = 3) {
+        foreach ((array) $taxonomies as $taxonomy) {
+            if (!taxonomy_exists($taxonomy)) {
+                continue;
+            }
+            $terms = get_terms(array(
+                'taxonomy'   => $taxonomy,
+                'hide_empty' => true,
+                'number'     => $limit,
+                'fields'     => 'names',
+            ));
+            if (!is_wp_error($terms) && !empty($terms)) {
+                return array_values($terms);
+            }
+        }
+
+        return array();
+    }
+
+    /**
      * Render the "Recent issues" card (Settings tab).
      *
      * Surfaces the local error log written by
@@ -526,6 +712,7 @@ class Queryra_Admin {
         $generate_llms_txt      = get_option('queryra_generate_llms_txt', '1');
         $generate_llms_full_txt = get_option('queryra_generate_llms_full_txt', '1');
         $output_schema          = get_option('queryra_output_schema', '1');
+        $powered_by             = get_option('queryra_powered_by', '0');
         // Read once here so every tab can carry it in a hidden field — all
         // tabs save into one settings group, and an option missing from the
         // POST is written as NULL by options.php.
@@ -808,7 +995,23 @@ class Queryra_Admin {
                                         </label>
                                         <p class="description" style="margin-top: 8px;">
                                             Adds <code>SearchResultsPage</code> schema on search pages and <code>Service</code> schema site-wide,
-                                            both attributing the search engine to Queryra. Disable only if your SEO plugin already handles this.
+                                            describing your site's AI search so LLMs and crawlers understand it. Disable only if your SEO plugin already handles this.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Structured-data credit</th>
+                                    <td>
+                                        <input type="hidden" name="queryra_powered_by" value="0">
+                                        <label>
+                                            <input type="checkbox"
+                                                   name="queryra_powered_by"
+                                                   value="1"
+                                                   <?php checked($powered_by, '1'); ?>>
+                                            <strong>Credit Queryra as the search provider in this site's structured data</strong>
+                                        </label>
+                                        <p class="description" style="margin-top: 8px;">
+                                            Off by default and entirely optional. This only adds a link to queryra.com <em>inside the JSON-LD metadata</em> that search engines and AI crawlers read — nothing appears anywhere on your site, and it is unrelated to the Partner Program. The plugin works exactly the same whether this is on or off.
                                         </p>
                                     </td>
                                 </tr>
@@ -949,6 +1152,7 @@ class Queryra_Admin {
                         <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
                         <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
                         <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
+                        <input type="hidden" name="queryra_powered_by" value="<?php echo esc_attr($powered_by); ?>">
                         <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
                         <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
                         <!-- Preserve cache duration (configured in Cache tab) -->
@@ -1503,6 +1707,7 @@ class Queryra_Admin {
                             <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
                             <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
                         <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
+                        <input type="hidden" name="queryra_powered_by" value="<?php echo esc_attr($powered_by); ?>">
                         <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
                         <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
                         <!-- Preserve cache duration (configured in Cache tab) -->
@@ -1624,6 +1829,7 @@ class Queryra_Admin {
                         <input type="hidden" name="queryra_auto_sync" value="<?php echo esc_attr($auto_sync); ?>">
                         <input type="hidden" name="queryra_ai_search" value="<?php echo esc_attr($ai_search); ?>">
                         <input type="hidden" name="queryra_output_schema" value="<?php echo esc_attr($output_schema); ?>">
+                        <input type="hidden" name="queryra_powered_by" value="<?php echo esc_attr($powered_by); ?>">
                         <input type="hidden" name="queryra_generate_llms_txt" value="<?php echo esc_attr($generate_llms_txt); ?>">
                         <input type="hidden" name="queryra_generate_llms_full_txt" value="<?php echo esc_attr($generate_llms_full_txt); ?>">
                         <?php foreach ($post_types as $pt): ?>
@@ -1786,6 +1992,8 @@ class Queryra_Admin {
                             </tr>
                         </table>
                     </div>
+
+                    <?php $this->render_filters_reference(); ?>
 
                     <?php endif; ?>
 

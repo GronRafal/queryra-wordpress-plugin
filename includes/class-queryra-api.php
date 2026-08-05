@@ -302,11 +302,19 @@ class Queryra_API {
         );
 
         // Optional scope filters, forwarded verbatim as filter_<dimension>=<value>
-        // query parameters. The API validates each dimension against its own
-        // metadata allow-list (tax_<slug>, type) and applies them BEFORE
-        // retrieval. We never build a query clause here — only flat pairs — so
-        // there is nothing to inject. sanitize_key() re-guards the shape in case
-        // a caller (e.g. an integration) passes filters directly.
+        // query parameters and applied by the API BEFORE retrieval.
+        //
+        // Deliberately a pass-through: the plugin sanitises the SHAPE and
+        // nothing else. Which dimensions exist, and what they mean, is the
+        // API's business — it owns the allow-list. Translating names here
+        // (say, prefixing taxonomies) would put a copy of that vocabulary in
+        // the plugin and quietly mangle any dimension the API adds later.
+        // Site owners get the exact parameter to use from the filters
+        // reference in the plugin settings, so they never type one from memory.
+        //
+        // We never build a query clause — only flat pairs — so there is
+        // nothing to inject. sanitize_key() re-guards the shape in case a
+        // caller (e.g. an integration) passes filters directly.
         if (!empty($filters) && is_array($filters)) {
             foreach ($filters as $dimension => $value) {
                 $dimension = sanitize_key((string) $dimension);

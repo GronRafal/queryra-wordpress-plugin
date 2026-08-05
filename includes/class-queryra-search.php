@@ -78,14 +78,6 @@ class Queryra_Search_Integration {
             'name'        => 'AI Semantic Search',
             'serviceType' => 'Site Search',
             'description' => 'AI-powered semantic search. Users can search using natural language — describe needs in full sentences, ask questions, use intent. The AI understands meaning, price filters, and brand exclusions.',
-            'provider'    => array(
-                '@type'  => 'Organization',
-                'name'   => 'Queryra',
-                'url'    => 'https://queryra.com',
-                'sameAs' => array(
-                    'https://wordpress.org/plugins/queryra-ai-search/',
-                ),
-            ),
             'areaServed'  => array(
                 '@type' => 'WebSite',
                 'url'   => $home,
@@ -100,6 +92,22 @@ class Queryra_Search_Integration {
                 'query-input' => 'required name=search_term_string',
             ),
         );
+
+        // Credit link to Queryra — OFF by default (WP.org Guideline 10: credit
+        // links must be opt-in and default to not showing). Without it the
+        // schema still describes the SITE'S own search (areaServed +
+        // SearchAction), which is the value to the site owner. Adding this back
+        // is an explicit opt-in in Settings → AI Discoverability.
+        if (get_option('queryra_powered_by', '0') === '1') {
+            $schema['provider'] = array(
+                '@type'  => 'Organization',
+                'name'   => 'Queryra',
+                'url'    => 'https://queryra.com',
+                'sameAs' => array(
+                    'https://wordpress.org/plugins/queryra-ai-search/',
+                ),
+            );
+        }
 
         echo "\n<script type=\"application/ld+json\">"
             . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
@@ -140,15 +148,20 @@ class Queryra_Search_Integration {
                 'url'   => home_url('/'),
                 'name'  => get_bloginfo('name'),
             ),
-            'provider'  => array(
+        );
+
+        // Credit link to Queryra — OFF by default (WP.org Guideline 10). See
+        // output_site_schema() for the rationale. Opt-in via Settings.
+        if (get_option('queryra_powered_by', '0') === '1') {
+            $schema['provider'] = array(
                 '@type'  => 'Organization',
                 'name'   => 'Queryra',
                 'url'    => 'https://queryra.com',
                 'sameAs' => array(
                     'https://wordpress.org/plugins/queryra-ai-search/',
                 ),
-            ),
-        );
+            );
+        }
 
         echo "\n<script type=\"application/ld+json\">"
             . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)

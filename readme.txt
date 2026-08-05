@@ -3,7 +3,7 @@ Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -24,7 +24,7 @@ WooCommerce search can't connect "present for girlfriend" to "Gift Box".
 Your customer leaves. Sale lost. This happens every day.
 
 👉 **[Try AI Search live → WooCommerce demo store](https://woo.queryra.com)** —
-200+ products across 10 brands. Search naturally and see the difference.
+220+ products across 10 brands. Search naturally and see the difference.
 
 = What is AI Search for WooCommerce? =
 
@@ -71,7 +71,7 @@ Queryra has confirmed integrations and tested compatibility with leading WordPre
 * [Weglot](https://queryra.com/docs/weglot-integration?utm_source=b9f1ce71) — multilingual semantic search
 
 **Membership & Affiliate:**
-* [MemberPress](https://queryra.com/docs/memberpress-integration?utm_source=b9f1ce71) — semantic search across member-only content, alongside MemberPress access rules
+* [MemberPress](https://queryra.com/docs/memberpress-integration?utm_source=b9f1ce71) — semantic search across member-only content; MemberPress continues to gate the content itself at render time
 * [Easy Affiliate Pro](https://queryra.com/docs/easy-affiliate-pro-integration?utm_source=b9f1ce71) — affiliate product search with custom fields
 
 **B2B:**
@@ -338,7 +338,7 @@ Semantic search understands the meaning behind a query, not just keywords. AI Se
 No. AI Search is powered by Queryra's backend — no OpenAI account, no API key management, no per-request costs. One free API key at queryra.com covers everything.
 
 = Does AI Search support multiple languages? =
-Yes. AI Search supports 50+ languages out of the box including Polish, German, French, Spanish, Dutch, Japanese, Czech, and more. No configuration needed — customers search in their native language and find products automatically.
+Yes. AI Search supports 100+ languages out of the box including Polish, German, French, Spanish, Dutch, Japanese, Czech, and more. No configuration needed — customers search in their native language and find products automatically.
 
 = Will AI Search slow down my WooCommerce store? =
 No. AI Search processes queries via an optimized API. Products are indexed in the background. Search results typically return in under a second — competitive with keyword search for most stores.
@@ -383,16 +383,18 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.5.2 =
-* New: scope filters via URL — add `filter_<taxonomy>=<term>` to your search form (e.g. `/?s=shoes&filter_product_cat=boots`) and results are narrowed by that taxonomy before ranking, so counts stay exact. Combine several filters. Searches without `filter_` parameters are unchanged.
-* New: `queryra_result_ids` filter — lets your site narrow AI search results in PHP by its own rules (membership access, B2B groups). Receives the ranked post IDs and the search term; if your callback removes every result, the search correctly returns nothing. Suggested by [@jonnwalker](https://profiles.wordpress.org/jonnwalker/).
+= 1.5.3 =
+* Fixed: the search filter syntax described in 1.5.2 was wrong. The parameters are `filter_type`, `filter_category`, `filter_tag`, `filter_brand` and `filter_tax_<taxonomy>` — e.g. `/?s=design&filter_tax_course_cat=Design` — and the value is the term name, not its slug. Written the wrong way a filter was silently ignored and every result came back, so it looked like it worked.
+* New: a filters reference in the plugin settings shows which filters your site supports, with ready-to-copy examples built from your own taxonomies and terms.
+* Fixed: the setup wizard now counts every content type in its site summary — a site built on custom post types was previously described as having only a few items while offering to import hundreds — and content types with nothing published are selectable instead of ticked and locked.
+* Changed: the "Powered by Queryra" credit in your site's structured data is now opt-in and off by default (WordPress.org plugin guideline 10). The structured data describing your search stays; only the link to queryra.com is removed unless you enable it under Settings → AI Discoverability. No visible change on your site.
 
 For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.5.2 =
-Adds filtering for developers: narrow AI search results by taxonomy through `filter_<taxonomy>=<term>` URL parameters, or in PHP via the new `queryra_result_ids` filter — useful for membership sites, B2B stores and faceted catalogues. No change in behaviour unless you use them.
+= 1.5.3 =
+Compliance update: the Queryra credit link in structured data is now opt-in and off by default. No visible change to your site; re-enable it in Settings → AI Discoverability if you want it.
 
 == Privacy ==
 

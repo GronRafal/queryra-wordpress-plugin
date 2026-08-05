@@ -1,5 +1,36 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-08-05 - version 1.5.3
+* Fixed: the search filter syntax in the 1.5.2 notes was wrong. The
+  parameters are filter_type, filter_category, filter_tag, filter_brand and
+  filter_tax_<taxonomy> for custom taxonomies — so
+  /?s=design&filter_tax_course_cat=Design, not filter_course_cat, and
+  filter_category rather than filter_product_cat for shop categories. Values
+  are the term NAME, not the slug ("software development", not
+  "software-development"). Written the wrong way a filter was silently
+  ignored and the full unfiltered result set came back, so it looked like it
+  worked. Nothing changed in how filtering behaves; the documentation now
+  matches it.
+* New: filters reference in the plugin settings, listing the dimensions
+  available on YOUR site with ready-to-copy examples built from your own
+  taxonomies and terms — so the exact parameter never has to be guessed.
+* Changed: the "Powered by Queryra" reference in the site's structured data
+  (JSON-LD) is now opt-in and OFF by default, per WordPress.org plugin
+  guideline 10 (credit links must not appear unless the site owner chooses
+  to show them). The structured data describing your site's search stays as
+  before — only the outbound credit link to queryra.com is removed by
+  default. Re-enable it any time under Settings → AI Discoverability →
+  "Structured-data credit". Existing sites lose the reference on update. No
+  visible change on the front end.
+* Fixed: the setup wizard counted only posts, pages and products in the
+  "Your WordPress Site" summary, so a site built on custom post types was
+  described as having a handful of items while the list underneath offered
+  to import hundreds. Every content type is now counted.
+* Fixed: content types with nothing published were shown ticked but locked
+  in the setup wizard, and were saved as enabled even though they could not
+  be unticked. They are now unticked and selectable — tick one to have that
+  type indexed automatically as soon as its first item is published.
+
 2026-07-22 - version 1.5.2
 * New: scope filters via URL — a search request may carry
   filter_<dimension>=<value> parameters (e.g. /?s=shoes&filter_product_cat=boots),

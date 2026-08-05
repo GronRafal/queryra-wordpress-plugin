@@ -12,9 +12,63 @@ if (!defined('ABSPATH')) {
 class Queryra_Sync {
 
     /**
+     * Taxonomies never sent in the `taxonomies` payload.
+     *
+     * The first group already travels in dedicated record fields
+     * (categories / tags / brand); the second is WordPress plumbing rather
+     * than content. Kept here as one source of truth so the settings screen
+     * can list exactly what ends up filterable.
+     */
+    const SKIPPED_TAXONOMIES = array(
+        // Already reported via dedicated fields
+        'category', 'post_tag',
+        'product_cat', 'product_tag',
+        'product_brand', 'yith_product_brand', 'pwb-brand',
+        // WordPress system / non-content
+        'post_format', 'nav_menu', 'link_category',
+    );
+
+    /**
      * API client
      */
     private $api;
+
+    /**
+     * Taxonomies whose terms reach the search index for the given post types —
+     * that is, exactly the dimensions a site can filter searches on.
+     *
+     * Same rules as collect_custom_taxonomies(), minus the per-post term
+     * lookup, so the settings screen can list what is filterable without
+     * inspecting individual posts.
+     *
+     * Note: a site using the `queryra_indexable_taxonomies` filter to alter
+     * the set per post may end up with something different from this list —
+     * that hook is post-specific and cannot be evaluated here.
+     *
+     * @param array $post_types Post type slugs (e.g. the enabled ones).
+     * @return array Map of taxonomy slug => taxonomy object, key-sorted.
+     */
+    public static function get_indexed_taxonomies($post_types) {
+        $found = array();
+
+        foreach ((array) $post_types as $post_type) {
+            if (!is_string($post_type) || !post_type_exists($post_type)) {
+                continue;
+            }
+            foreach (get_object_taxonomies($post_type, 'objects') as $tax_name => $tax_object) {
+                if (empty($tax_object->public)) {
+                    continue;
+                }
+                if (in_array($tax_name, self::SKIPPED_TAXONOMIES, true)) {
+                    continue;
+                }
+                $found[$tax_name] = $tax_object;
+            }
+        }
+
+        ksort($found);
+        return $found;
+    }
 
     /**
      * Constructor
@@ -465,14 +519,7 @@ class Queryra_Sync {
      * filter (e.g., to remove a private internal taxonomy).
      */
     private function collect_custom_taxonomies($post) {
-        $skip = array(
-            // Already reported via dedicated fields
-            'category', 'post_tag',
-            'product_cat', 'product_tag',
-            'product_brand', 'yith_product_brand', 'pwb-brand',
-            // WordPress system / non-content
-            'post_format', 'nav_menu', 'link_category',
-        );
+        $skip = self::SKIPPED_TAXONOMIES;
 
         $all_taxonomies = get_object_taxonomies($post->post_type, 'objects');
         if (empty($all_taxonomies)) {

@@ -110,7 +110,11 @@ jQuery(document).ready(function($) {
     $('#queryra-start-import').on('click', function() {
         var $button = $(this);
 
-        var selectedTypes = $('.queryra-type-checkbox:checked').map(function() {
+        // Defensive: jQuery's :checked also matches disabled controls, so a
+        // disabled box would be submitted even though the user cannot act on
+        // it. Nothing disables these today (empty types are simply unticked
+        // and remain selectable), and the summary above applies the same rule.
+        var selectedTypes = $('.queryra-type-checkbox:checked').not(':disabled').map(function() {
             return $(this).val();
         }).get();
 

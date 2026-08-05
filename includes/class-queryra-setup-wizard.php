@@ -460,6 +460,23 @@ class Queryra_Setup_Wizard {
                         <p style="margin: 5px 0 0 0; font-size: 14px; color: #646970;">Products</p>
                     </div>
                     <?php endif; ?>
+                    <?php
+                    // Custom post types registered by other plugins (LMS courses,
+                    // portfolios, listings...). Without these the summary claimed
+                    // "1 post, 5 pages" while the import list below counted 109 —
+                    // the same site described two different ways. Empty types are
+                    // skipped here; the selection list below still lists them all
+                    // so the user can see every available choice.
+                    foreach ($custom_types as $cpt) :
+                        if ($cpt['count'] < 1) {
+                            continue;
+                        }
+                    ?>
+                    <div>
+                        <span style="font-size: 32px; font-weight: 700; color: #2271b1;"><?php echo number_format($cpt['count']); ?></span>
+                        <p style="margin: 5px 0 0 0; font-size: 14px; color: #646970;"><?php echo esc_html($cpt['label']); ?></p>
+                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -480,25 +497,30 @@ class Queryra_Setup_Wizard {
 
                 <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
-                        <input type="checkbox" class="queryra-type-checkbox" value="post" data-count="<?php echo (int) $published_posts; ?>" checked <?php disabled($published_posts, 0); ?>>
+                        <?php // Ticked when there is something to import. An empty type stays
+                              // unticked but SELECTABLE: ticking it means "index these once they
+                              // exist", and auto-sync then picks up new content of that type.
+                              // Ticked-but-locked (the old rendering) read as "included, and you
+                              // cannot change it" — the opposite of what an empty type means. ?>
+                        <input type="checkbox" class="queryra-type-checkbox" value="post" data-count="<?php echo (int) $published_posts; ?>" <?php checked($published_posts > 0); ?>>
                         <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($published_posts); ?></strong>
                         <span>Posts</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
-                        <input type="checkbox" class="queryra-type-checkbox" value="page" data-count="<?php echo (int) $published_pages; ?>" checked <?php disabled($published_pages, 0); ?>>
+                        <input type="checkbox" class="queryra-type-checkbox" value="page" data-count="<?php echo (int) $published_pages; ?>" <?php checked($published_pages > 0); ?>>
                         <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($published_pages); ?></strong>
                         <span>Pages</span>
                     </label>
                     <?php if ($has_woocommerce): ?>
                     <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
-                        <input type="checkbox" class="queryra-type-checkbox" value="product" data-count="<?php echo (int) $published_products; ?>" checked <?php disabled($published_products, 0); ?>>
+                        <input type="checkbox" class="queryra-type-checkbox" value="product" data-count="<?php echo (int) $published_products; ?>" <?php checked($published_products > 0); ?>>
                         <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($published_products); ?></strong>
                         <span>Products</span>
                     </label>
                     <?php endif; ?>
                     <?php foreach ($custom_types as $cpt): ?>
                     <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #f6f7f7; border-radius: 4px; cursor: pointer; font-size: 15px;">
-                        <input type="checkbox" class="queryra-type-checkbox" value="<?php echo esc_attr($cpt['name']); ?>" data-count="<?php echo (int) $cpt['count']; ?>" checked <?php disabled($cpt['count'], 0); ?>>
+                        <input type="checkbox" class="queryra-type-checkbox" value="<?php echo esc_attr($cpt['name']); ?>" data-count="<?php echo (int) $cpt['count']; ?>" <?php checked($cpt['count'] > 0); ?>>
                         <strong style="color: #2271b1; font-size: 18px; min-width: 60px; text-align: right;"><?php echo number_format($cpt['count']); ?></strong>
                         <span><?php echo esc_html($cpt['label']); ?></span>
                     </label>
