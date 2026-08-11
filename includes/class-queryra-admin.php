@@ -519,6 +519,20 @@ class Queryra_Admin {
                 <code>software-development</code>. Encode spaces as <code>%20</code>. Capitalisation does not matter.
                 Combining several filters narrows further; each one must match.
             </p>
+
+            <?php if ($this->course_scope_hint_applies($post_types)) : ?>
+            <div style="margin: 18px 0 0; padding: 12px 14px; background: #f6f7f7; border-left: 4px solid #72aee6;">
+                <p style="margin: 0;">
+                    <strong>Running a course or membership site?</strong>
+                    Lessons usually aren't tagged with their parent course, so they can't be narrowed by course yet.
+                    <a href="<?php echo esc_url('https://queryra.com/docs/search-inside-one-course?utm_source=plugin&utm_medium=support_tab'); ?>" target="_blank" rel="noopener noreferrer">How to add that&nbsp;&rarr;</a>
+                </p>
+            </div>
+            <?php endif; ?>
+
+            <p style="margin-top: 18px;">
+                <a href="<?php echo esc_url('https://queryra.com/docs/search-filters?utm_source=plugin&utm_medium=support_tab'); ?>" target="_blank" rel="noopener noreferrer">Full guide with worked examples&nbsp;&rarr;</a>
+            </p>
         </div>
         <?php
     }
@@ -552,6 +566,52 @@ class Queryra_Admin {
         }
 
         return array();
+    }
+
+    /**
+     * Whether this site teaches lessons but cannot narrow a search to one course.
+     *
+     * Looks for a term in USE rather than a registered taxonomy: MemberPress
+     * registers mpcs-curriculum-categories and mpcs-curriculum-tags on lessons
+     * and almost nobody fills them in, so a registration test would stay
+     * silent on the very platform this hint exists for. Any assigned term
+     * means something can already narrow the search, so the hint also retires
+     * itself once course tagging is in place.
+     *
+     * @param array $post_types The post types being indexed.
+     * @return bool
+     */
+    private function course_scope_hint_applies($post_types) {
+        // MemberPress Courses, LifterLMS, LearnDash.
+        $lesson_types = array_filter(
+            array_intersect((array) $post_types, array('mpcs-lesson', 'lesson', 'sfwd-lessons')),
+            'post_type_exists'
+        );
+
+        if (empty($lesson_types)) {
+            return false;
+        }
+
+        foreach ($lesson_types as $lesson_type) {
+            foreach (get_object_taxonomies($lesson_type, 'objects') as $tax_name => $tax_object) {
+                if (empty($tax_object->public)) {
+                    continue;
+                }
+
+                $terms = get_terms(array(
+                    'taxonomy'   => $tax_name,
+                    'hide_empty' => true,
+                    'number'     => 1,
+                    'fields'     => 'ids',
+                ));
+
+                if (!is_wp_error($terms) && !empty($terms)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

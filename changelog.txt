@@ -1,5 +1,16 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-08-11 - version 1.5.4
+* New: the filters reference on the Support tab links to the full guide with
+  worked examples, so the panel is a starting point rather than the whole
+  story.
+* New: a site running courses or memberships now sees a note explaining why
+  its lessons cannot be narrowed to a single course yet, with a link to the
+  fix. It appears only where it is true — a lesson post type is being indexed
+  and nothing on those lessons carries a single term — and disappears by
+  itself once course tagging is in place. Shops and blogs never see it.
+* Changed: declared compatible with WordPress 7.1.
+
 2026-08-05 - version 1.5.3
 * Fixed: the search filter syntax in the 1.5.2 notes was wrong. The
   parameters are filter_type, filter_category, filter_tag, filter_brand and

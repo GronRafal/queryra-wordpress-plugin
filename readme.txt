@@ -2,8 +2,8 @@
 Contributors: queryra, aisearch
 Tags: ai search, semantic search, woocommerce search, product search, search
 Requires at least: 5.8
-Tested up to: 7.0
-Stable tag: 1.5.3
+Tested up to: 7.1
+Stable tag: 1.5.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -383,18 +383,17 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.5.3 =
-* Fixed: the search filter syntax described in 1.5.2 was wrong. The parameters are `filter_type`, `filter_category`, `filter_tag`, `filter_brand` and `filter_tax_<taxonomy>` — e.g. `/?s=design&filter_tax_course_cat=Design` — and the value is the term name, not its slug. Written the wrong way a filter was silently ignored and every result came back, so it looked like it worked.
-* New: a filters reference in the plugin settings shows which filters your site supports, with ready-to-copy examples built from your own taxonomies and terms.
-* Fixed: the setup wizard now counts every content type in its site summary — a site built on custom post types was previously described as having only a few items while offering to import hundreds — and content types with nothing published are selectable instead of ticked and locked.
-* Changed: the "Powered by Queryra" credit in your site's structured data is now opt-in and off by default (WordPress.org plugin guideline 10). The structured data describing your search stays; only the link to queryra.com is removed unless you enable it under Settings → AI Discoverability. No visible change on your site.
+= 1.5.4 =
+* New: the filters reference in the plugin settings now links to the full guide with worked examples.
+* New: sites running courses or memberships see a note explaining why their lessons cannot be narrowed to a single course yet, with a link to the fix. It appears only where it applies — lessons are being indexed and nothing on them carries a term — and disappears once course tagging is in place. Shops and blogs never see it.
+* Changed: tested up to WordPress 7.1.
 
 For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.5.3 =
-Compliance update: the Queryra credit link in structured data is now opt-in and off by default. No visible change to your site; re-enable it in Settings → AI Discoverability if you want it.
+= 1.5.4 =
+Documentation links in the settings, plus a note for course sites whose lessons cannot yet be filtered by course. No change to search behaviour or to your site.
 
 == Privacy ==
 
