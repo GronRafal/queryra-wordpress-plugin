@@ -12,6 +12,11 @@ if (!defined('ABSPATH')) {
 class Queryra_Search_Integration {
 
     /**
+     * Consecutive failed search calls, used to widen the retry window.
+     */
+    const API_FAILURES_OPTION = 'queryra_api_failures';
+
+    /**
      * API client
      */
     private $api;
@@ -300,10 +305,12 @@ class Queryra_Search_Integration {
                 return; // Fallback to WordPress search
             }
 
-            // Negative cache: the API failed within the last minute. Skip
-            // straight to the WordPress fallback instead of paying another
-            // doomed HTTP round-trip per search — during an outage every
-            // uncached search would otherwise stall for the full timeout.
+            // Negative cache: the API failed recently. Skip straight to the
+            // WordPress fallback instead of paying another doomed HTTP
+            // round-trip per search — during an outage every uncached search
+            // would otherwise stall for the full timeout. How long this lasts
+            // depends on how many calls have failed in a row; see
+            // api_backoff_seconds().
             if (get_transient('queryra_api_down')) {
                 return;
             }
@@ -349,15 +356,25 @@ class Queryra_Search_Integration {
                     ));
                 }
 
-                // Mark the API as down for 60s so concurrent/subsequent
+                // Stop calling the API for a while so concurrent/subsequent
                 // searches fall back immediately instead of each repeating
-                // the failed call. Also naturally rate-limits the error
-                // telemetry above to ~1 event per minute during an outage.
+                // the failed call. The window widens with each consecutive
+                // failure, which also rate-limits the error telemetry above.
                 if (!$is_window_closed) {
-                    set_transient('queryra_api_down', 1, MINUTE_IN_SECONDS);
+                    $failures = (int) get_option(self::API_FAILURES_OPTION, 0) + 1;
+                    update_option(self::API_FAILURES_OPTION, $failures, false);
+                    set_transient('queryra_api_down', 1, $this->api_backoff_seconds($failures));
                 }
 
                 return; // Let WordPress handle search normally
+            }
+
+            // The call succeeded, so whatever was wrong has cleared. Collapse
+            // the retry window back to its shortest setting. Guarded because
+            // this runs on every uncached search on a healthy site, and there
+            // is no reason to write an option each time.
+            if ((int) get_option(self::API_FAILURES_OPTION, 0) !== 0) {
+                update_option(self::API_FAILURES_OPTION, 0, false);
             }
 
             if (empty($results['results'])) {
@@ -462,6 +479,35 @@ class Queryra_Search_Integration {
 
         // Backward-compat: keep this for any custom theme that already reads it.
         $query->set('queryra_search_term', $search_term);
+    }
+
+    /**
+     * How long to stop calling the search API after a failure.
+     *
+     * An outage and an exhausted monthly quota arrive as the same WP_Error,
+     * and the message does not separate them — the older check matches "FREE
+     * plan", which the community plan never says, so a spent quota was retried
+     * every 60 seconds until the plan reset. Persistence separates them, so
+     * the window widens per consecutive failure and collapses on success.
+     *
+     * Capped at six hours rather than "until the quota resets" so a site that
+     * upgrades mid-month is not locked out of the search it just paid for.
+     *
+     * @param int $failures Consecutive failures, including the one just seen.
+     * @return int Seconds to suppress further calls.
+     */
+    private function api_backoff_seconds($failures) {
+        if ($failures >= 4) {
+            return 6 * HOUR_IN_SECONDS;
+        }
+        if ($failures === 3) {
+            return 30 * MINUTE_IN_SECONDS;
+        }
+        if ($failures === 2) {
+            return 5 * MINUTE_IN_SECONDS;
+        }
+
+        return MINUTE_IN_SECONDS;
     }
 
     /**

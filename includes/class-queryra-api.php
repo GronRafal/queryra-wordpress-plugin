@@ -324,12 +324,18 @@ class Queryra_API {
             }
         }
 
-        // 5s timeout — search runs on the visitor-facing request path
+        // 8s timeout — search runs on the visitor-facing request path
         // (pre_get_posts, B2BKing live search). With the default 30s, a
         // slow API would hang every uncached search page and exhaust
-        // PHP workers under modest traffic; 5s bounds the worst case
+        // PHP workers under modest traffic; this bounds the worst case
         // before the WordPress-search fallback kicks in.
-        $response = $this->request('GET', '/api/v1/search', $params, null, 5);
+        //
+        // Raised from 5s: the ranking models behind the API now take longer
+        // to answer, and a limit below their real response time does not fail
+        // loudly — it silently drops the visitor to keyword search while the
+        // API is working correctly. Only the first search for a given term
+        // pays this; results are cached from then on.
+        $response = $this->request('GET', '/api/v1/search', $params, null, 8);
 
         return $response;
     }

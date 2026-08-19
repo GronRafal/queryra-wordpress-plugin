@@ -61,6 +61,9 @@ function queryra_uninstall_cleanup() {
         'queryra_site_profile',
         'queryra_plugin_version',
         'queryra_recent_errors',
+        // Consecutive search-API failures, paired with the queryra_api_down
+        // transient below. Runtime state, meaningless once the plugin is gone.
+        'queryra_api_failures',
         'queryra_deactivation_feedback',
         'queryra_pending_activation_event',
     );

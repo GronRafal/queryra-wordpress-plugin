@@ -1,5 +1,23 @@
 *** Queryra – AI Semantic Search Changelog ***
 
+2026-08-19 - version 1.5.5
+* Fixed: a site that used up its monthly search allowance was treated as
+  though the search service had gone down. Because an outage is expected to
+  clear in seconds, the plugin kept retrying once a minute — for the rest of
+  the billing period. Searching itself was never broken (WordPress search
+  takes over whenever the AI service cannot answer), but the site made tens
+  of thousands of pointless requests a month and the account owner was
+  notified about each retry. The retry pause now widens with each consecutive
+  failure — one minute, five, thirty, then six hours — and drops back to one
+  minute the moment a request succeeds. A brief outage still recovers within
+  a minute; an exhausted allowance is checked four times a day instead of
+  1,440. An upgraded plan is picked up within six hours without any action.
+* Changed: the search request now waits up to 8 seconds instead of 5. The
+  ranking models behind the service need longer than they used to, and a
+  limit set below their real response time fails quietly — the visitor is
+  dropped to keyword search while the service is answering normally. Only
+  the first search for a given phrase waits; results are cached after that.
+
 2026-08-11 - version 1.5.4
 * New: the filters reference on the Support tab links to the full guide with
   worked examples, so the panel is a starting point rather than the whole

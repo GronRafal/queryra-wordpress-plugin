@@ -383,17 +383,17 @@ Categories, tags, and the WooCommerce brand taxonomy continue to work as before.
 
 == Changelog ==
 
-= 1.5.4 =
-* New: the filters reference in the plugin settings now links to the full guide with worked examples.
-* New: sites running courses or memberships see a note explaining why their lessons cannot be narrowed to a single course yet, with a link to the fix. It appears only where it applies — lessons are being indexed and nothing on them carries a term — and disappears once course tagging is in place. Shops and blogs never see it.
-* Changed: tested up to WordPress 7.1.
+= 1.5.5 =
+* Fixed: a site that used up its monthly search allowance was treated as a service outage and retried once a minute for the rest of the billing period. Searching itself kept working — WordPress search takes over whenever the AI service cannot answer — but the site made tens of thousands of pointless requests a month. The pause between retries now grows with each failure (one minute, five, thirty, then six hours) and resets as soon as a request succeeds.
+* Changed: the search request now waits up to 8 seconds instead of 5, so slower ranking models are not cut off mid-answer and dropped to keyword search. Only the first search for a phrase waits; results are cached after that.
+
 
 For the full changelog history, see changelog.txt.
 
 == Upgrade Notice ==
 
-= 1.5.4 =
-Documentation links in the settings, plus a note for course sites whose lessons cannot yet be filtered by course. No change to search behaviour or to your site.
+= 1.5.5 =
+Fixes needless retrying when a site's monthly search allowance runs out, and gives the search service more time to answer before falling back to keyword search. No change to how search behaves on your site.
 
 == Privacy ==
 
